@@ -1,11 +1,13 @@
 import PubSub from "pubsub-js";
 import EVENTS from "./EVENTS/EVENTS";
-import STORE_INIT from "./store/store";
+import { taskStore } from "./store/store";
 
-const components = [STORE_INIT];
+const components = [taskStore];
 
 (function initComponent() {
-  components.forEach((component) => component());
-})()
+  components.forEach((component) => component.init());
+})();
 
-PubSub.publish(EVENTS.STORE.ADD_TASK, { description: "How to run away" });
+window.EVENTS = EVENTS;
+
+// PubSub.publish(EVENTS.STORE.TASK_STORE.ADD, { description: "How to run away" });
