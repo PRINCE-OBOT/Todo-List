@@ -1,11 +1,13 @@
 {
-  "name": "restaurant-page",
+  "name": "todo-list",
   "version": "1.0.0",
-  "description": "A Restaurant website with tabbed navigation",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack serve --open --config webpack.dev.js",
-    "build": "webpack serve --open --config webpack.prod.js"
+    "start": "webpack serve --config webpack.dev.js",
+    "build": "webpack serve --config webpack.prod.js",
+    "dev": "webpack --config webpack.dev.js",
+    "prod": "webpack --config webpack.prod.js"
   },
   "repository": {
     "type": "git",
@@ -29,5 +31,9 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
     "webpack-merge": "^6.0.1"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "pubsub-js": "^1.9.5"
   }
 }
