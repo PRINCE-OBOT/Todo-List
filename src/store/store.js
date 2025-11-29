@@ -16,7 +16,7 @@ function TaskStore() {
 
   const taskStore = [];
 
-  // The length of the `taskIndexes` is used to track where to add a task or subtask in another task (Level of Task, on each other)
+  // The length of the `taskIndexes` is used to track where to add a task or subtask in another task (Level)
   // The element in the `taskIndexes` is used to determine the index of the task in it own section
   const taskIndexes = [];
 
@@ -63,8 +63,9 @@ function TaskStore() {
     const taskIndexesLength = taskIndexes.length - 1;
     const topLevelTaskIndex = taskIndexes[taskIndexesLength];
 
+    // Delete the last task in `taskIndexes` to shorten the level
+    // To get the section the top level task is
     taskIndexes.pop();
-
     const topLevelTaskSection = getTopLevelTask();
     topLevelTaskSection.splice(topLevelTaskIndex, topLevelTaskIndex + 1);
   };
