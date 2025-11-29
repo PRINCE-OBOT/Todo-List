@@ -33,40 +33,39 @@ function TaskStore() {
     console.log(taskIndexes);
   };
 
-  const getTopLevelTask = () => {
+  const getTopLevelTaskSection = () => {
     if (taskIndexes.length === 0) return taskStore;
 
     let topLevelTask;
     taskIndexes.forEach((taskIndex) => {
-      topLevelTask
-        ? (topLevelTask = topLevelTask.subTask[taskIndex])
-        : (topLevelTask = taskStore[taskIndex]);
+      if (topLevelTask) {
+        topLevelTask = topLevelTask.subTask[taskIndex];
+      } else {
+        topLevelTask = taskStore[taskIndex];
+      }
     });
 
-    return topLevelTask;
+    if (!topLevelTask.subTask) topLevelTask.subTask = [];
+
+    return topLevelTask.subTask;
   };
+
   // =======================
-
   const addTask = (msg, task) => {
-    const topLevelTask = getTopLevelTask();
-
-    if (topLevelTask === taskStore) {
-      taskStore.push(task);
-    } else {
-      if (!topLevelTask.subTask) topLevelTask.subTask = [];
-
-      topLevelTask.subTask.push(task);
-    }
+    const topLevelTaskSection = getTopLevelTaskSection();
+    topLevelTaskSection.push(task);
   };
 
   const deleteTask = (msg) => {
     const taskIndexesLength = taskIndexes.length - 1;
     const topLevelTaskIndex = taskIndexes[taskIndexesLength];
 
+    debugger;
     // Delete the last task in `taskIndexes` to shorten the level
     // To get the section the top level task is
     taskIndexes.pop();
-    const topLevelTaskSection = getTopLevelTask();
+    const topLevelTaskSection = getTopLevelTaskSection();
+    debugger;
     topLevelTaskSection.splice(topLevelTaskIndex, topLevelTaskIndex + 1);
   };
 
