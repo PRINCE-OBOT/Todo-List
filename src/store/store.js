@@ -5,7 +5,7 @@ function TaskStore() {
   const init = () => {
     PubSub.subscribe(EVENTS.STORE.TASK_STORE.CHANGE, handleTaskStoreChange);
     PubSub.subscribe(EVENTS.STORE.TASK_STORE.ADD, addTask);
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.MARK, markTask);
+    PubSub.subscribe(EVENTS.STORE.TASK_STORE.MARK_STATUS, markTaskStatus);
     PubSub.subscribe(EVENTS.STORE.TASK_STORE.DELETE, deleteTask);
 
     PubSub.subscribe(
@@ -16,45 +16,44 @@ function TaskStore() {
   };
 
   const taskStore = [];
-  // The length of the `taskIndexes` is used to track where to add a task or subtask in another task (Level)
-  // The element in the `taskIndexes` is used to determine the index of the task in it own section
+  // The length of `taskIndexes` tracks the current task
+  // The element in `taskIndexes` point to the index of the current task in it own section
   const taskIndexes = [];
-  const TASK_EMPTY = "TASK DOES NOT EMPTY";
+  const NO_TASK_REFERENCE = "NO TASK REFERENCES THIS INDEX";
+  const PRIORITIES = ["LOW", "MEDIUM", "HIGH"];
 
   // ============  Task Index (Start)  =========== \\
-  const getTopLevelTaskSection = (msg) => {
-    if (taskIndexes.length === 0) return taskStore;
-
-    let topLevelTask;
+  const getActiveTask = () => {
+    let activeTask = NO_TASK_REFERENCE;
 
     for (let i = 0; i < taskIndexes.length; i++) {
       const taskIndex = taskIndexes[i];
 
-      if (topLevelTask) {
-        topLevelTask = topLevelTask.subTask[taskIndex];
+      if (activeTask === NO_TASK_REFERENCE) {
+        activeTask = taskStore[taskIndex];
       } else {
-        topLevelTask = taskStore[taskIndex];
+        if (!activeTask.subTask) {
+          return NO_TASK_REFERENCE;
+        }
+        activeTask = activeTask.subTask[taskIndex];
       }
 
-      if (!topLevelTask) {
-        return TASK_EMPTY;
+      if (!activeTask) {
+        return NO_TASK_REFERENCE;
       }
     }
 
-    if (msg === EVENTS.STORE.TASK_STORE.ADD) {
-      if (!topLevelTask.subTask) topLevelTask.subTask = [];
-    }
-    return topLevelTask.subTask;
+    return activeTask;
   };
 
   const addTaskIndex = (msg, index) => {
     taskIndexes.push(index);
 
-    const topLevelTaskSection = getTopLevelTaskSection();
+    const activeTask = getActiveTask();
 
-    if (topLevelTaskSection === TASK_EMPTY) {
+    if (activeTask === NO_TASK_REFERENCE) {
       taskIndexes.pop();
-      console.log(TASK_EMPTY);
+      console.log(NO_TASK_REFERENCE);
     }
   };
 
@@ -66,44 +65,102 @@ function TaskStore() {
     console.log(taskIndexes);
   };
 
-  const getTopLevelTaskIndexAndDelete = () => {
+  const getActiveTaskIndexAndDelete = () => {
     const taskIndexesLength = taskIndexes.length - 1;
-    const topLevelTaskIndex = taskIndexes[taskIndexesLength];
+    const currentTaskIndex = taskIndexes[taskIndexesLength];
 
-    // Remove the topLevelTask index from taskIndexes so
-    // `getTopLevelTaskSection()` return the section where the topLevelTask is
+    // Remove the activeTask index from taskIndexes so
+    // `getActiveTask()` return the immediate task
     taskIndexes.pop();
 
-    return topLevelTaskIndex;
+    return currentTaskIndex;
   };
   // ================ Task Index (Stop) ===============  \\
 
   // ================  Task (Start)  ===================== \\
-  const addTask = (msg, task) => {
-    const topLevelTaskSection = getTopLevelTaskSection();
-    topLevelTaskSection.push(task);
+  const getLastIndexOfPriority = (currentTaskSection, priorityLevel) => {
+    const lastIndexPriority = currentTaskSection.findLastIndex(
+      (task) => task.priority === priorityLevel
+    );
+    return lastIndexPriority;
   };
 
-  const markTask = (msg, status) => {
-    const topLevelTaskIndex = getTopLevelTaskIndexAndDelete();
+  const getLastIndexOfPriorityNextIndex = (priority, activeTask) => {
+    let lastIndexPriority = 0;
+    let lastIndexOfPriorityNextIndex;
 
-    if (topLevelTaskIndex === undefined) {
-      console.log(TASK_EMPTY);
+    const priorityLevels = PRIORITIES.slice(PRIORITIES.indexOf(priority));
+
+    for (let i = 0; i < priorityLevels.length; i++) {
+      const priorityLevel = priorityLevels[i];
+
+      if (activeTask === NO_TASK_REFERENCE) {
+        lastIndexPriority = getLastIndexOfPriority(taskStore, priorityLevel);
+      } else {
+        lastIndexPriority = getLastIndexOfPriority(
+          activeTask.subTask,
+          priorityLevel
+        );
+      }
+
+      if (lastIndexPriority >= 0) {
+        lastIndexOfPriorityNextIndex = lastIndexPriority + 1;
+        break;
+      }
+    }
+
+    return lastIndexPriority < 0 ? 0 : lastIndexOfPriorityNextIndex;
+  };
+
+  const addTask = (msg, task) => {
+    const activeTask = getActiveTask();
+
+    let lastIndexPriority = getLastIndexOfPriorityNextIndex(
+      task.priority,
+      activeTask
+    );
+
+    if (activeTask === NO_TASK_REFERENCE) {
+      taskStore.splice(lastIndexPriority, 0, task);
     } else {
-      const topLevelTaskSection = getTopLevelTaskSection(msg);
-      topLevelTaskSection[topLevelTaskIndex].status = status;
+      if (!activeTask.subTask) activeTask.subTask = [];
+      activeTask.subTask.splice(lastIndexPriority, 0, task);
+    }
+  };
+
+  const markTaskStatus = (msg, status) => {
+    const currentTaskIndex = getActiveTaskIndexAndDelete();
+
+    if (currentTaskIndex === undefined) {
+      console.log(NO_TASK_REFERENCE);
+    } else {
+      const activeTask = getActiveTask();
+
+      if (activeTask === NO_TASK_REFERENCE) {
+        taskStore[currentTaskIndex].status = status;
+      } else {
+        activeTask.subTask[currentTaskIndex].status = status;
+      }
     }
   };
 
   const deleteTask = (msg) => {
-    const topLevelTaskIndex = getTopLevelTaskIndexAndDelete();
+    const currentTaskIndex = getActiveTaskIndexAndDelete();
 
-    const topLevelTaskSection = getTopLevelTaskSection();
-
-    if (topLevelTaskIndex === undefined) {
-      console.log(TASK_EMPTY);
+    if (currentTaskIndex === undefined) {
+      console.log(NO_TASK_REFERENCE);
     } else {
-      topLevelTaskSection.splice(topLevelTaskIndex, topLevelTaskIndex + 1);
+      const activeTask = getActiveTask();
+
+      if (activeTask === NO_TASK_REFERENCE) {
+        taskStore.splice(currentTaskIndex, 1);
+      } else {
+        activeTask.subTask.splice(currentTaskIndex, 1);
+
+        if (activeTask.subTask.length === 0) {
+          delete activeTask.subTask;
+        }
+      }
     }
   };
   // ================  Task (Stop)  ===================== \\
