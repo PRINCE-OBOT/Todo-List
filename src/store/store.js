@@ -22,9 +22,6 @@ function TaskStore() {
   const taskIndexes = [];
   const NO_TASK_REFERENCE = "NO TASK REFERENCES THIS INDEX";
 
-  const PRIORITIES = ["LOW", "NORMAL", "HIGH"];
-  const PRIORITY_NOT_FOUND = "PRIORITY NOT FOUND IN CURRENT SECTION";
-
   // ============  Task Index (Start)  =========== \\
   const getActiveTask = () => {
     let activeTask = NO_TASK_REFERENCE;
@@ -81,55 +78,13 @@ function TaskStore() {
   // ================ Task Index (Stop) ===============  \\
 
   // ================  Task (Start)  ===================== \\
-  const getLastIndexOfPriority = (currentTaskSection, priorityLevel) => {
-    const lastIndexOfPriority = currentTaskSection.findLastIndex(
-      (task) => task.priority === priorityLevel
-    );
-
-    return lastIndexOfPriority < 0 ? PRIORITY_NOT_FOUND : lastIndexOfPriority;
-  };
-
-  const getLastIndexOfPriorityNextIndex = (priority, activeTask) => {
-    let lastIndexOfPriority;
-    let lastIndexOfPriorityNextIndex = 0;
-
-    const priorityLevels = PRIORITIES.slice(PRIORITIES.indexOf(priority));
-
-    for (let i = 0; i < priorityLevels.length; i++) {
-      const priorityLevel = priorityLevels[i];
-
-      if (activeTask === NO_TASK_REFERENCE) {
-        lastIndexOfPriority = getLastIndexOfPriority(taskStore, priorityLevel);
-      } else {
-        if (!activeTask.subTask) activeTask.subTask = [];
-
-        lastIndexOfPriority = getLastIndexOfPriority(
-          activeTask.subTask,
-          priorityLevel
-        );
-      }
-
-      if (lastIndexOfPriority !== PRIORITY_NOT_FOUND) {
-        lastIndexOfPriorityNextIndex = lastIndexOfPriority + 1;
-        break;
-      }
-    }
-
-    return lastIndexOfPriorityNextIndex;
-  };
-
   const addTask = (msg, task) => {
     const activeTask = getActiveTask();
 
-    let lastIndexOfPriority = getLastIndexOfPriorityNextIndex(
-      task.priority,
-      activeTask
-    );
-
     if (activeTask === NO_TASK_REFERENCE) {
-      taskStore.splice(lastIndexOfPriority, 0, task);
+      taskStore.push(task);
     } else {
-      activeTask.subTask.splice(lastIndexOfPriority, 0, task);
+      activeTask.subTask.push(task);
     }
   };
 
@@ -184,6 +139,25 @@ function TaskStore() {
       }
     }
   };
+
+  const sortTaskBaseOnPriority = (activeTaskSection) => {
+    activeTaskSection.sort(
+      (currentTask, nextTask) => currentTask.priority - nextTask.priority
+    );
+  };
+
+  const handleTaskPrioritySort = () => {
+    taskIndexes.pop();
+
+    const activeTaskSection = getActiveTask();
+
+    if (activeTaskSection === NO_TASK_REFERENCE) {
+      sortTaskBaseOnPriority(taskStore);
+    } else {
+      sortTaskBaseOnPriority(activeTaskSection);
+    }
+  };
+
   // ================  Task (Stop)  ===================== \\
 
   // ================  Storage (Start)  ===================== \\
@@ -194,6 +168,7 @@ function TaskStore() {
 
   // ================  Handle (Start)  ===================== \\
   function handleTaskStoreChange() {
+    handleTaskPrioritySort();
     clearTaskIndexes();
     updateStorage();
   }
