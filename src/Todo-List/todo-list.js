@@ -23,7 +23,9 @@ function TaskStore() {
   const taskIndexes = [];
   const NO_TASK_REFERENCE = "NO TASK REFERENCES THIS INDEX";
   const SUBTASK_DEEP = "SUBTASK TOO DEEP";
-  const TASK_DELETED = "LAST TASK DELETED";
+  const TASK_DELETED = "LAST TASK IN SECTION DELETED";
+
+  const KEY_TASK_STORE = "taskStore";
 
   // ============  Task Index (Start)  =========== \\
   const getLastReferenceTaskSection = (msg) => {
@@ -146,15 +148,9 @@ function TaskStore() {
     }
   };
 
-  const isSubtaskDeep = (depth) => {
+  const filterTaskBy = ({ tasks, key, value, depth = 0 }) => {
     if (depth >= 50) {
       console.log(SUBTASK_DEEP);
-      return SUBTASK_DEEP;
-    }
-  };
-
-  const filterTaskBy = ({ tasks, key, value, depth = 0 }) => {
-    if (isSubtaskDeep(depth) === SUBTASK_DEEP) {
       return;
     }
 
@@ -181,6 +177,7 @@ function TaskStore() {
 
   // ================  Storage (Start)  ===================== \\
   const updateStorage = () => {
+    localStorage.setItem(KEY_TASK_STORE, taskStore);
     console.log("taskStore", taskStore, "taskIndexes", taskIndexes);
   };
   // ================  Storage (Stop)  ===================== \\
@@ -196,7 +193,7 @@ function TaskStore() {
   }
   // ================  Handle (Stop)  ===================== \\
 
-  return { init, taskStore };
+  return { init };
 }
 
 const taskStore = TaskStore();

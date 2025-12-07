@@ -12,7 +12,13 @@ const EVENTS = {
       CHANGE: "TASK_INDEXES_STORE.CHANGE",
       ADD: "TASK_INDEXES_STORE.CHANGE.ADD_TASK_INDEX"
     }
-  }
+  },
+  PAGE: {
+    LOAD: "LOAD.PAGE",
+    REMOVE: {
+      HERO: 'REMOVE_HERO_PAGE'
+    }
+  },
 };
 
 export default EVENTS;
