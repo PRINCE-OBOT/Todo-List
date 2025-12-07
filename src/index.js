@@ -1,6 +1,6 @@
 import PubSub from "pubsub-js";
 import EVENTS from "./EVENTS/EVENTS";
-import { taskStore } from "./store/store";
+import { taskStore } from "./Todo-List/todo-list";
 
 const components = [taskStore];
 
@@ -9,5 +9,6 @@ const components = [taskStore];
 })();
 
 window.EVENTS = EVENTS;
+window.taskStore
 
 // PubSub.publish(EVENTS.STORE.TASK_STORE.ADD, { description: "How to run away" });
