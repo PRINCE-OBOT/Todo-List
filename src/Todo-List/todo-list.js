@@ -7,11 +7,7 @@ function TaskStore() {
     PubSub.subscribe(EVENTS.STORE.TASK_STORE.ADD, addTask);
     PubSub.subscribe(EVENTS.STORE.TASK_STORE.MARK_STATUS, markTaskStatus);
     PubSub.subscribe(EVENTS.STORE.TASK_STORE.EDIT, editTask);
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.DISPLAY, handleDisplayTask);
-    PubSub.subscribe(
-      EVENTS.STORE.TASK_STORE.DISPLAY_FILTER,
-      handleDisplayFilterTask
-    );
+    PubSub.subscribe(EVENTS.STORE.TASK_STORE.FILTER_BY, handleFilterTaskBy);
     PubSub.subscribe(EVENTS.STORE.TASK_STORE.DELETE, deleteTask);
 
     PubSub.subscribe(
@@ -157,42 +153,30 @@ function TaskStore() {
     }
   };
 
-  const displayAllTask = ({ tasks, depth = 0 }) => {
+  const filterTaskBy = ({ tasks, key, value, depth = 0 }) => {
     if (isSubtaskDeep(depth) === SUBTASK_DEEP) {
       return;
     }
 
     tasks.forEach((task) => {
-      console.log(task);
-      if (task.subtask) {
-        displayAllTask({ tasks: task.subtask, depth: depth + 1 });
-      }
-    });
-  };
-
-  const displayFilterTask = ({ tasks, label, depth }) => {
-    if (isSubtaskDeep(depth) === SUBTASK_DEEP) {
-      return;
-    }
-    tasks.forEach((task) => {
-      if (task.label === label) {
+      if (task[key] === value) {
         console.log(task);
       }
 
       if (task.subtask) {
-        displayFilterTask({ tasks: task.subtask, label, depth: depth + 1 });
+        filterTaskBy({
+          tasks: task.subtask,
+          key,
+          value,
+          depth: depth + 1
+        });
       }
     });
   };
 
-  function handleDisplayFilterTask(msg, label) {
-    displayFilterTask({ tasks: taskStore, label });
+  function handleFilterTaskBy(msg, { key, value }) {
+    filterTaskBy({ tasks: taskStore, key, value });
   }
-
-  function handleDisplayTask() {
-    displayAllTask({ taskStore });
-  }
-
   // ================  Task (Stop)  ===================== \\
 
   // ================  Storage (Start)  ===================== \\
