@@ -1,19 +1,20 @@
-import './style.css'
+import "./style.css";
+import PubSub from "pubsub-js";
 import EVENTS from "./EVENTS/EVENTS";
-import { taskStore } from "./Todo-List/todo-list";
-import homePage from './view/heroPage'
-import PubSub from 'pubsub-js';
+import { taskStore, category } from "./Todo-List/todo-list";
+import homePage from "./view/heroPage";
+import mainNavController from "./view/mainNavController";
 
-const components = [taskStore, homePage];
+const components = [taskStore, category, homePage, mainNavController];
 
 (function initComponent() {
   components.forEach((component) => component.init());
 })();
 
-PubSub.publish(EVENTS.PAGE.LOAD, document);
+// PubSub.publish(EVENTS.PAGE.LOAD.HERO);
 
-setTimeout(() => PubSub.publish(EVENTS.PAGE.REMOVE.HERO), 2000);
+// setTimeout(() => PubSub.publish(EVENTS.PAGE.REMOVE.HERO), 2000);
+
+PubSub.publish(EVENTS.PAGE.LOAD.MAIN_NAV_CONTROLLER);
 
 window.EVENTS = EVENTS;
-
-// PubSub.publish(EVENTS.STORE.TASK_STORE.ADD, { description: "How to run away" });

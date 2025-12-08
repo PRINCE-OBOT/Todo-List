@@ -1,66 +1,102 @@
 /*  =========== Reset =========  */
 /* 1. Use a more-intuitive box-sizing model */
-*, *::before, *::after {
-    box-sizing: border-box;
-  }
-
-  /* 2. Remove default margin */
-  * {
-    margin: 0;
-  }
-
-  body {
-    /* 3. Add accessible line-height */
-    line-height: 1.5;
-    /* 4. Improve text rendering */
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* 5. Improve media defaults */
-  img, svg {
-    display: block;
-    max-width: 100%;
-  }
-
-  /* 6. Inherit fonts for form controls */
-  input, button, textarea, select {
-    font: inherit;
-  }
-
-  /* 7. Avoid text overflows */
-  p, h1, h2, h3, h4, h5, h6 {
-    overflow-wrap: break-word;
-  }
-
-  /* 8. Improve line wrapping */
-  p {
-    text-wrap: pretty;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    text-wrap: balance;
-  }
-
-:root{
- --black: rgb(28, 28, 28);
- --white: rgb(250, 250, 250);
- --primary-accent: rgb(96, 4, 4);
- --high-priority: rgb(144, 42, 13);
- --normal-priority: rgb(39, 144, 13);
- --low-priority: rgb(13, 144, 113);
-
- --fs-sz-xlg: 40px;
- --fs-sz-lg: 20px;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-body, html{
-    height: 100%;
+/* 2. Remove default margin */
+* {
+  margin: 0;
 }
-.hero_page_text{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--black);
-    height: 100%;
-    color: var(--white);
-    font-size: var(--fs-sz-xlg);
+
+body {
+  /* 3. Add accessible line-height */
+  line-height: 1.5;
+  /* 4. Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 5. Improve media defaults */
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 6. Inherit fonts for form controls */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 7. Avoid text overflows */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* 8. Improve line wrapping */
+p {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+:root {
+  --black: rgb(28, 28, 28);
+  --white: rgb(250, 250, 250);
+  --primary-accent: rgb(96, 4, 4);
+  --high-priority: rgb(144, 42, 13);
+  --normal-priority: rgb(39, 144, 13);
+  --low-priority: rgb(13, 144, 113);
+
+  --fs-sz-xlg: 40px;
+  --fs-sz-lg: 20px;
+
+  --pd-lg: 20px;
+  --gp-lg: 20px;
+}
+
+body,
+html {
+  height: 100%;
+}
+.hero_page_text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--black);
+  height: 100%;
+  color: var(--white);
+  font-size: var(--fs-sz-xlg);
+}
+.mainNavController {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gp-lg);
+  background-color: var(--black);
+  opacity: 0.9;
+  padding: var(--pd-lg);
+}
+[data-nav] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--white);
 }

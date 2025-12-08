@@ -2,7 +2,7 @@ import EVENTS from "../EVENTS/EVENTS";
 
 function HeroPage() {
   const init = () => {
-    PubSub.subscribe(EVENTS.PAGE.LOAD, renderHeroPage);
+    PubSub.subscribe(EVENTS.PAGE.LOAD.HERO, renderHeroPage);
     PubSub.subscribe(EVENTS.PAGE.REMOVE.HERO, removeHeroPage);
   };
 

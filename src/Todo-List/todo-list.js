@@ -1,20 +1,23 @@
 import EVENTS from "../EVENTS/EVENTS";
 import PubSub from "pubsub-js";
 
+const category = Category();
+const taskStore = TaskStore();
+
 function TaskStore() {
   const init = () => {
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.CHANGE, handleTaskStoreChange);
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.ADD, addTask);
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.MARK_STATUS, markTaskStatus);
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.EDIT, editTask);
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.FILTER_BY, handleFilterTaskBy);
-    PubSub.subscribe(EVENTS.STORE.TASK_STORE.DELETE, deleteTask);
+    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.CHANGE, handleTaskStoreChange);
+    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.ADD, addTask);
+    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.MARK_STATUS, markTaskStatus);
+    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.EDIT, editTask);
+    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.FILTER_BY, handleFilterTaskBy);
+    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.DELETE, deleteTask);
 
     PubSub.subscribe(
-      EVENTS.STORE.TASK_INDEXES_STORE.CHANGE,
+      EVENTS.TODO_LIST.TASK_INDEXES_STORE.CHANGE,
       handleTaskIndexesChange
     );
-    PubSub.subscribe(EVENTS.STORE.TASK_INDEXES_STORE.ADD, addTaskIndex);
+    PubSub.subscribe(EVENTS.TODO_LIST.TASK_INDEXES_STORE.ADD, addTaskIndex);
   };
 
   const taskStore = [];
@@ -36,21 +39,21 @@ function TaskStore() {
 
       const lastReferenceTask = lastReferenceTaskSection[taskIndex];
 
-      if (msg === EVENTS.STORE.TASK_STORE.ADD) {
+      if (msg === EVENTS.TODO_LIST.TASK_STORE.ADD) {
         if (!lastReferenceTask.subtask) lastReferenceTask.subtask = [];
         lastReferenceTaskSection = lastReferenceTask.subtask;
       } else {
         lastReferenceTaskSection = lastReferenceTask?.subtask || [];
       }
 
-      if (msg === EVENTS.STORE.TASK_STORE.DELETE) {
+      if (msg === EVENTS.TODO_LIST.TASK_STORE.DELETE) {
         if (lastReferenceTask.subtask.length === 1) {
           delete lastReferenceTask.subtask;
           return TASK_DELETED;
         }
       }
 
-      if (msg === EVENTS.STORE.TASK_INDEXES_STORE.ADD) {
+      if (msg === EVENTS.TODO_LIST.TASK_INDEXES_STORE.ADD) {
         if (lastReferenceTask === undefined) {
           return NO_TASK_REFERENCE;
         }
@@ -191,11 +194,128 @@ function TaskStore() {
   function handleTaskIndexesChange() {
     displayTaskIndexes();
   }
+  const getTaskStore = () => taskStore;
   // ================  Handle (Stop)  ===================== \\
+
+  return { init, getTaskStore };
+}
+
+function Category() {
+  const init = () => {
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.INBOX.ADD_SECTION,
+      addSectionInInbox
+    );
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.CHANGE, displayCategories);
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_CATEGORY,
+      addCategoryToMyProject
+    );
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_SECTION,
+      addSectionToCategoryInMyProject
+    );
+
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.CATEGORIZE, categorizeTask);
+  };
+
+  // UI will illiterate through this an get the section arrange
+  const Categories = {
+    Inbox: [],
+    My_Project: []
+  };
+
+  //const currentCategory = { categoryTitle: "Inbox" };
+  // To reference section in inbox include categoryIndex
+  //const currentCategory = { categoryTitle: "Inbox", categoryIndex: [0] };
+
+  const CATEGORY_VOID = "CATEGORY DOES NOT EXIST";
+  const INBOX = "INBOX";
+
+  // Adding section and category to `Inbox` and `My_Project`
+  const addSectionInInbox = (msg, section) => {
+    Categories.Inbox.push(section);
+  };
+
+  const addCategoryToMyProject = (msg, category) => {
+    Categories.My_Project.push(category);
+  };
+
+  const addSectionToCategoryInMyProject = (msg, { section, categoryIndex }) => {
+    const category = Categories.My_Project[categoryIndex];
+
+    if (!category) {
+      console.log(CATEGORY_VOID);
+      return;
+    }
+
+    if (!category.section) {
+      category.section = [];
+    }
+
+    category.section.push(section);
+  };
+
+  const displayCategories = () => {
+    console.log("INBOX", Categories.Inbox);
+    console.log("MY PROJECT", Categories.My_Project);
+  };
+
+  const categorizeInboxTask = (task) => {
+    const sectionTitle = task.category.sectionTitle;
+    if (sectionTitle) {
+      for (let i = Categories.Inbox.length - 1; i >= 0; i--) {
+        const categorySection = Categories.Inbox[i];
+        
+        if (categorySection.sectionTitle === sectionTitle) {
+          if (!categorySection.section) categorySection.section = [];
+          categorySection.section.push(task);
+          return;
+        }
+      }
+      Categories.Inbox.unshift(task);
+    } else {
+      Categories.Inbox.unshift(task);
+    }
+  };
+
+  const categorizeMyProjectTask = (task) => {
+    for (let i = 0; i < Categories.My_Project.length; i++) {
+      const category = Categories.My_Project[i];
+      
+      if (category.categoryTitle === task.category.categoryTitle) {
+        if (task.category.sectionTitle) {
+          for (let i = category.section.length - 1; i >= 0; i--) {
+            const categorySection = category.section[i];
+
+            if (categorySection.sectionTitle === task.category.sectionTitle) {
+              if (!categorySection.section) categorySection.section = [];
+              categorySection.section.push(task);
+              return;
+            }
+          }
+        }
+        if(!category.section) category.section = []
+        category.section.unshift(task);
+      }
+    }
+  };
+
+  const categorizeTask = () => {
+    // illiterate through the taskStore, and arrange task base on it category
+    const listOfTask = taskStore.getTaskStore();
+
+    listOfTask.forEach((task) => {
+      if (task.category.categoryTitle) {
+        categorizeMyProjectTask(task);
+      } else {
+        categorizeInboxTask(task);
+      }
+    });
+    // fix task under it category
+  };
 
   return { init };
 }
 
-const taskStore = TaskStore();
-
-export { taskStore };
+export { taskStore, category };
