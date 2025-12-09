@@ -236,7 +236,7 @@ function Category() {
     filterTaskBy({ tasks: taskStore, key, value });
   }
 
-  const displayAllCategory = (categories, subtaskIndentLevel = []) => {
+  const displayAllCategory = (categories, subtaskIndentLevel = 0) => {
     categories.forEach((category) => {
       if (Array.isArray(category)) {
         displayAllCategory(category, subtaskIndentLevel);
@@ -247,9 +247,11 @@ function Category() {
           ? TASKS
           : SUBTASKS;
 
-        if (key === SUBTASKS) {
-          subtaskIndentLevel.push(0);
-          console.log(category, subtaskIndentLevel.length);
+        console.log(subtaskIndentLevel);
+        console.log(category);
+
+        if (category.subtasks) {
+          subtaskIndentLevel++;
         }
 
         if (category[key]) {
