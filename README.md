@@ -9,9 +9,7 @@
 - Sorting of the category base on priority when task is added
 - Filtering of task that meet certain criteria
 
-#### Important
-
-##### How to use Todo-list with console
+#### How to use Todo-list with console
 
 - To add task (By default task are added in the inbox)
 
