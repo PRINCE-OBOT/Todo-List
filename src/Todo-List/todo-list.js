@@ -2,152 +2,211 @@ import EVENTS from "../EVENTS/EVENTS";
 import PubSub from "pubsub-js";
 
 const category = Category();
-const taskStore = TaskStore();
 
-function TaskStore() {
+function Category() {
   const init = () => {
-    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.CHANGE, handleTaskStoreChange);
-    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.ADD, addTask);
-    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.MARK_STATUS, markTaskStatus);
-    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.EDIT, editTask);
-    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.FILTER_BY, handleFilterTaskBy);
-    PubSub.subscribe(EVENTS.TODO_LIST.TASK_STORE.DELETE, deleteTask);
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.INBOX.ADD_SECTION,
+      addSectionInInbox
+    );
+
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.CHANGE, displayCategories);
 
     PubSub.subscribe(
-      EVENTS.TODO_LIST.TASK_INDEXES_STORE.CHANGE,
-      handleTaskIndexesChange
+      EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_CATEGORY,
+      addTaskCategoryToMyProject
     );
-    PubSub.subscribe(EVENTS.TODO_LIST.TASK_INDEXES_STORE.ADD, addTaskIndex);
+
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_SECTION,
+      addSectionToCategoryInMyProject
+    );
+
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.ADD, addTaskCategory);
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.DELETE, deleteTaskCategory);
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.MARK, markCategoryStatus);
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.EDIT, editCategory);
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.REFERENCE, referenceCategory);
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.DISPLAY_ALL,
+      handleDisplayAllCategory
+    );
   };
 
-  const taskStore = [];
-  // The length of `taskIndexes` tracks the current task
-  // The element in `taskIndexes` point to the index of the current task in it own section
-  const taskIndexes = [];
-  const NO_TASK_REFERENCE = "NO TASK REFERENCES THIS INDEX";
-  const SUBTASK_DEEP = "SUBTASK TOO DEEP";
+  // The first category in the array is classified as the category
+  // if the first index is not in the Categories key, then it get added to the inbox first index array
+  const Categories = {
+    Inbox: [[]],
+    My_Project: []
+  };
+
+  const Inbox = "Inbox";
+  const My_Project = "My_Project";
+  const SUBTASKS = "subtasks";
+  const TASKS = "tasks";
+  const SECTIONS = "sections";
+  const My_Project_Maximum_Category = 3;
+
+  const DEFAULT_REFERENCE = "Inbox>0".split(">");
+  let categoryReferences = DEFAULT_REFERENCE;
+
+  const referenceCategory = (_, categoryReference) => {
+    categoryReferences = categoryReference.split(">");
+    console.log(categoryReferences);
+  };
+
+  const CATEGORY_VOID = "CATEGORY DOES NOT EXIST";
+  const VALUE_NOT_ACCEPTED = "CATEGORY NOT DELETABLE";
   const TASK_DELETED = "LAST TASK IN SECTION DELETED";
 
-  const KEY_TASK_STORE = "taskStore";
+  // Utility Function
+  const getLastReference = (
+    msg,
+    lastReferenceCategory,
+    indexOfCategoryReferenceLast,
+    key
+  ) => {
+    const category = lastReferenceCategory[indexOfCategoryReferenceLast][key];
 
-  // ============  Task Index (Start)  =========== \\
-  const getLastReferenceTaskSection = (msg) => {
-    let lastReferenceTaskSection = taskStore;
+    if (msg === EVENTS.TODO_LIST.CATEGORY.DELETE) {
+      if (category.length === 1)
+        delete lastReferenceCategory[indexOfCategoryReferenceLast][key];
+      return TASK_DELETED;
+    }
 
-    for (let i = 0; i < taskIndexes.length; i++) {
-      const taskIndex = taskIndexes[i];
+    if (!category) {
+      lastReferenceCategory[indexOfCategoryReferenceLast][key] = [];
+    }
 
-      const lastReferenceTask = lastReferenceTaskSection[taskIndex];
+    return lastReferenceCategory[indexOfCategoryReferenceLast][key];
+  };
 
-      if (msg === EVENTS.TODO_LIST.TASK_STORE.ADD) {
-        if (!lastReferenceTask.subtask) lastReferenceTask.subtask = [];
-        lastReferenceTaskSection = lastReferenceTask.subtask;
+  const getLastReferenceCategory = (msg) => {
+    let lastReferenceCategory = Categories[categoryReferences[0]];
+
+    for (let i = 1; i < categoryReferences.length; i++) {
+      const indexOfCategoryReferenceLast = +categoryReferences[i];
+
+      const category = lastReferenceCategory[indexOfCategoryReferenceLast];
+
+      if (Array.isArray(category)) {
+        lastReferenceCategory = category;
       } else {
-        lastReferenceTaskSection = lastReferenceTask?.subtask || [];
-      }
+        const key = category.categoryTitle
+          ? SECTIONS
+          : category.sectionTitle
+          ? TASKS
+          : SUBTASKS;
 
-      if (msg === EVENTS.TODO_LIST.TASK_STORE.DELETE) {
-        if (lastReferenceTask.subtask.length === 1) {
-          delete lastReferenceTask.subtask;
-          return TASK_DELETED;
-        }
-      }
-
-      if (msg === EVENTS.TODO_LIST.TASK_INDEXES_STORE.ADD) {
-        if (lastReferenceTask === undefined) {
-          return NO_TASK_REFERENCE;
-        }
+        lastReferenceCategory = getLastReference(
+          msg,
+          lastReferenceCategory,
+          indexOfCategoryReferenceLast,
+          key
+        );
       }
     }
 
-    return lastReferenceTaskSection;
+    return lastReferenceCategory === Categories.Inbox
+      ? Categories.Inbox[0]
+      : lastReferenceCategory;
   };
 
-  const addTaskIndex = (msg, index) => {
-    taskIndexes.push(index);
+  const isCategoryExist = () => {
+    const categoryReferenceIndex = +categoryReferences.pop();
 
-    const lastReferenceTaskSection = getLastReferenceTaskSection(msg);
+    const category = Categories.My_Project[categoryReferenceIndex];
 
-    if (lastReferenceTaskSection === NO_TASK_REFERENCE) {
-      taskIndexes.pop();
-      console.log(NO_TASK_REFERENCE);
+    if (!category) {
+      console.log(CATEGORY_VOID);
+      return CATEGORY_VOID;
     }
+    return category;
   };
 
-  const clearTaskIndexes = () => {
-    taskIndexes.splice(0);
+  const handleLastReferenceCategory = (msg) => {
+    const indexOfCategoryReferenceLast = +categoryReferences.pop();
+
+    if (Number.isNaN(indexOfCategoryReferenceLast)) {
+      console.log(VALUE_NOT_ACCEPTED);
+      return VALUE_NOT_ACCEPTED;
+    }
+
+    const lastReferenceCategory = getLastReferenceCategory(msg);
+
+    return { lastReferenceCategory, indexOfCategoryReferenceLast };
   };
-
-  const displayTaskIndexes = () => {
-    console.log(taskIndexes);
-  };
-
-  const extractLastReferenceTaskIndex = () => {
-    const lastReferenceTaskIndex = taskIndexes.pop();
-
-    return lastReferenceTaskIndex !== undefined
-      ? lastReferenceTaskIndex
-      : NO_TASK_REFERENCE;
-  };
-  // ================ Task Index (Stop) ===============  \\
-
-  // ================  Task (Start)  ===================== \\
 
   const sortTaskBaseOnPriority = (currentTask, nextTask) =>
     currentTask.priority - nextTask.priority;
 
-  const addTask = (msg, task) => {
-    const lastReferenceTaskSection = getLastReferenceTaskSection(msg);
-    lastReferenceTaskSection.push(task);
-    lastReferenceTaskSection.sort(sortTaskBaseOnPriority);
+  // Main Function
+  const addTaskCategory = (msg, task) => {
+    task.category = categoryReferences;
+    const lastReferenceCategory = getLastReferenceCategory(msg);
+    lastReferenceCategory.push(task);
+    lastReferenceCategory.sort(sortTaskBaseOnPriority);
   };
 
-  const markTaskStatus = (msg, status) => {
-    const lastReferenceTaskIndex = extractLastReferenceTaskIndex();
+  const deleteTaskCategory = (msg) => {
+    const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
 
-    const lastReferenceTaskSection = getLastReferenceTaskSection();
+    if (lastReferenceCategoryValue === VALUE_NOT_ACCEPTED) return;
 
-    if (lastReferenceTaskIndex === NO_TASK_REFERENCE) {
-      console.log(NO_TASK_REFERENCE);
+    const { lastReferenceCategory, indexOfCategoryReferenceLast } =
+      lastReferenceCategoryValue;
+
+    if (lastReferenceCategory !== TASK_DELETED) {
+      lastReferenceCategory.splice(indexOfCategoryReferenceLast, 1);
+    }
+  };
+
+  const markCategoryStatus = (msg, status) => {
+    const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
+
+    if (lastReferenceCategoryValue === VALUE_NOT_ACCEPTED) return;
+
+    const { lastReferenceCategory, indexOfCategoryReferenceLast } =
+      lastReferenceCategoryValue;
+
+    const task = lastReferenceCategory[indexOfCategoryReferenceLast].status;
+
+    if (task === undefined) {
+      console.log(VALUE_NOT_ACCEPTED);
       return;
     }
 
-    lastReferenceTaskSection[lastReferenceTaskIndex].status = status;
+    lastReferenceCategory[indexOfCategoryReferenceLast].status = status;
   };
 
-  const editTask = (msg, editedTask) => {
-    const lastReferenceTaskIndex = extractLastReferenceTaskIndex();
+  const editCategory = (msg, editedTask) => {
+    const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
 
-    if (lastReferenceTaskIndex === NO_TASK_REFERENCE) {
-      console.log(NO_TASK_REFERENCE);
-      return;
-    }
+    if (lastReferenceCategoryValue === VALUE_NOT_ACCEPTED) return;
 
-    const lastReferenceTaskSection = getLastReferenceTaskSection();
+    const { lastReferenceCategory, indexOfCategoryReferenceLast } =
+      lastReferenceCategoryValue;
 
-    const lastReferenceTask = lastReferenceTaskSection[lastReferenceTaskIndex];
+    const task = lastReferenceCategory[indexOfCategoryReferenceLast];
 
-    const editedTaskKeys = Object.keys(editedTask);
+    if (task.Category === editedTask.category) {
+      const editedTaskKeys = Object.keys(editedTask);
 
-    editedTaskKeys.forEach((key) => {
-      lastReferenceTask[key] = editedTask[key];
-    });
+      editedTaskKeys.forEach((key) => {
+        task[key] = editedTask[key];
+      });
 
-    lastReferenceTaskSection.sort(sortTaskBaseOnPriority);
-  };
+      lastReferenceCategory.sort(sortTaskBaseOnPriority);
+    } else {
+      if (task.subtask) {
+        editedTask.subtask = task.subtask;
+      }
 
-  const deleteTask = (msg) => {
-    const lastReferenceTaskIndex = extractLastReferenceTaskIndex();
+      deleteTaskCategory(EVENTS.TODO_LIST.CATEGORY.DELETE);
 
-    if (lastReferenceTaskIndex === NO_TASK_REFERENCE) {
-      console.log(NO_TASK_REFERENCE);
-      return;
-    }
+      categoryReferences = editedTask.category;
 
-    const lastReferenceTaskSection = getLastReferenceTaskSection(msg);
-
-    if (lastReferenceTaskSection !== TASK_DELETED) {
-      lastReferenceTaskSection.splice(lastReferenceTaskIndex, 1);
+      addTaskCategory(EVENTS.TODO_LIST.CATEGORY.ADD, editedTask);
     }
   };
 
@@ -176,146 +235,83 @@ function TaskStore() {
   function handleFilterTaskBy(msg, { key, value }) {
     filterTaskBy({ tasks: taskStore, key, value });
   }
-  // ================  Task (Stop)  ===================== \\
 
-  // ================  Storage (Start)  ===================== \\
-  const updateStorage = () => {
-    localStorage.setItem(KEY_TASK_STORE, taskStore);
-    console.log("taskStore", taskStore, "taskIndexes", taskIndexes);
-  };
-  // ================  Storage (Stop)  ===================== \\
+  const displayAllCategory = (categories, subtaskIndentLevel = []) => {
+    categories.forEach((category) => {
+      if (Array.isArray(category)) {
+        displayAllCategory(category, subtaskIndentLevel);
+      } else {
+        const key = category.categoryTitle
+          ? SECTIONS
+          : category.sectionTitle
+          ? TASKS
+          : SUBTASKS;
 
-  // ================  Handle (Start)  ===================== \\
-  function handleTaskStoreChange() {
-    clearTaskIndexes();
-    updateStorage();
-  }
+        if (key === SUBTASKS) {
+          subtaskIndentLevel.push(0);
+          console.log(category, subtaskIndentLevel.length);
+        }
 
-  function handleTaskIndexesChange() {
-    displayTaskIndexes();
-  }
-  const getTaskStore = () => taskStore;
-  // ================  Handle (Stop)  ===================== \\
-
-  return { init, getTaskStore };
-}
-
-function Category() {
-  const init = () => {
-    PubSub.subscribe(
-      EVENTS.TODO_LIST.CATEGORY.INBOX.ADD_SECTION,
-      addSectionInInbox
-    );
-    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.CHANGE, displayCategories);
-    PubSub.subscribe(
-      EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_CATEGORY,
-      addCategoryToMyProject
-    );
-    PubSub.subscribe(
-      EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_SECTION,
-      addSectionToCategoryInMyProject
-    );
-
-    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.CATEGORIZE, categorizeTask);
+        if (category[key]) {
+          displayAllCategory(category[key], subtaskIndentLevel);
+        }
+      }
+    });
   };
 
-  // UI will illiterate through this an get the section arrange
-  const Categories = {
-    Inbox: [],
-    My_Project: []
+  const handleDisplayAllCategory = () => {
+    for (let key in Categories) {
+      console.log(key);
+      displayAllCategory(Categories[key]);
+    }
   };
 
-  //const currentCategory = { categoryTitle: "Inbox" };
-  // To reference section in inbox include categoryIndex
-  //const currentCategory = { categoryTitle: "Inbox", categoryIndex: [0] };
-
-  const CATEGORY_VOID = "CATEGORY DOES NOT EXIST";
-  const INBOX = "INBOX";
-
-  // Adding section and category to `Inbox` and `My_Project`
-  const addSectionInInbox = (msg, section) => {
+  const addSectionInInbox = (_, section) => {
     Categories.Inbox.push(section);
   };
 
-  const addCategoryToMyProject = (msg, category) => {
+  const addTaskCategoryToMyProject = (_, category) => {
     Categories.My_Project.push(category);
   };
 
-  const addSectionToCategoryInMyProject = (msg, { section, categoryIndex }) => {
-    const category = Categories.My_Project[categoryIndex];
+  const addSectionToCategoryInMyProject = (_, section) => {
+    const category = isCategoryExist();
+    if (category === CATEGORY_VOID) return;
 
-    if (!category) {
-      console.log(CATEGORY_VOID);
-      return;
+    if (!category.sections) {
+      category.sections = [];
     }
-
-    if (!category.section) {
-      category.section = [];
-    }
-
-    category.section.push(section);
+    category.sections.push(section);
   };
 
   const displayCategories = () => {
     console.log("INBOX", Categories.Inbox);
     console.log("MY PROJECT", Categories.My_Project);
-  };
-
-  const categorizeInboxTask = (task) => {
-    const sectionTitle = task.category.sectionTitle;
-    if (sectionTitle) {
-      for (let i = Categories.Inbox.length - 1; i >= 0; i--) {
-        const categorySection = Categories.Inbox[i];
-        
-        if (categorySection.sectionTitle === sectionTitle) {
-          if (!categorySection.section) categorySection.section = [];
-          categorySection.section.push(task);
-          return;
-        }
-      }
-      Categories.Inbox.unshift(task);
-    } else {
-      Categories.Inbox.unshift(task);
-    }
-  };
-
-  const categorizeMyProjectTask = (task) => {
-    for (let i = 0; i < Categories.My_Project.length; i++) {
-      const category = Categories.My_Project[i];
-      
-      if (category.categoryTitle === task.category.categoryTitle) {
-        if (task.category.sectionTitle) {
-          for (let i = category.section.length - 1; i >= 0; i--) {
-            const categorySection = category.section[i];
-
-            if (categorySection.sectionTitle === task.category.sectionTitle) {
-              if (!categorySection.section) categorySection.section = [];
-              categorySection.section.push(task);
-              return;
-            }
-          }
-        }
-        if(!category.section) category.section = []
-        category.section.unshift(task);
-      }
-    }
-  };
-
-  const categorizeTask = () => {
-    // illiterate through the taskStore, and arrange task base on it category
-    const listOfTask = taskStore.getTaskStore();
-
-    listOfTask.forEach((task) => {
-      if (task.category.categoryTitle) {
-        categorizeMyProjectTask(task);
-      } else {
-        categorizeInboxTask(task);
-      }
-    });
-    // fix task under it category
+    categoryReferences = DEFAULT_REFERENCE;
   };
 
   return { init };
 }
 
-export { taskStore, category };
+export { category };
+
+/*How to use Todo-list with console
+1.  To add task (By default task are added in the inbox)
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD, { title: 'one', description: 'Go to gym as early as possible', status: false, priority: 1, label: 'exercise' });
+
+2.  To add task in any category - reference that category
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, 'Inbox>1');
+    The category in index one of the `inbox` is been reference here
+
+3.  To add a section to inbox  
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.INBOX.ADD_SECTION, { sectionTitle: 'gym'});
+
+4.  To add a category to my_project  
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_CATEGORY, { categoryTitle: 'gym'});
+
+5.  To add a section to my_project  
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_SECTION, { sectionTitle: 'gym'});
+
+6.  To display all category, include task  
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DISPLAY_ALL);
+*/
