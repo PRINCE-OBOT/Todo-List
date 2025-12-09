@@ -1,8 +1,6 @@
 import EVENTS from "../EVENTS/EVENTS";
 import PubSub from "pubsub-js";
 
-const category = Category();
-
 function Category() {
   const init = () => {
     PubSub.subscribe(
@@ -37,19 +35,17 @@ function Category() {
     );
   };
 
-  // The first category in the array is classified as the category
-  // if the first index is not in the Categories key, then it get added to the inbox first index array
+  /*
+  Double array like this [[]], means the first index is kept aside for task, and `category` with `sectionTitle` or `categoryTitle` can be pushed in the other index
+  */
   const Categories = {
     Inbox: [[]],
     My_Project: []
   };
 
-  const Inbox = "Inbox";
-  const My_Project = "My_Project";
   const SUBTASKS = "subtasks";
   const TASKS = "tasks";
   const SECTIONS = "sections";
-  const My_Project_Maximum_Category = 3;
 
   const DEFAULT_REFERENCE = "Inbox>0".split(">");
   let categoryReferences = DEFAULT_REFERENCE;
@@ -85,6 +81,12 @@ function Category() {
     return lastReferenceCategory[indexOfCategoryReferenceLast][key];
   };
 
+  /*
+  Use the path provided via the `categoryReferences` and target the category that was reference last
+  (category reference last could be, category, section, task - task is also classified as category because it can contain subtask)
+
+  If the path is incorrect, then use the Category.Inbox category (array)
+  */
   const getLastReferenceCategory = (msg) => {
     let lastReferenceCategory = Categories[categoryReferences[0]];
 
@@ -185,6 +187,11 @@ function Category() {
     lastReferenceCategory[indexOfCategoryReferenceLast].status = status;
   };
 
+  /*
+  Check if the task edited now has a different category,
+  If it does not, just update the existing task value to the edited task value
+  else  delete the category in the old category and add it in the new category
+  */
   const editCategory = (msg, editedTask) => {
     const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
 
@@ -306,31 +313,8 @@ function Category() {
   return { init };
 }
 
+const category = Category();
+
 export { category };
 
-/*How to use Todo-list with console
-1.  To add task (By default task are added in the inbox)
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD, { title: 'one', description: 'Go to gym as early as possible', status: false, priority: 1, label: 'exercise' });
 
-2.  To add task in any category - reference that category
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, 'Inbox>1');
-      
-      The category in index 1 of `inbox`  is been reference here
-      Note: If a category is not reference correctly, the `inbox` categories (array) is used
-
-
-3.  To add a section to inbox  
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.INBOX.ADD_SECTION, { sectionTitle: 'gym'});
-
-4.  To add a category to my_project  
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_CATEGORY, { categoryTitle: 'gym'});
-
-5.  To add a section to my_project  
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_SECTION, { sectionTitle: 'gym'});
-
-6.  To display all category, include task  
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DISPLAY_ALL);
-
-7.  To display only filtered task
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DISPLAY_FILTER, { filterKey: 'title', filterValue: 'Hockey' });
-*/

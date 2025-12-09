@@ -1,7 +1,6 @@
 const EVENTS = {
   TODO_LIST: {
     CATEGORY: {
-      CHANGE: "CHANGE",
       INBOX: {
         ADD_SECTION: "CHANGE.INBOX.ADD_SECTION"
       },
@@ -9,6 +8,7 @@ const EVENTS = {
         ADD_CATEGORY: "CHANGE.MY_PROJECT.ADD_CATEGORY",
         ADD_SECTION: "CHANGE.MY_PROJECT.ADD_SECTION"
       },
+      CHANGE: "CHANGE",
       ADD: "CHANGE.ADD_CATEGORY",
       MARK: "CHANGE.MARK_CATEGORY",
       EDIT: "CHANGE.EDIT_CATEGORY",
@@ -18,17 +18,6 @@ const EVENTS = {
       REFERENCE: "CATEGORY_REFERENCE"
     }
   },
-  PAGE: {
-    LOAD: {
-      HERO: "LOAD.HERO_PAGE",
-      TODAY: "LOAD.TODAY_PAGE",
-      MAIN_NAV_CONTROLLER: "LOAD.MAIN_NAV_CONTROLLER_PAGE"
-    },
-    REMOVE: {
-      HERO: "REMOVE_HERO_PAGE",
-      TODAY: "REMOVE_TODAY_PAGE"
-    }
-  }
 };
 
 export default EVENTS;
