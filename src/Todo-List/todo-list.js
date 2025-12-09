@@ -31,6 +31,10 @@ function Category() {
       EVENTS.TODO_LIST.CATEGORY.DISPLAY_ALL,
       handleDisplayAllCategory
     );
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.DISPLAY_FILTER,
+      handleFilterTaskBy
+    );
   };
 
   // The first category in the array is classified as the category
@@ -88,6 +92,8 @@ function Category() {
       const indexOfCategoryReferenceLast = +categoryReferences[i];
 
       const category = lastReferenceCategory[indexOfCategoryReferenceLast];
+
+      if (category === undefined) return Categories.Inbox[0];
 
       if (Array.isArray(category)) {
         lastReferenceCategory = category;
@@ -210,30 +216,34 @@ function Category() {
     }
   };
 
-  const filterTaskBy = ({ tasks, key, value, depth = 0 }) => {
-    if (depth >= 50) {
-      console.log(SUBTASK_DEEP);
-      return;
-    }
+  const filterTaskBy = (categories, filterKey, filterValue) => {
+    categories.forEach((category) => {
+      if (Array.isArray(category)) {
+        filterTaskBy(category, filterKey, filterValue);
+      } else {
+        const categorySectionKey = category.categoryTitle
+          ? SECTIONS
+          : category.sectionTitle
+          ? TASKS
+          : SUBTASKS;
 
-    tasks.forEach((task) => {
-      if (task[key] === value) {
-        console.log(task);
-      }
+        if (category.title) {
+          if (category[filterKey] === filterValue) {
+            console.log(category);
+          }
+        }
 
-      if (task.subtask) {
-        filterTaskBy({
-          tasks: task.subtask,
-          key,
-          value,
-          depth: depth + 1
-        });
+        if (category[categorySectionKey]) {
+          filterTaskBy(category[categorySectionKey], filterKey, filterValue);
+        }
       }
     });
   };
 
-  function handleFilterTaskBy(msg, { key, value }) {
-    filterTaskBy({ tasks: taskStore, key, value });
+  function handleFilterTaskBy(msg, { filterKey, filterValue }) {
+    for (let key in Categories) {
+      filterTaskBy(Categories[key], filterKey, filterValue);
+    }
   }
 
   const displayAllCategory = (categories, subtaskIndentLevel = 0) => {
@@ -241,7 +251,7 @@ function Category() {
       if (Array.isArray(category)) {
         displayAllCategory(category, subtaskIndentLevel);
       } else {
-        const key = category.categoryTitle
+        const categorySectionKey = category.categoryTitle
           ? SECTIONS
           : category.sectionTitle
           ? TASKS
@@ -254,8 +264,8 @@ function Category() {
           subtaskIndentLevel++;
         }
 
-        if (category[key]) {
-          displayAllCategory(category[key], subtaskIndentLevel);
+        if (category[categorySectionKey]) {
+          displayAllCategory(category[categorySectionKey], subtaskIndentLevel);
         }
       }
     });
@@ -273,6 +283,7 @@ function Category() {
   };
 
   const addTaskCategoryToMyProject = (_, category) => {
+    category.sections = [[]];
     Categories.My_Project.push(category);
   };
 
@@ -303,7 +314,10 @@ export { category };
 
 2.  To add task in any category - reference that category
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, 'Inbox>1');
-    The category in index one of the `inbox` is been reference here
+      
+      The category in index 1 of `inbox`  is been reference here
+      Note: If a category is not reference correctly, the `inbox` categories (array) is used
+
 
 3.  To add a section to inbox  
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.INBOX.ADD_SECTION, { sectionTitle: 'gym'});
@@ -316,4 +330,7 @@ export { category };
 
 6.  To display all category, include task  
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DISPLAY_ALL);
+
+7.  To display only filtered task
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DISPLAY_FILTER, { filterKey: 'title', filterValue: 'Hockey' });
 */
