@@ -13,6 +13,6 @@ module.exports = merge(common, {
   },
   devtool: 'inline-source-map',
   devServer: {
-    watchFiles: ['./']
+    watchFiles: ['./*.html']
   }
 });

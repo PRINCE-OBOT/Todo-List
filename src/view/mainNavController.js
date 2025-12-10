@@ -1,6 +1,7 @@
-import EVENTS from "../EVENTS/EVENTS";
+import PubSub from "pubsub-js";
+import EVENTS from "../config/EVENTS";
 
-function MainNavController() {
+function MainNavController(mainNavigation, changeViewHolder) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.MAIN_NAV_CONTROLLER, navPage);
   };
@@ -9,21 +10,21 @@ function MainNavController() {
   div.classList.add("mainNavController");
 
   div.innerHTML = `
-    <div data-nav="today">
+    <div data-change-main-view="TODAY">
         <div class="nav-icon">
             📆
         </div>
         Today
     </div>
     
-    <div data-nav="search">
+    <div data-change-main-view="SEARCH">
         <div class="nav-icon">
             🔍
         </div>
         Search
     </div>
    
-    <div data-nav="category">
+    <div data-change-main-view="CATEGORY">
         <div class="nav-icon">
             📅
         </div>
@@ -31,12 +32,23 @@ function MainNavController() {
     </div>
   `;
 
+  function mainView(e) {
+    const changeMainView = e.target.dataset.changeMainView;
+
+    if (!changeMainView) return;
+
+    changeViewHolder.innerHTML = "";
+
+    PubSub.publish(EVENTS.PAGE.LOAD[changeMainView]);
+  }
+
+  div.addEventListener("click", mainView);
+
   const navPage = () => {
-    document.body.append(div);
+    mainNavigation.append(div);
   };
 
   return { init };
 }
-const mainNavController = MainNavController();
 
-export default mainNavController;
+export default MainNavController;

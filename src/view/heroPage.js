@@ -1,4 +1,4 @@
-import EVENTS from "../EVENTS/EVENTS";
+import EVENTS from "../config/EVENTS";
 
 function HeroPage() {
   const init = () => {

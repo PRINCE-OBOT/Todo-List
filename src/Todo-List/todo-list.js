@@ -1,4 +1,5 @@
-import EVENTS from "../EVENTS/EVENTS";
+import { CATEGORIES } from "../config/constant";
+import EVENTS from "../config/EVENTS";
 import PubSub from "pubsub-js";
 
 const category = Category();
@@ -10,7 +11,7 @@ function Category() {
       addSectionInInbox
     );
 
-    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.CHANGE, displayCategories);
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.CHANGE, updateStorage);
 
     PubSub.subscribe(
       EVENTS.TODO_LIST.CATEGORY.MY_PROJECT.ADD_CATEGORY,
@@ -31,28 +32,30 @@ function Category() {
       EVENTS.TODO_LIST.CATEGORY.DISPLAY_ALL,
       handleDisplayAllCategory
     );
-    PubSub.subscribe(
-      EVENTS.TODO_LIST.CATEGORY.DISPLAY_FILTER,
-      handleFilterTaskBy
-    );
+
+    initializeCategory();
   };
+
+  const CATEGORY = "CATEGORY";
+
+
+  const DEFAULT_REFERENCE = "Inbox>0".split(">");
+  let categoryReferences = DEFAULT_REFERENCE;
 
   // The first category in the array is classified as the category
   // if the first index is not in the Categories key, then it get added to the inbox first index array
-  const Categories = {
+  let Categories = {
     Inbox: [[]],
     My_Project: []
   };
 
-  const Inbox = "Inbox";
-  const My_Project = "My_Project";
-  const SUBTASKS = "subtasks";
-  const TASKS = "tasks";
-  const SECTIONS = "sections";
-  const My_Project_Maximum_Category = 3;
+  function initializeCategory() {
+    const categories = localStorage.getItem(CATEGORY);
 
-  const DEFAULT_REFERENCE = "Inbox>0".split(">");
-  let categoryReferences = DEFAULT_REFERENCE;
+    if (!categories) return;
+
+    Categories = JSON.parse(categories);
+  }
 
   const referenceCategory = (_, categoryReference) => {
     categoryReferences = categoryReference.split(">");
@@ -99,10 +102,10 @@ function Category() {
         lastReferenceCategory = category;
       } else {
         const key = category.categoryTitle
-          ? SECTIONS
+          ? CATEGORIES.SECTIONS
           : category.sectionTitle
-          ? TASKS
-          : SUBTASKS;
+          ? CATEGORIES.TASKS
+          : CATEGORIES.SUBTASKS;
 
         lastReferenceCategory = getLastReference(
           msg,
@@ -216,36 +219,6 @@ function Category() {
     }
   };
 
-  const filterTaskBy = (categories, filterKey, filterValue) => {
-    categories.forEach((category) => {
-      if (Array.isArray(category)) {
-        filterTaskBy(category, filterKey, filterValue);
-      } else {
-        const categorySectionKey = category.categoryTitle
-          ? SECTIONS
-          : category.sectionTitle
-          ? TASKS
-          : SUBTASKS;
-
-        if (category.title) {
-          if (category[filterKey] === filterValue) {
-            console.log(category);
-          }
-        }
-
-        if (category[categorySectionKey]) {
-          filterTaskBy(category[categorySectionKey], filterKey, filterValue);
-        }
-      }
-    });
-  };
-
-  function handleFilterTaskBy(msg, { filterKey, filterValue }) {
-    for (let key in Categories) {
-      filterTaskBy(Categories[key], filterKey, filterValue);
-    }
-  }
-
   const displayAllCategory = (categories, subtaskIndentLevel = 0) => {
     categories.forEach((category) => {
       if (Array.isArray(category)) {
@@ -297,13 +270,17 @@ function Category() {
     category.sections.push(section);
   };
 
-  const displayCategories = () => {
+  const updateStorage = () => {
+    localStorage.setItem(CATEGORY, JSON.stringify(Categories));
+
     console.log("INBOX", Categories.Inbox);
     console.log("MY PROJECT", Categories.My_Project);
     categoryReferences = DEFAULT_REFERENCE;
   };
 
-  return { init };
+  const getCategories = () => Categories;
+
+  return { init, getCategories };
 }
 
 export { category };

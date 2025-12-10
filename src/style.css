@@ -57,24 +57,62 @@ h6 {
   text-wrap: balance;
 }
 
+/* font */
+@font-face {
+  font-family: Roboto;
+  src: url(./fonts/Roboto-400.woff) format(woff),
+    url(./fonts/Pacifico-Regular.woff2) format(woff2);
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Pacifico;
+  src: url(./fonts/Pacifico-Regular.woff) format(woff),
+    url(./fonts/Pacifico-Regular.woff2) format(woff2);
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+
 :root {
   --black: rgb(28, 28, 28);
   --white: rgb(250, 250, 250);
   --primary-accent: rgb(96, 4, 4);
+  --warning: rgb(215, 41, 41);
   --high-priority: rgb(144, 42, 13);
   --normal-priority: rgb(39, 144, 13);
   --low-priority: rgb(13, 144, 113);
+  --transparent: rgba(59, 55, 55, 0.5);
+  --transparent-white: rgba(255 255 255/ 0.5);
 
   --fs-sz-xlg: 40px;
   --fs-sz-lg: 20px;
 
   --pd-lg: 20px;
+  --pd-sm: 10px;
+
+  --gp-xlg: 40px;
   --gp-lg: 20px;
+  --gp-sm: 10px;
+
+  --br-lg: 20px;
+  --br-sm: 10px;
+  --br-xlg: 40px;
 }
 
 body,
-html {
+html,
+.container {
   height: 100%;
+  font-family: Roboto, Arial, Helvetica, sans-serif;
+}
+main {
+  display: flex;
+  min-height: 100%;
+  background-color: var(--black);
+  flex-direction: column;
 }
 .hero_page_text {
   display: flex;
@@ -85,16 +123,60 @@ html {
   color: var(--white);
   font-size: var(--fs-sz-xlg);
 }
+.change-view-holder {
+  flex: 1;
+  display: flex;
+}
+.today_page {
+  flex: 1;
+  padding: var(--pd-sm);
+  color: var(--white);
+  max-width: 500px;
+  margin: 0 auto 0;
+}
+.today_page p {
+  opacity: 0.7;
+}
+
+[data-tasks-section] {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-sm);
+}
+
+.overdue-title {
+  color: var(--warning);
+  padding-top: 20px;
+}
+
+.today_page .task {
+  background-color: var(--transparent);
+  padding: var(--pd-lg);
+  display: grid;
+  grid-template-columns: 15px 1fr 1fr;
+  gap: var(--gp-lg);
+  border-radius: var(--br-sm);
+  border: 2px solid var(--transparent-white);
+}
+
+.today_page .category {
+  align-self: flex-end;
+  justify-self: flex-end;
+}
+
 .mainNavController {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--gp-lg);
+  gap: var(--gp-xlg);
   background-color: var(--black);
   opacity: 0.9;
   padding: var(--pd-lg);
 }
-[data-nav] {
+.nav-icon {
+  pointer-events: none;
+}
+[data-change-main-view] {
   display: flex;
   flex-direction: column;
   align-items: center;
