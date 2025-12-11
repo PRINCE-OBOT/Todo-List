@@ -19,10 +19,10 @@ function Search(main) {
     </div>
   `;
 
-  const filterTaskBy = (categories, filterKey, filterValue) => {
+  const getTasks = (categories, filterKey, filterValue) => {
     categories.forEach((category) => {
       if (Array.isArray(category)) {
-        filterTaskBy(category, filterKey, filterValue);
+        getTasks(category, filterKey, filterValue);
       } else {
         const categorySectionKey = category.categoryTitle
           ? SECTIONS
@@ -37,7 +37,7 @@ function Search(main) {
         }
 
         if (category[categorySectionKey]) {
-          filterTaskBy(category[categorySectionKey], filterKey, filterValue);
+          getTasks(category[categorySectionKey], filterKey, filterValue);
         }
       }
     });
@@ -47,7 +47,7 @@ function Search(main) {
     const Categories = category.getCategories();
 
     for (let key in Categories) {
-      filterTaskBy(Categories[key], "title", "");
+      getTasks(Categories[key], "title", "");
     }
   };
 

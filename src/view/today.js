@@ -1,6 +1,6 @@
 import EVENTS from "../config/EVENTS";
 import { category } from "../Todo-List/todo-list";
-import { CATEGORIES, filterTaskBy } from "../config/constant";
+import { getTasks, Context } from "../config/constant";
 import isBefore from "date-fns/isBefore";
 import startOfDay from "date-fns/startOfDay";
 import isToday from "date-fns/isToday";
@@ -10,6 +10,8 @@ function Today(main) {
     PubSub.subscribe(EVENTS.PAGE.LOAD.TODAY, render);
     PubSub.subscribe(EVENTS.PAGE.REMOVE.TODAY, removeToday);
   };
+
+  let categoryTitles = ''
 
   const todayDate = new Date().toDateString();
   const today = startOfDay(new Date());
@@ -44,17 +46,17 @@ function Today(main) {
   );
 
   const createTodayTask = (category) => {
-    if (!isToday(category.date)) return;
-
     const task = document.createElement("div");
     task.classList.add("task");
 
     task.innerHTML = `
-    <input class="mark-status" type="checkbox" data-priority="${category.priority}"/>
+    <input class="mark-status" type="checkbox" data-priority="${
+      category.priority
+    }"/>
     <div>
       <div class="title">${category.title}</div>
     </div>
-    <p class="category">${category.formatCategory}</p>
+    <p class="category">${categoryTitles}</p>
     `;
 
     todayTaskSection.append(task);
@@ -67,37 +69,39 @@ function Today(main) {
     task.classList.add("task");
 
     task.innerHTML = `
-    <input class="mark-status" type="checkbox" data-priority="${category.priority}"/>
+    <input class="mark-status" type="checkbox" data-priority="${
+      category.priority
+    }"/>
     <div>
       <div class="title">${category.title}</div>
       <p class="date">${category.date}</p>
     </div>
-    <p class="category">${category.formatCategory}</p>
+    <p class="category">${categoryTitles}</p>
     `;
 
     overdueTaskSection.append(task);
   };
 
-  const filterTodayTask = () => {
+  const handleFilterTask = (category, categoryTitle) => {
+    categoryTitles = categoryTitle;
+    if (isBefore(new Date(category.date), today)) createOverdueTask(category);
+    if (isToday(category.date)) createTodayTask(category);
+  };
+
+  const handleGetTask = () => {
     const Categories = category.getCategories();
 
     for (let key in Categories) {
-      filterTaskBy(Categories[key], createTodayTask);
+      categoryTitles = key
+
+      getTasks(Categories[key], handleFilterTask, Context.NEW, categoryTitles);
     }
   };
 
-  const filterOverdueTask = () => {
-    const Categories = category.getCategories();
-
-    for (let key in Categories) {
-      filterTaskBy(Categories[key], createOverdueTask);
-    }
-  };
 
   const render = () => {
     main.append(div);
-    filterTodayTask();
-    filterOverdueTask();
+    handleGetTask();
   };
 
   const removeToday = () => {

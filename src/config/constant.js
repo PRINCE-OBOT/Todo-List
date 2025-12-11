@@ -4,10 +4,18 @@ const CATEGORIES = {
   SECTIONS: "sections"
 };
 
-const filterTaskBy = (categories, callback) => {
+const Context = {
+  NEW: "NEW",
+  OLD: "OLD"
+};
+
+const CATEGORY_TITLE = "categoryTitle";
+const SECTION_TITLE = "sectionTitle";
+
+const getTasks = (categories, callback, context, categoryTitles) => {
   categories.forEach((category) => {
     if (Array.isArray(category)) {
-      filterTaskBy(category, callback);
+      getTasks(category, callback, Context.NEW, categoryTitles);
     } else {
       const categorySectionKey = category.categoryTitle
         ? CATEGORIES.SECTIONS
@@ -15,15 +23,39 @@ const filterTaskBy = (categories, callback) => {
         ? CATEGORIES.TASKS
         : CATEGORIES.SUBTASKS;
 
-      if (category.title) {
-        callback(category);
+      if (!category.title) {
+        const categoryTitle = category.categoryTitle
+          ? CATEGORY_TITLE
+          : SECTION_TITLE;
+
+        // If the iteration occur in the same array remove the last `categoryTitle` before adding another `categoryTitle`
+        // Else just add another `categoryTitle`
+        // Changing context to OLD or NEW help to keep track whether the iteration is occurring in the same array
+
+        if (context === Context.OLD) {
+          categoryTitles = categoryTitles.slice(
+            0,
+            categoryTitles.lastIndexOf("/")
+          );
+        }
+
+        categoryTitles += ` / ${category[categoryTitle]}`;
+
+        context = Context.OLD;
+      } else {
+        callback(category, categoryTitles);
       }
 
       if (category[categorySectionKey]) {
-        filterTaskBy(category[categorySectionKey], filterKey, filterValue);
+        getTasks(
+          category[categorySectionKey],
+          callback,
+          Context.NEW,
+          categoryTitles
+        );
       }
     }
   });
 };
 
-export { CATEGORIES, filterTaskBy };
+export { CATEGORIES, getTasks, Context };
