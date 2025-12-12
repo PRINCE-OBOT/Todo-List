@@ -38,8 +38,7 @@ function Category() {
 
   const CATEGORY = "CATEGORY";
 
-
-  const DEFAULT_REFERENCE = "Inbox>0".split(">");
+  const DEFAULT_REFERENCE = ["Inbox", 0];
   let categoryReferences = DEFAULT_REFERENCE;
 
   // The first category in the array is classified as the category
@@ -58,7 +57,11 @@ function Category() {
   }
 
   const referenceCategory = (_, categoryReference) => {
-    categoryReferences = categoryReference.split(">");
+    categoryReferences.splice(
+      0,
+      categoryReferences.length,
+      ...categoryReference
+    );
     console.log(categoryReferences);
   };
 
@@ -122,7 +125,7 @@ function Category() {
   };
 
   const isCategoryExist = () => {
-    const categoryReferenceIndex = +categoryReferences.pop();
+    const categoryReferenceIndex = categoryReferences.pop();
 
     const category = Categories.My_Project[categoryReferenceIndex];
 
@@ -134,16 +137,11 @@ function Category() {
   };
 
   const handleLastReferenceCategory = (msg) => {
-    const indexOfCategoryReferenceLast = +categoryReferences.pop();
-
-    if (Number.isNaN(indexOfCategoryReferenceLast)) {
-      console.log(VALUE_NOT_ACCEPTED);
-      return VALUE_NOT_ACCEPTED;
-    }
+    const id = categoryReferences.pop();
 
     const lastReferenceCategory = getLastReferenceCategory(msg);
 
-    return { lastReferenceCategory, indexOfCategoryReferenceLast };
+    return { lastReferenceCategory, id };
   };
 
   const sortTaskBaseOnPriority = (currentTask, nextTask) =>
@@ -151,52 +149,45 @@ function Category() {
 
   // Main Function
   const addTaskCategory = (msg, task) => {
-    task.category = categoryReferences;
+    task.category = [...categoryReferences, task.id];
+
     const lastReferenceCategory = getLastReferenceCategory(msg);
     lastReferenceCategory.push(task);
     lastReferenceCategory.sort(sortTaskBaseOnPriority);
   };
 
+  const getCategoryIndex = (lastReferenceCategory, id) =>
+    lastReferenceCategory.findIndex((category) => category.id === id);
+
   const deleteTaskCategory = (msg) => {
     const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
 
-    if (lastReferenceCategoryValue === VALUE_NOT_ACCEPTED) return;
-
-    const { lastReferenceCategory, indexOfCategoryReferenceLast } =
-      lastReferenceCategoryValue;
+    const { lastReferenceCategory, id } = lastReferenceCategoryValue;
 
     if (lastReferenceCategory !== TASK_DELETED) {
-      lastReferenceCategory.splice(indexOfCategoryReferenceLast, 1);
+      const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
+      lastReferenceCategory.splice(indexOfCategory, 1);
     }
   };
 
   const markCategoryStatus = (msg, status) => {
     const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
 
-    if (lastReferenceCategoryValue === VALUE_NOT_ACCEPTED) return;
+    const { lastReferenceCategory, id } = lastReferenceCategoryValue;
 
-    const { lastReferenceCategory, indexOfCategoryReferenceLast } =
-      lastReferenceCategoryValue;
+    const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
 
-    const task = lastReferenceCategory[indexOfCategoryReferenceLast].status;
-
-    if (task === undefined) {
-      console.log(VALUE_NOT_ACCEPTED);
-      return;
-    }
-
-    lastReferenceCategory[indexOfCategoryReferenceLast].status = status;
+    lastReferenceCategory[indexOfCategory].status = status;
   };
 
   const editCategory = (msg, editedTask) => {
     const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
 
-    if (lastReferenceCategoryValue === VALUE_NOT_ACCEPTED) return;
+    const { lastReferenceCategory, id } = lastReferenceCategoryValue;
 
-    const { lastReferenceCategory, indexOfCategoryReferenceLast } =
-      lastReferenceCategoryValue;
+    const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
 
-    const task = lastReferenceCategory[indexOfCategoryReferenceLast];
+    const task = lastReferenceCategory[indexOfCategory];
 
     if (task.Category === editedTask.category) {
       const editedTaskKeys = Object.keys(editedTask);

@@ -11,8 +11,6 @@ function Today(main) {
     PubSub.subscribe(EVENTS.PAGE.REMOVE.TODAY, removeToday);
   };
 
-  let categoryTitles = ''
-
   const todayDate = new Date().toDateString();
   const today = startOfDay(new Date());
 
@@ -45,59 +43,102 @@ function Today(main) {
     '[data-tasks-section="overdue"]'
   );
 
-  const createTodayTask = (category) => {
+  overdueTaskSection.addEventListener("click", handleTaskAction);
+
+  const TaskAction = {
+    delete: () => PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE)
+  };
+
+  function handleTaskAction(e) {
+    const taskDataset = e.target.dataset;
+
+    if (!taskDataset.taskAction) return;
+
+    const taskSection = e.target.closest("[data-category-reference]");
+
+    const categoryReference = taskSection.getAttribute(
+      "data-category-reference"
+    );
+
+    const result = categoryReference
+      .split(",")
+      .map((index, i) => (Number.isNaN(+index) ? index : +index));
+
+
+    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, result);
+
+    TaskAction[taskDataset.taskAction]();
+  }
+
+  const createTodayTask = (category, categoryTitles) => {
     const task = document.createElement("div");
     task.classList.add("task");
+    task.setAttribute("data-category-reference", category.category);
 
     task.innerHTML = `
-    <input class="mark-status" type="checkbox" data-priority="${
-      category.priority
-    }"/>
+    <input class="mark-status" type="checkbox" data-priority="${category.priority}"/>
     <div>
-      <div class="title">${category.title}</div>
+    <div class="title">${category.title}</div>
     </div>
-    <p class="category">${categoryTitles}</p>
+    <div>
+      <div class="more-options">&vellip;</div>
+      <p class="category">${categoryTitles}</p>
+    </div>
     `;
 
     todayTaskSection.append(task);
   };
 
-  const createOverdueTask = (category) => {
+  const createOverdueTask = (category, categoryTitles) => {
     if (!isBefore(new Date(category.date), today)) return;
 
     const task = document.createElement("div");
     task.classList.add("task");
+    task.setAttribute("data-category-reference", category.category);
 
     task.innerHTML = `
-    <input class="mark-status" type="checkbox" data-priority="${
-      category.priority
-    }"/>
-    <div>
-      <div class="title">${category.title}</div>
-      <p class="date">${category.date}</p>
-    </div>
-    <p class="category">${categoryTitles}</p>
+      <input
+        class="mark-status"
+        type="checkbox"
+        data-priority="${category.priority}"
+      />
+      <div>
+        <div class="title">${category.title}</div>
+        <p class="date">${category.date}</p>
+      </div>
+      <div>
+        <div class="more_options_section">
+          <div class="more_options_action">
+            <span class="delete_task" data-task-action="delete">Delete</span>
+            <span class="edit_task" data-task-action="edit">Edit</span>
+          </div>
+          <div class="show_more_options">&vellip;</div>
+        </div>
+        <p class="category">${categoryTitles}</p>
+      </div>
     `;
 
     overdueTaskSection.append(task);
   };
 
-  const handleFilterTask = (category, categoryTitle) => {
-    categoryTitles = categoryTitle;
-    if (isBefore(new Date(category.date), today)) createOverdueTask(category);
-    if (isToday(category.date)) createTodayTask(category);
+  const handleFilterTask = (category, categoryTitles) => {
+    if (isBefore(new Date(category.date), today))
+      createOverdueTask(category, categoryTitles);
+    if (isToday(category.date)) createTodayTask(category, categoryTitles);
   };
 
   const handleGetTask = () => {
     const Categories = category.getCategories();
 
-    for (let key in Categories) {
-      categoryTitles = key
-
-      getTasks(Categories[key], handleFilterTask, Context.NEW, categoryTitles);
+    for (let categoryTitle in Categories) {
+      getTasks(
+        Categories[categoryTitle],
+        handleFilterTask,
+        Context.NEW,
+        categoryTitle
+      );
     }
   };
-
 
   const render = () => {
     main.append(div);

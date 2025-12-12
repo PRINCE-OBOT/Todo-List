@@ -160,8 +160,23 @@ main {
 }
 
 .today_page .category {
-  align-self: flex-end;
-  justify-self: flex-end;
+  align-self: end;
+  justify-self: end;
+}
+
+.more_options_section {
+  display: flex;
+  justify-content: end;
+  gap: var(--gp-sm);
+}
+
+.more_options_action{
+  display: flex;
+  gap: var(--gp-lg);
+}
+
+.delete_task{
+  color: var(--warning);
 }
 
 .mainNavController {
