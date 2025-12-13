@@ -46,29 +46,46 @@ function Today(main) {
   );
 
   todayContent.addEventListener("click", handleTaskAction);
+  todayContent.addEventListener("click", showMoreOptions);
 
   const TaskAction = {
     delete: (taskSection) => {
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
       taskSection.remove();
     },
-    showMoreAction: (taskSection) => {
-      const moreOptionsAction = taskSection.querySelector(
-        ".more_options_action"
-      );
-      moreOptionsAction.classList.toggle("hide");
-    },
     view: () => {
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.GET_TASK);
     }
   };
+
+  const getClosestElement = (target, value) => {
+    return target.closest(value);
+  };
+
+  function showMoreOptions(e) {
+    const moreOption = e.target.dataset.moreOption;
+
+    if (!moreOption) return;
+
+    const taskSection = getClosestElement(
+      e.target,
+      "[data-category-reference]"
+    );
+
+    const moreOptionsAction = taskSection.querySelector(".more_options_action");
+
+    moreOptionsAction.classList.toggle("hide");
+  }
 
   function handleTaskAction(e) {
     const taskDataset = e.target.dataset;
 
     if (!taskDataset.taskAction) return;
 
-    const taskSection = e.target.closest("[data-category-reference]");
+    const taskSection = getClosestElement(
+      e.target,
+      "[data-category-reference]"
+    );
 
     const categoryReference = taskSection.getAttribute(
       "data-category-reference"
@@ -89,19 +106,24 @@ function Today(main) {
 
   const appendOverdueTask = (category, task, titleAndDateSection) => {
     const p = document.createElement("p");
-    p.textContent = category.date;
+    p.textContent = new Date(category.date).toDateString();
 
     titleAndDateSection.append(p);
 
     overdueTaskSection.append(task);
   };
 
-  const createTaskElement = (category, categoryTitles) => {
+  const todayTask = [];
+
+  const handleSortOfTask = (category, categoryTitles) => {
+    category.categoryTitleFormatted = categoryTitles;
+    todayTask.push(category);
+  };
+
+  const createTaskElement = (category) => {
     const task = document.createElement("div");
     task.classList.add("task");
     task.setAttribute("data-category-reference", category.category);
-
-    category.categoryTitleFormatted = categoryTitles
 
     task.innerHTML = `
       <input
@@ -118,9 +140,9 @@ function Today(main) {
             <span class="delete_task" data-task-action="delete">Delete</span>
             <span class="view_task" data-task-action="view">View</span>
           </div>
-          <div class="show_more_options" data-task-action="showMoreAction">&vellip;</div>
+          <div class="show_more_options" data-more-option="toggle">&vellip;</div>
         </div>
-        <p class="category">${categoryTitles}</p>
+        <p class="category">${category.categoryTitleFormatted}</p>
       </div>
     `;
 
@@ -131,17 +153,26 @@ function Today(main) {
     if (isToday(category.date)) appendTodayTask(task);
   };
 
+  
+  const sortTaskBaseOnPriority = (currentTask, nextTask) =>
+    currentTask.priority - nextTask.priority;
+
   const handleGetTask = () => {
+    todayTask.splice(0);
+
     const Categories = category.getCategories();
 
     for (let categoryTitle in Categories) {
       getTasks(
         Categories[categoryTitle],
-        createTaskElement,
+        handleSortOfTask,
         Context.NEW,
         categoryTitle
       );
     }
+    
+    todayTask.sort(sortTaskBaseOnPriority);
+    todayTask.forEach(createTaskElement);
   };
 
   const render = () => {
