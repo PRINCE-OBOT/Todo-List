@@ -158,24 +158,35 @@ main {
   border-radius: var(--br-sm);
   border: 2px solid var(--transparent-white);
 }
+.mark-status {
+  align-self: start;
+}
 
 .today_page .category {
   align-self: end;
   justify-self: end;
 }
-
 .more_options_section {
   display: flex;
   justify-content: end;
   gap: var(--gp-sm);
 }
 
-.more_options_action{
+.more_options_action {
   display: flex;
   gap: var(--gp-lg);
+  width: calc-size(auto, size);
+  transition: 100ms;
+  overflow: hidden;
+}
+[data-task-action] {
+  cursor: pointer;
+}
+.more_options_action.hide {
+  width: calc-size(auto, size * 0);
 }
 
-.delete_task{
+.delete_task {
   color: var(--warning);
 }
 

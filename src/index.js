@@ -6,6 +6,7 @@ import homePage from "./view/heroPage";
 import MainNavController from "./view/mainNavController";
 import Today from "./view/today";
 import Search from "./view/search";
+import taskDialog from "./view/taskDialog";
 
 const changeViewHolder = document.querySelector("[data-change-view-holder");
 const mainNavigation = document.querySelector("[data-main-navigation]");
@@ -14,7 +15,7 @@ const mainNavController = MainNavController(mainNavigation, changeViewHolder);
 
 const components = [category, homePage, mainNavController];
 
-[Today, Search].forEach((component) => {
+[Today, Search, taskDialog].forEach((component) => {
   components.push(component(changeViewHolder));
 });
 

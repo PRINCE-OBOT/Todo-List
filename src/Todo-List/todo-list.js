@@ -27,6 +27,7 @@ function Category() {
     PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.DELETE, deleteTaskCategory);
     PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.MARK, markCategoryStatus);
     PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.EDIT, editCategory);
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.GET_TASK, getTask);
     PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.REFERENCE, referenceCategory);
     PubSub.subscribe(
       EVENTS.TODO_LIST.CATEGORY.DISPLAY_ALL,
@@ -66,7 +67,6 @@ function Category() {
   };
 
   const CATEGORY_VOID = "CATEGORY DOES NOT EXIST";
-  const VALUE_NOT_ACCEPTED = "CATEGORY NOT DELETABLE";
   const TASK_DELETED = "LAST TASK IN SECTION DELETED";
 
   // Utility Function
@@ -124,6 +124,9 @@ function Category() {
       : lastReferenceCategory;
   };
 
+  const getCategoryIndex = (lastReferenceCategory, id) =>
+    lastReferenceCategory.findIndex((category) => category.id === id);
+
   const isCategoryExist = () => {
     const categoryReferenceIndex = categoryReferences.pop();
 
@@ -144,6 +147,16 @@ function Category() {
     return { lastReferenceCategory, id };
   };
 
+  const getTask = (msg) => {
+    const { lastReferenceCategory, id } = handleLastReferenceCategory(msg);
+    const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
+
+    PubSub.publish(
+      EVENTS.TODO_LIST.CATEGORY.TASK_SENT,
+      lastReferenceCategory[indexOfCategory]
+    );
+  };
+
   const sortTaskBaseOnPriority = (currentTask, nextTask) =>
     currentTask.priority - nextTask.priority;
 
@@ -155,9 +168,6 @@ function Category() {
     lastReferenceCategory.push(task);
     lastReferenceCategory.sort(sortTaskBaseOnPriority);
   };
-
-  const getCategoryIndex = (lastReferenceCategory, id) =>
-    lastReferenceCategory.findIndex((category) => category.id === id);
 
   const deleteTaskCategory = (msg) => {
     const lastReferenceCategoryValue = handleLastReferenceCategory(msg);

@@ -14,10 +14,10 @@ function Today(main) {
   const todayDate = new Date().toDateString();
   const today = startOfDay(new Date());
 
-  const div = document.createElement("div");
-  div.classList.add("today_page");
+  const todayContent = document.createElement("div");
+  todayContent.classList.add("today_page");
 
-  div.innerHTML = `
+  todayContent.innerHTML = `
     <div>
       <h2>Today</h2>
       <p>
@@ -38,15 +38,29 @@ function Today(main) {
     </div>
   `;
 
-  const todayTaskSection = div.querySelector('[data-tasks-section="today"]');
-  const overdueTaskSection = div.querySelector(
+  const todayTaskSection = todayContent.querySelector(
+    '[data-tasks-section="today"]'
+  );
+  const overdueTaskSection = todayContent.querySelector(
     '[data-tasks-section="overdue"]'
   );
 
-  overdueTaskSection.addEventListener("click", handleTaskAction);
+  todayContent.addEventListener("click", handleTaskAction);
 
   const TaskAction = {
-    delete: () => PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE)
+    delete: (taskSection) => {
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
+      taskSection.remove();
+    },
+    showMoreAction: (taskSection) => {
+      const moreOptionsAction = taskSection.querySelector(
+        ".more_options_action"
+      );
+      moreOptionsAction.classList.toggle("hide");
+    },
+    view: () => {
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.GET_TASK);
+    }
   };
 
   function handleTaskAction(e) {
@@ -62,39 +76,32 @@ function Today(main) {
 
     const result = categoryReference
       .split(",")
-      .map((index, i) => (Number.isNaN(+index) ? index : +index));
-
+      .map((index) => (Number.isNaN(+index) ? index : +index));
 
     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, result);
 
-    TaskAction[taskDataset.taskAction]();
+    TaskAction[taskDataset.taskAction](taskSection);
   }
 
-  const createTodayTask = (category, categoryTitles) => {
-    const task = document.createElement("div");
-    task.classList.add("task");
-    task.setAttribute("data-category-reference", category.category);
-
-    task.innerHTML = `
-    <input class="mark-status" type="checkbox" data-priority="${category.priority}"/>
-    <div>
-    <div class="title">${category.title}</div>
-    </div>
-    <div>
-      <div class="more-options">&vellip;</div>
-      <p class="category">${categoryTitles}</p>
-    </div>
-    `;
-
+  const appendTodayTask = (task) => {
     todayTaskSection.append(task);
   };
 
-  const createOverdueTask = (category, categoryTitles) => {
-    if (!isBefore(new Date(category.date), today)) return;
+  const appendOverdueTask = (category, task, titleAndDateSection) => {
+    const p = document.createElement("p");
+    p.textContent = category.date;
 
+    titleAndDateSection.append(p);
+
+    overdueTaskSection.append(task);
+  };
+
+  const createTaskElement = (category, categoryTitles) => {
     const task = document.createElement("div");
     task.classList.add("task");
     task.setAttribute("data-category-reference", category.category);
+
+    category.categoryTitleFormatted = categoryTitles
 
     task.innerHTML = `
       <input
@@ -102,29 +109,26 @@ function Today(main) {
         type="checkbox"
         data-priority="${category.priority}"
       />
-      <div>
+      <div class="title-and-date-section">
         <div class="title">${category.title}</div>
-        <p class="date">${category.date}</p>
       </div>
       <div>
         <div class="more_options_section">
-          <div class="more_options_action">
+          <div class="more_options_action hide">
             <span class="delete_task" data-task-action="delete">Delete</span>
-            <span class="edit_task" data-task-action="edit">Edit</span>
+            <span class="view_task" data-task-action="view">View</span>
           </div>
-          <div class="show_more_options">&vellip;</div>
+          <div class="show_more_options" data-task-action="showMoreAction">&vellip;</div>
         </div>
         <p class="category">${categoryTitles}</p>
       </div>
     `;
 
-    overdueTaskSection.append(task);
-  };
+    const titleAndDateSection = task.querySelector(".title-and-date-section");
 
-  const handleFilterTask = (category, categoryTitles) => {
     if (isBefore(new Date(category.date), today))
-      createOverdueTask(category, categoryTitles);
-    if (isToday(category.date)) createTodayTask(category, categoryTitles);
+      appendOverdueTask(category, task, titleAndDateSection);
+    if (isToday(category.date)) appendTodayTask(task);
   };
 
   const handleGetTask = () => {
@@ -133,7 +137,7 @@ function Today(main) {
     for (let categoryTitle in Categories) {
       getTasks(
         Categories[categoryTitle],
-        handleFilterTask,
+        createTaskElement,
         Context.NEW,
         categoryTitle
       );
@@ -141,12 +145,12 @@ function Today(main) {
   };
 
   const render = () => {
-    main.append(div);
+    main.append(todayContent);
     handleGetTask();
   };
 
   const removeToday = () => {
-    div.remove();
+    todayContent.remove();
   };
 
   return { init };

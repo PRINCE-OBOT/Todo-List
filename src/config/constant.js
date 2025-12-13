@@ -28,10 +28,10 @@ const getTasks = (categories, callback, context, categoryTitles) => {
           ? CATEGORY_TITLE
           : SECTION_TITLE;
 
-        // If the iteration occur in the same array remove the last 
+        // If the iteration occur in the same array remove the last
         // `categoryTitle` before adding another `categoryTitle`
         // Else just add another `categoryTitle`
-        // Changing context to OLD or NEW help to keep track 
+        // Changing context to OLD or NEW help to keep track
         // whether the iteration is occurring in the same array or not
 
         if (context === Context.OLD) {
@@ -59,5 +59,6 @@ const getTasks = (categories, callback, context, categoryTitles) => {
     }
   });
 };
+
 
 export { CATEGORIES, getTasks, Context };
