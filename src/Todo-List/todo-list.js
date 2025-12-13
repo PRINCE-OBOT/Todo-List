@@ -199,7 +199,7 @@ function Category() {
 
     const task = lastReferenceCategory[indexOfCategory];
 
-    if (task.Category === editedTask.category) {
+    if (task.Category === editedTask.category || !editedTask.category) {
       const editedTaskKeys = Object.keys(editedTask);
 
       editedTaskKeys.forEach((key) => {

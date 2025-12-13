@@ -57,6 +57,23 @@ function Today(main) {
     },
     view: () => {
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.GET_TASK);
+    },
+    mark: (taskSection) => {
+      const markStatus = taskSection.querySelector(".mark-status");
+
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.EDIT, {
+        status: markStatus.checked
+      });
+
+      taskSection.textContent = "Task ";
+
+      taskSection.textContent += markStatus.checked
+        ? "Completed"
+        : "Not completed";
+
+      setTimeout(() => taskSection.classList.add("task_mark"), 1000);
+      
+      setTimeout(() => taskSection.remove(), 1299);
     }
   };
 
@@ -93,11 +110,11 @@ function Today(main) {
       "data-category-reference"
     );
 
-    const result = categoryReference
+    const categoryPath = categoryReference
       .split(",")
       .map((index) => (Number.isNaN(+index) ? index : +index));
 
-    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, result);
+    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, categoryPath);
 
     TaskAction[taskDataset.taskAction](taskSection);
   }
@@ -108,6 +125,8 @@ function Today(main) {
 
   const appendOverdueTask = (category, task, titleAndDateSection) => {
     const p = document.createElement("p");
+
+    p.classList.add("task_overdue_date");
     p.textContent = new Date(category.date).toDateString();
 
     titleAndDateSection.append(p);
@@ -123,23 +142,28 @@ function Today(main) {
   const CreateTaskTemplate = () => {
     const task = document.createElement("div");
     task.classList.add("task");
-    
+
     task.innerHTML = `
-      <input class="mark-status" type="checkbox" data-priority />
+      <input class="mark-status" data-task-action="mark" type="checkbox" data-priority />
+      
       <div class="title-and-date-section">
         <div class="title"></div>
-        <div class="description"></div>
+        <p class="description"></p>
       </div>
+      
       <div class="task-right-side">
         <div class="more_options_section">
+          
           <div class="more_options_action hide">
             <span class="delete_task" data-task-action="delete">Delete</span>
             <span class="view_task" data-task-action="view">View</span>
           </div>
+          
           <div class="show_more_options" data-more-option="toggle">
             &vellip;
           </div>
         </div>
+
         <p class="categoryTitle"></p>
       </div>
     `;
@@ -165,7 +189,7 @@ function Today(main) {
 
     title.textContent = category.title;
     categoryTitle.textContent = category.categoryTitleFormatted;
-    description.textContent = category.description
+    description.textContent = category.description;
 
     if (isBefore(new Date(category.date), today))
       appendOverdueTask(category, task, titleAndDateSection);

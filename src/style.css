@@ -156,6 +156,10 @@ main {
   border-radius: 50%;
   outline: 2px solid;
   outline-offset: 2px;
+
+  &:checked {
+    background-color: var(--black);
+  }
 }
 
 [data-priority="1"] {
@@ -182,6 +186,17 @@ main {
   gap: var(--gp-lg);
   border-radius: var(--br-sm);
   border: 2px solid var(--transparent-white);
+}
+
+.today_page .task.task_mark {
+  transition: 300ms;
+  padding: 0;
+  overflow: hidden;
+  max-height: 0;
+}
+
+.task_overdue_date {
+  color: var(--warning);
 }
 
 .today_page .description {
