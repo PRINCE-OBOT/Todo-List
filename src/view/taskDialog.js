@@ -12,36 +12,35 @@ function TaskDialog() {
   taskDialogContent.setAttribute("closedby", "any");
 
   taskDialogContent.innerHTML = `
-    <form method="dialog" >
+    <form method="dialog" class="dialog_form">
       <div>
-        <span>📫</span><p class="categoryTitle"></p>
+        <span>📫</span>
+        <p class="categoryTitle"></p>
       </div>
       <div>
-        <input type="checkbox" name="markStatus" class="mark-status" /><input name="title" type="text" class="title" />
+          <input type="checkbox" name="markStatus" class="mark-status" />
+          <input name="title" type="text" class="title" />
       </div>
       <div>
-        <span>📝</span><textarea name="description" class="description"></textarea>
+        <span>📝</span
+        ><textarea name="description" class="description"></textarea>
       </div>
-      <div>
-        <span>📅</span><input name="date" type="date" class="date" />
-      </div>
+      <div><span>📅</span><input name="date" type="date" class="date" /></div>
       <div>
         <span>🏳️</span>
         <select name="priority" class="priority">
-        <option value="1">High Priority</option>
-        <option value="2">Normal Priority</option>
-        <option value="3">Low Priority</option>
+          <option value="1">High Priority</option>
+          <option value="2">Normal Priority</option>
+          <option value="3">Low Priority</option>
         </select>
       </div>
       <div>
         <span>🏷️</span>
-        <select name="label" class="label">
-        </select>
+        <select name="label" class="label"></select>
       </div>
-      <div>
-        <button name="saveButton">Save ✅</button>
-      </div>
-      
+      <section>
+        <button name="saveButton" class="btn-save_task">Save</button>
+      </section>
     </form>
   `;
 
@@ -63,9 +62,9 @@ function TaskDialog() {
     form.priority.selectedIndex = indexOfPriority;
   };
 
-  const formatDate = (date)=>{
+  const formatDate = (date) => {
     return date.split("T")[0];
-  }
+  };
 
   const updateTaskDialog = (msg, category) => {
     categoryTitle.textContent = category.categoryTitleFormatted;
@@ -75,6 +74,7 @@ function TaskDialog() {
 
     setPriorityValue(category);
     form.label.value = category.label;
+    form.markStatus.setAttribute("data-priority", category.priority);
 
     taskDialogContent.showModal();
   };

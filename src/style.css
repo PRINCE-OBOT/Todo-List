@@ -79,7 +79,8 @@ h6 {
 :root {
   --black: rgb(28, 28, 28);
   --white: rgb(250, 250, 250);
-  --primary-accent: rgb(96, 4, 4);
+  --primary-accent: rgb(240, 194, 8);
+  --secondary-accent: rgb(243, 240, 193);
   --warning: rgb(215, 41, 41);
   --high-priority: rgb(144, 42, 13);
   --normal-priority: rgb(39, 144, 13);
@@ -92,6 +93,7 @@ h6 {
 
   --pd-lg: 20px;
   --pd-sm: 10px;
+  --pd-xxsm: 2px;
 
   --gp-xlg: 40px;
   --gp-lg: 20px;
@@ -100,6 +102,8 @@ h6 {
   --br-lg: 20px;
   --br-sm: 10px;
   --br-xlg: 40px;
+
+  --container_width: min(550px, 100%);
 }
 
 body,
@@ -107,12 +111,17 @@ html,
 .container {
   height: 100%;
   font-family: Roboto, Arial, Helvetica, sans-serif;
+  background-color: var(--black);
+}
+
+.container {
+  margin: 0 auto 0;
+  max-width: var(--container_width);
 }
 
 main {
   display: flex;
   min-height: 100%;
-  background-color: var(--black);
   flex-direction: column;
 }
 
@@ -130,13 +139,12 @@ main {
   flex: 1;
   display: flex;
 }
+/* Today page */
 
 .today_page {
   flex: 1;
   padding: var(--pd-sm);
   color: var(--white);
-  max-width: 500px;
-  margin: 0 auto 0;
 }
 
 .today_page p {
@@ -151,8 +159,8 @@ main {
 [data-priority] {
   appearance: none;
   background-color: var(--white);
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   outline: 2px solid;
   outline-offset: 2px;
@@ -206,7 +214,7 @@ main {
   text-overflow: ellipsis;
 }
 
-.mark-status {
+.today_page .mark-status {
   align-self: start;
 }
 
@@ -263,4 +271,84 @@ main {
   flex-direction: column;
   align-items: center;
   color: var(--white);
+}
+
+/* TaskDialog page */
+
+.TaskDialog_page {
+  transition: 300ms allow-discrete;
+  border: none;
+  left: 50%;
+  top: 100%;
+  translate: -50% 100%;
+  height: 70%;
+  background: var(--black);
+  width: var(--container_width);
+  border-radius: var(--br-lg) var(--br-lg) 0 0;
+  border: 2px solid var(--transparent-white);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.TaskDialog_page:open {
+  translate: -50% -100%;
+  transition: 100ms;
+}
+dialog::backdrop {
+  backdrop-filter: blur(1px);
+}
+@starting-style {
+  .TaskDialog_page[open] {
+    translate: -50% 100%;
+  }
+}
+
+.dialog_form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--br-lg);
+  font-size: var(--fs-sz-lg);
+  padding: var(--pd-lg);
+}
+
+.dialog_form > div {
+  display: flex;
+  gap: var(--gp-lg);
+  align-items: center;
+}
+
+.dialog_form > div > *:first-child {
+  width: 12px;
+}
+.dialog_form > div > *:last-child {
+  flex: 1;
+}
+
+.dialog_form :is(input, textarea, select) {
+  border-radius: var(--br-sm);
+  padding: var(--pd-sm);
+}
+
+.dialog_form > div * {
+  background-color: var(--black);
+  color: var(--white);
+  opacity: 0.8;
+  border: none;
+}
+.dialog_form .description {
+  height: 50px;
+}
+
+.btn-save_task {
+  border: none;
+  margin-top: 40px;
+  border-radius: var(--br-sm);
+  padding: var(--pd-xxsm) var(--pd-lg);
+  background-color: var(--primary-accent);
+}
+
+::-webkit-scrollbar {
+  display: none;
 }

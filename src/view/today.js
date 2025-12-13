@@ -1,9 +1,7 @@
 import EVENTS from "../config/EVENTS";
 import { category } from "../Todo-List/todo-list";
 import { getTasks, Context } from "../config/constant";
-import isBefore from "date-fns/isBefore";
-import startOfDay from "date-fns/startOfDay";
-import isToday from "date-fns/isToday";
+import { startOfDay, isToday, isBefore } from "date-fns";
 
 function Today(main) {
   const init = () => {
@@ -14,7 +12,7 @@ function Today(main) {
   const todayDate = new Date().toDateString();
   const today = startOfDay(new Date());
 
-  const todayTask = [];
+  const todayAndOverdueTask = [];
 
   const todayContent = document.createElement("div");
   todayContent.classList.add("today_page");
@@ -23,7 +21,7 @@ function Today(main) {
     <div>
       <h2>Today</h2>
       <p>
-        <span data-number-of="today-ahead-task"></span> <span>tasks</span>
+        <span class="today_and_overdue_task"></span> <span>tasks</span>
       </p>
     </div>
 
@@ -40,11 +38,14 @@ function Today(main) {
     </div>
   `;
 
-  const todayTaskSection = todayContent.querySelector(
+  const todayAndOverdueTaskSection = todayContent.querySelector(
     '[data-tasks-section="today"]'
   );
   const overdueTaskSection = todayContent.querySelector(
     '[data-tasks-section="overdue"]'
+  );
+  const today_and_overdue_task = todayContent.querySelector(
+    ".today_and_overdue_task"
   );
 
   todayContent.addEventListener("click", handleTaskAction);
@@ -72,7 +73,7 @@ function Today(main) {
         : "Not completed";
 
       setTimeout(() => taskSection.classList.add("task_mark"), 1000);
-      
+
       setTimeout(() => taskSection.remove(), 1299);
     }
   };
@@ -119,8 +120,8 @@ function Today(main) {
     TaskAction[taskDataset.taskAction](taskSection);
   }
 
-  const appendTodayTask = (task) => {
-    todayTaskSection.append(task);
+  const appendTodayAndOverdueTask = (task) => {
+    todayAndOverdueTaskSection.append(task);
   };
 
   const appendOverdueTask = (category, task, titleAndDateSection) => {
@@ -136,7 +137,7 @@ function Today(main) {
 
   const handleSortOfTask = (category, categoryTitles) => {
     category.categoryTitleFormatted = categoryTitles;
-    todayTask.push(category);
+    todayAndOverdueTask.push(category);
   };
 
   const CreateTaskTemplate = () => {
@@ -193,14 +194,14 @@ function Today(main) {
 
     if (isBefore(new Date(category.date), today))
       appendOverdueTask(category, task, titleAndDateSection);
-    if (isToday(category.date)) appendTodayTask(task);
+    if (isToday(category.date)) appendTodayAndOverdueTask(task);
   };
 
   const sortTaskBaseOnPriority = (currentTask, nextTask) =>
     currentTask.priority - nextTask.priority;
 
   const handleGetTask = () => {
-    todayTask.splice(0);
+    todayAndOverdueTask.splice(0);
 
     const Categories = category.getCategories();
 
@@ -213,8 +214,9 @@ function Today(main) {
       );
     }
 
-    todayTask.sort(sortTaskBaseOnPriority);
-    todayTask.forEach(setTaskValue);
+    todayAndOverdueTask.sort(sortTaskBaseOnPriority);
+    todayAndOverdueTask.forEach(setTaskValue);
+    today_and_overdue_task.textContent = todayAndOverdueTask.length;
   };
 
   const render = () => {
