@@ -155,6 +155,8 @@ function Category() {
       EVENTS.TODO_LIST.CATEGORY.TASK_SENT,
       lastReferenceCategory[indexOfCategory]
     );
+
+    categoryReferences.push(id);
   };
 
   const sortTaskBaseOnPriority = (currentTask, nextTask) =>
@@ -198,7 +200,7 @@ function Category() {
     const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
 
     const task = lastReferenceCategory[indexOfCategory];
-
+    
     if (task.Category === editedTask.category || !editedTask.category) {
       const editedTaskKeys = Object.keys(editedTask);
 

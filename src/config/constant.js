@@ -60,5 +60,4 @@ const getTasks = (categories, callback, context, categoryTitles) => {
   });
 };
 
-
 export { CATEGORIES, getTasks, Context };

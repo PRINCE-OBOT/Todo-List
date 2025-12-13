@@ -2,17 +2,20 @@ import EVENTS from "../config/EVENTS";
 import { category } from "../Todo-List/todo-list";
 import { getTasks, Context } from "../config/constant";
 import { startOfDay, isToday, isBefore } from "date-fns";
+import PubSub from "pubsub-js";
 
 function Today(main) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.TODAY, render);
     PubSub.subscribe(EVENTS.PAGE.REMOVE.TODAY, removeToday);
+    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL, sendLabels);
   };
 
   const todayDate = new Date().toDateString();
   const today = startOfDay(new Date());
 
   const todayAndOverdueTask = [];
+  const labels = [];
 
   const todayContent = document.createElement("div");
   todayContent.classList.add("today_page");
@@ -20,25 +23,28 @@ function Today(main) {
   todayContent.innerHTML = `
     <div>
       <h2>Today</h2>
-      <p>
-        <span class="today_and_overdue_task"></span> <span>tasks</span>
-      </p>
+      <p><span class="today_and_overdue_task"></span> <span>tasks</span></p>
     </div>
 
-    <div data-tasks="today-ahead">
-      <div data-tasks-section="today">
+    <div>
+      
+      <div>
         <h3 data-date="today">${todayDate}</h3>
         <div data-tasks-section="today"></div>
       </div>
 
-      <div data-tasks-section="overdue">
-        <h3 class="overdue-title">Overdue<span data-number-of="overdue-task"></span></h3>
-        <div data-tasks="overdue"></div>
+      <div>
+        <h3 class="overdue-title">
+          Overdue
+        </h3>
+        <br>
+        <div data-tasks-section="overdue"></div>
       </div>
+
     </div>
   `;
 
-  const todayAndOverdueTaskSection = todayContent.querySelector(
+  const todayTaskSection = todayContent.querySelector(
     '[data-tasks-section="today"]'
   );
   const overdueTaskSection = todayContent.querySelector(
@@ -74,7 +80,7 @@ function Today(main) {
 
       setTimeout(() => taskSection.classList.add("task_mark"), 1000);
 
-      setTimeout(() => taskSection.remove(), 1299);
+      setTimeout(() => taskSection.remove(), 1290);
     }
   };
 
@@ -120,8 +126,8 @@ function Today(main) {
     TaskAction[taskDataset.taskAction](taskSection);
   }
 
-  const appendTodayAndOverdueTask = (task) => {
-    todayAndOverdueTaskSection.append(task);
+  const appendTodayTask = (task) => {
+    todayTaskSection.append(task);
   };
 
   const appendOverdueTask = (category, task, titleAndDateSection) => {
@@ -176,6 +182,12 @@ function Today(main) {
 
   const taskTemplate = CreateTaskTemplate();
 
+  const addLabelValue = (category) => {
+    if (!labels.includes(category.label)) {
+      labels.push(category.label);
+    }
+  };
+
   const setTaskValue = (category) => {
     const task = taskTemplate.getTaskTemplate();
     task.setAttribute("data-category-reference", category.category);
@@ -192,16 +204,22 @@ function Today(main) {
     categoryTitle.textContent = category.categoryTitleFormatted;
     description.textContent = category.description;
 
+    addLabelValue(category);
+
     if (isBefore(new Date(category.date), today))
       appendOverdueTask(category, task, titleAndDateSection);
-    if (isToday(category.date)) appendTodayAndOverdueTask(task);
+    if (isToday(category.date)) appendTodayTask(task);
   };
 
   const sortTaskBaseOnPriority = (currentTask, nextTask) =>
     currentTask.priority - nextTask.priority;
 
   const handleGetTask = () => {
+    overdueTaskSection.innerHTML = "";
+    todayTaskSection.innerHTML = "";
+
     todayAndOverdueTask.splice(0);
+    labels.splice(0);
 
     const Categories = category.getCategories();
 
@@ -217,6 +235,10 @@ function Today(main) {
     todayAndOverdueTask.sort(sortTaskBaseOnPriority);
     todayAndOverdueTask.forEach(setTaskValue);
     today_and_overdue_task.textContent = todayAndOverdueTask.length;
+  };
+
+  const sendLabels = () => {
+    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.LABEL_SENT, labels);
   };
 
   const render = () => {
