@@ -108,12 +108,14 @@ html,
   height: 100%;
   font-family: Roboto, Arial, Helvetica, sans-serif;
 }
+
 main {
   display: flex;
   min-height: 100%;
   background-color: var(--black);
   flex-direction: column;
 }
+
 .hero_page_text {
   display: flex;
   justify-content: center;
@@ -123,10 +125,12 @@ main {
   color: var(--white);
   font-size: var(--fs-sz-xlg);
 }
+
 .change-view-holder {
   flex: 1;
   display: flex;
 }
+
 .today_page {
   flex: 1;
   padding: var(--pd-sm);
@@ -134,6 +138,7 @@ main {
   max-width: 500px;
   margin: 0 auto 0;
 }
+
 .today_page p {
   opacity: 0.7;
 }
@@ -143,7 +148,27 @@ main {
   flex-direction: column;
   row-gap: var(--gp-sm);
 }
+[data-priority] {
+  appearance: none;
+  background-color: var(--white);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  outline: 2px solid;
+  outline-offset: 2px;
+}
 
+[data-priority="1"] {
+  outline-color: var(--high-priority);
+}
+
+[data-priority="2"] {
+  outline-color: var(--normal-priority);
+}
+
+[data-priority="3"] {
+  outline-color: var(--low-priority);
+}
 .overdue-title {
   color: var(--warning);
   padding-top: 20px;
@@ -153,23 +178,34 @@ main {
   background-color: var(--transparent);
   padding: var(--pd-lg);
   display: grid;
-  grid-template-columns: 15px 1fr 1fr;
+  grid-template-columns: 15px 2fr 1fr;
   gap: var(--gp-lg);
   border-radius: var(--br-sm);
   border: 2px solid var(--transparent-white);
 }
+
+.today_page .description {
+  max-width: 300px;
+  overflow: hidden;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+}
+
 .mark-status {
   align-self: start;
 }
 
-.today_page .category {
-  align-self: end;
-  justify-self: end;
-}
 .more_options_section {
   display: flex;
   justify-content: end;
   gap: var(--gp-sm);
+}
+
+.task-right-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
 .more_options_action {
@@ -179,9 +215,12 @@ main {
   transition: 100ms;
   overflow: hidden;
 }
-[data-task-action] {
+
+[data-task-action],
+.show_more_options {
   cursor: pointer;
 }
+
 .more_options_action.hide {
   width: calc-size(auto, size * 0);
 }
@@ -199,9 +238,11 @@ main {
   opacity: 0.9;
   padding: var(--pd-lg);
 }
+
 .nav-icon {
   pointer-events: none;
 }
+
 [data-change-main-view] {
   display: flex;
   flex-direction: column;

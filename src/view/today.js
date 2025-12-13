@@ -14,6 +14,8 @@ function Today(main) {
   const todayDate = new Date().toDateString();
   const today = startOfDay(new Date());
 
+  const todayTask = [];
+
   const todayContent = document.createElement("div");
   todayContent.classList.add("today_page");
 
@@ -113,47 +115,63 @@ function Today(main) {
     overdueTaskSection.append(task);
   };
 
-  const todayTask = [];
-
   const handleSortOfTask = (category, categoryTitles) => {
     category.categoryTitleFormatted = categoryTitles;
     todayTask.push(category);
   };
 
-  const createTaskElement = (category) => {
+  const CreateTaskTemplate = () => {
     const task = document.createElement("div");
     task.classList.add("task");
-    task.setAttribute("data-category-reference", category.category);
-
+    
     task.innerHTML = `
-      <input
-        class="mark-status"
-        type="checkbox"
-        data-priority="${category.priority}"
-      />
+      <input class="mark-status" type="checkbox" data-priority />
       <div class="title-and-date-section">
-        <div class="title">${category.title}</div>
+        <div class="title"></div>
+        <div class="description"></div>
       </div>
-      <div>
+      <div class="task-right-side">
         <div class="more_options_section">
           <div class="more_options_action hide">
             <span class="delete_task" data-task-action="delete">Delete</span>
             <span class="view_task" data-task-action="view">View</span>
           </div>
-          <div class="show_more_options" data-more-option="toggle">&vellip;</div>
+          <div class="show_more_options" data-more-option="toggle">
+            &vellip;
+          </div>
         </div>
-        <p class="category">${category.categoryTitleFormatted}</p>
+        <p class="categoryTitle"></p>
       </div>
     `;
 
+    const getTaskTemplate = () => task.cloneNode(true);
+
+    return { getTaskTemplate };
+  };
+
+  const taskTemplate = CreateTaskTemplate();
+
+  const setTaskValue = (category) => {
+    const task = taskTemplate.getTaskTemplate();
+    task.setAttribute("data-category-reference", category.category);
+
+    const priority = task.querySelector("[data-priority]");
+    const title = task.querySelector(".title");
+    const description = task.querySelector(".description");
+    const categoryTitle = task.querySelector(".categoryTitle");
     const titleAndDateSection = task.querySelector(".title-and-date-section");
+
+    priority.setAttribute("data-priority", category.priority);
+
+    title.textContent = category.title;
+    categoryTitle.textContent = category.categoryTitleFormatted;
+    description.textContent = category.description
 
     if (isBefore(new Date(category.date), today))
       appendOverdueTask(category, task, titleAndDateSection);
     if (isToday(category.date)) appendTodayTask(task);
   };
 
-  
   const sortTaskBaseOnPriority = (currentTask, nextTask) =>
     currentTask.priority - nextTask.priority;
 
@@ -170,9 +188,9 @@ function Today(main) {
         categoryTitle
       );
     }
-    
+
     todayTask.sort(sortTaskBaseOnPriority);
-    todayTask.forEach(createTaskElement);
+    todayTask.forEach(setTaskValue);
   };
 
   const render = () => {
