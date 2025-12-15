@@ -8,7 +8,10 @@ function Today(main) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.TODAY, render);
     PubSub.subscribe(EVENTS.PAGE.REMOVE.TODAY, removeToday);
+
     PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL, sendLabels);
+
+    PubSub.subscribe(EVENTS.UI.MARK, markTask);
   };
 
   const todayDate = new Date().toDateString();
@@ -16,6 +19,7 @@ function Today(main) {
 
   const todayAndOverdueTask = [];
   const labels = [];
+  const DATA_CAT_REF = "data-category-reference";
 
   const todayContent = document.createElement("div");
   todayContent.classList.add("today_page");
@@ -27,10 +31,11 @@ function Today(main) {
     </div>
 
     <div>
-      
-      <div>
-        <h3 data-date="today">${todayDate}</h3>
-        <div data-tasks-section="today"></div>
+    
+    <div>
+      <h3 data-date="today">${todayDate}</h3>
+      <br>
+      <div data-tasks-section="today"></div>
       </div>
 
       <div>
@@ -39,6 +44,10 @@ function Today(main) {
         </h3>
         <br>
         <div data-tasks-section="overdue"></div>
+      </div>
+
+      <div class="btn_add_task">
+        &#10011; Add Task
       </div>
 
     </div>
@@ -54,38 +63,61 @@ function Today(main) {
     ".today_and_overdue_task"
   );
 
+  const btnAddTask = todayContent.querySelector(".btn_add_task");
+
   todayContent.addEventListener("click", handleTaskAction);
   todayContent.addEventListener("click", showMoreOptions);
+  btnAddTask.addEventListener("click", addTask);
+
+  const DEFAULT_REFERENCE = ["Inbox", 0];
+
+  function addTask() {
+    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.REFERENCE, DEFAULT_REFERENCE);
+
+    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG);
+  }
+
+  const getClosestElement = (target, value) => {
+    return target.closest(`[${value}]`);
+  };
+
+  const getAttributeFromClosestParent = (target, value) => {
+    const closestParent = getClosestElement(target, value);
+    const attribute = closestParent.getAttribute(value);
+    return attribute;
+  };
 
   const TaskAction = {
-    delete: (taskSection) => {
+    delete: (target) => {
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
+
+      const taskSection = getClosestElement(target);
+
       taskSection.remove();
     },
-    view: () => {
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.GET_TASK);
+    view: (target) => {
+      const taskSection = getClosestElement(target, DATA_CAT_REF);
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.GET_TASK, taskSection);
     },
-    mark: (taskSection) => {
-      const markStatus = taskSection.querySelector(".mark-status");
-
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.EDIT, {
-        status: markStatus.checked
-      });
-
-      taskSection.textContent = "Task ";
-
-      taskSection.textContent += markStatus.checked
-        ? "Completed"
-        : "Not completed";
-
-      setTimeout(() => taskSection.classList.add("task_mark"), 1000);
-
-      setTimeout(() => taskSection.remove(), 1290);
+    mark: (target) => {
+      markTask(null, { target });
     }
   };
 
-  const getClosestElement = (target, value) => {
-    return target.closest(value);
+  const markTask = (msg, { target, taskSection }) => {
+    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.MARK, target.checked);
+
+    if (!msg) {
+      taskSection = getClosestElement(target, DATA_CAT_REF);
+    }
+
+    taskSection.textContent = "Task ";
+
+    taskSection.textContent += target.checked ? "Completed" : "Not completed";
+
+    setTimeout(() => taskSection.classList.add("task_mark"), 1000);
+
+    setTimeout(() => taskSection.remove(), 1290);
   };
 
   function showMoreOptions(e) {
@@ -93,10 +125,7 @@ function Today(main) {
 
     if (!moreOption) return;
 
-    const taskSection = getClosestElement(
-      e.target,
-      "[data-category-reference]"
-    );
+    const taskSection = getClosestElement(e.target, "data-category-reference");
 
     const moreOptionsAction = taskSection.querySelector(".more_options_action");
 
@@ -108,22 +137,15 @@ function Today(main) {
 
     if (!taskDataset.taskAction) return;
 
-    const taskSection = getClosestElement(
-      e.target,
-      "[data-category-reference]"
-    );
+    const attribute = getAttributeFromClosestParent(e.target, DATA_CAT_REF);
 
-    const categoryReference = taskSection.getAttribute(
-      "data-category-reference"
-    );
-
-    const categoryPath = categoryReference
+    const categoryPath = attribute
       .split(",")
       .map((index) => (Number.isNaN(+index) ? index : +index));
 
-    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.REFERENCE, categoryPath);
+    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.REFERENCE, categoryPath);
 
-    TaskAction[taskDataset.taskAction](taskSection);
+    TaskAction[taskDataset.taskAction](e.target);
   }
 
   const appendTodayTask = (task) => {
@@ -190,7 +212,7 @@ function Today(main) {
 
   const setTaskValue = (category) => {
     const task = taskTemplate.getTaskTemplate();
-    task.setAttribute("data-category-reference", category.category);
+    task.setAttribute(DATA_CAT_REF, category.category);
 
     const priority = task.querySelector("[data-priority]");
     const title = task.querySelector(".title");

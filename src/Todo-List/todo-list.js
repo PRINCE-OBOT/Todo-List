@@ -78,12 +78,6 @@ function Category() {
   ) => {
     const category = lastReferenceCategory[indexOfCategoryReferenceLast][key];
 
-    if (msg === EVENTS.TODO_LIST.CATEGORY.DELETE) {
-      if (category.length === 1)
-        delete lastReferenceCategory[indexOfCategoryReferenceLast][key];
-      return TASK_DELETED;
-    }
-
     if (!category) {
       lastReferenceCategory[indexOfCategoryReferenceLast][key] = [];
     }
@@ -147,15 +141,15 @@ function Category() {
     return { lastReferenceCategory, id };
   };
 
-  const getTask = (msg) => {
+  const getTask = (msg, taskSection) => {
     const { lastReferenceCategory, id } = handleLastReferenceCategory(msg);
     const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
 
-    PubSub.publish(
-      EVENTS.TODO_LIST.CATEGORY.TASK_SENT,
-      lastReferenceCategory[indexOfCategory]
-    );
-
+    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.VIEW_TASK_DIALOG, {
+      category: lastReferenceCategory[indexOfCategory],
+      taskSection
+    });
+    
     categoryReferences.push(id);
   };
 
@@ -200,7 +194,7 @@ function Category() {
     const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
 
     const task = lastReferenceCategory[indexOfCategory];
-    
+
     if (task.Category === editedTask.category || !editedTask.category) {
       const editedTaskKeys = Object.keys(editedTask);
 

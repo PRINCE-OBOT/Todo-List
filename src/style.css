@@ -78,6 +78,7 @@ h6 {
 
 :root {
   --black: rgb(28, 28, 28);
+  --fade-black: rgb(40, 38, 38);
   --white: rgb(250, 250, 250);
   --primary-accent: rgb(240, 194, 8);
   --secondary-accent: rgb(243, 240, 193);
@@ -111,7 +112,6 @@ h6 {
 body,
 html,
 .container {
-  height: 100%;
   font-family: Roboto, Arial, Helvetica, sans-serif;
   background-color: var(--black);
 }
@@ -123,7 +123,6 @@ html,
 
 main {
   display: flex;
-  min-height: 100%;
   flex-direction: column;
 }
 
@@ -147,6 +146,9 @@ main {
   flex: 1;
   padding: var(--pd-sm);
   color: var(--white);
+  overflow-y: auto;
+  max-height: 90vh;
+  position: relative;
 }
 
 .today_page p {
@@ -275,6 +277,18 @@ main {
   color: var(--white);
 }
 
+.btn_add_task{
+  position: sticky;
+  bottom: 5px;
+  margin-left: auto;
+  margin-right: 10px;
+  max-width: fit-content;
+  padding: var(--pd-sm);
+  background: var(--white);
+  border-radius: 10px;
+  color: var(--black);
+}
+
 /* TaskDialog page */
 
 .TaskDialog_page {
@@ -284,10 +298,11 @@ main {
   top: 100%;
   translate: -50% 100%;
   height: 70%;
-  background: var(--black);
+  background: var(--fade-black);
   width: var(--container_width);
   border-radius: var(--br-lg) var(--br-lg) 0 0;
   border: 2px solid var(--transparent-white);
+  
 
   &:focus {
     outline: none;
@@ -337,7 +352,7 @@ dialog::backdrop {
 }
 
 .dialog_form > div * {
-  background-color: var(--black);
+  background-color: var(--fade-black);
   color: var(--white);
   opacity: 0.8;
   border: none;

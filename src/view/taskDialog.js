@@ -3,8 +3,15 @@ import EVENTS from "../config/EVENTS";
 
 function TaskDialog() {
   const init = () => {
-    PubSub.subscribe(EVENTS.PAGE.REMOVE.TaskDialog, removeTaskDialog);
-    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.TASK_SENT, updateTaskDialog);
+    PubSub.subscribe(EVENTS.PAGE.REMOVE.TASK_DIALOG, removeTaskDialog);
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.VIEW_TASK_DIALOG,
+      displayViewTaskDialog
+    );
+    PubSub.subscribe(
+      EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG,
+      displayAddTaskDialog
+    );
     PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.LABEL_SENT, labelsSent);
   };
 
@@ -19,30 +26,39 @@ function TaskDialog() {
         <span>📫</span>
         <p class="categoryTitle"></p>
       </div>
+      
       <div>
-          <input type="checkbox" name="markStatus" class="mark-status" />
-          <input name="title" type="text" class="title" />
+          <input type="checkbox" name="markStatus" class="mark-status" data-task-action="markStatus" />
+          <input name="title" type="text" class="title" placeholder="Title" />
       </div>
+      
       <div>
         <span>📝</span
-        ><textarea name="description" class="description"></textarea>
+        ><textarea name="description" class="description" placeholder="Description"></textarea>
       </div>
-      <div><span>📅</span><input name="date" type="date" class="date" /></div>
+      
+      <div class="date">
+        <span>📅</span>
+        <input name="date" type="date"/>
+      </div>
+
       <div>
         <span>🏳️</span>
-        <select name="priority" class="priority">
-          <option value="1">High Priority</option>
-          <option value="2">Normal Priority</option>
-          <option value="3">Low Priority</option>
+        <select name="priority">
+        <option value="1">High Priority</option>
+        <option value="2">Normal Priority</option>
+        <option value="3">Low Priority</option>
         </select>
       </div>
-      <div>
+
+      <div class="label">
         <span>🏷️</span>
-        <select name="label" class="label">
-        </select>
+          <select name="label">
+          </select>
       </div>
+
       <section>
-        <button name="saveTaskButton" class="btn-save_task">Save</button>
+        <button name="saveTaskButton" data-task-action="saveTask" class="btn-save_task">Save</button>
       </section>
     </form>
   `;
@@ -52,15 +68,19 @@ function TaskDialog() {
   const form = taskDialogContent.querySelector("form");
   const categoryTitle = taskDialogContent.querySelector(".categoryTitle");
 
-  const PriorityValue = {
-    1: "High",
-    2: "Normal",
-    3: "Low"
-  };
+  let currentTaskSection;
 
   const labels = [];
 
-  form.saveTaskButton.addEventListener("click", saveTask);
+  form.addEventListener("click", handleTaskAction);
+
+  function handleTaskAction(e) {
+    const taskAction = e.target.dataset.taskAction;
+
+    if (!taskAction) return;
+
+    TaskAction[taskAction](e.target);
+  }
 
   function saveTask() {
     PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.EDIT, {
@@ -75,11 +95,24 @@ function TaskDialog() {
     PubSub.publishSync(EVENTS.PAGE.LOAD.TODAY);
   }
 
-  const setPriorityValue = (category) => {
-    const indexOfPriority = [...form.priority.options].findIndex(
-      (option) => option.value == category.priority
+  const markStatus = (target) => {
+    PubSub.publishSync(EVENTS.UI.MARK, {
+      target,
+      taskSection: currentTaskSection
+    });
+    taskDialogContent.close();
+  };
+
+  const TaskAction = {
+    saveTask,
+    markStatus
+  };
+
+  const setValueOfSelect = (category, element) => {
+    const indexOfPriority = [...form[element].options].findIndex(
+      (option) => option.value == category[element]
     );
-    form.priority.selectedIndex = indexOfPriority;
+    form[element].selectedIndex = indexOfPriority;
   };
 
   const formatDate = (date) => {
@@ -87,7 +120,14 @@ function TaskDialog() {
   };
 
   const labelsSent = (msg, label) => {
-    labels.push(...label);
+    labels.splice(0);
+    labels.push(...label, "None");
+  };
+
+  const resetLabel = () => {
+    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL);
+    form.label.innerHTML = "";
+    labels.forEach(setLabelValueInSelect);
   };
 
   const setLabelValueInSelect = (label) => {
@@ -99,19 +139,37 @@ function TaskDialog() {
     form.label.append(option);
   };
 
-  const updateTaskDialog = (msg, category) => {
+  const displayViewTaskDialog = (msg, { category, taskSection }) => {
+    currentTaskSection = taskSection;
+
     categoryTitle.textContent = category.categoryTitleFormatted;
     form.title.value = category.title;
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
 
-    setPriorityValue(category);
+    setValueOfSelect(category, 'priority');
 
-    form.label.value = category.label;
-    form.markStatus.setAttribute("data-priority", category.priority);
+    form.markStatus.setAttribute("data-priority", category?.priority);
 
-    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL);
-    labels.forEach(setLabelValueInSelect);
+    resetLabel();
+
+    setValueOfSelect(category, "label");
+    
+    taskDialogContent.showModal();
+  };
+
+  const displayAddTaskDialog = () => {
+    form.title.value = "";
+    form.date.value = "";
+    form.description.value = "";
+    categoryTitle.textContent = "Inbox";
+    form.markStatus.setAttribute("data-priority", "2");
+
+    setValueOfSelect({ priority: "2" }, "priority");
+
+    resetLabel();
+
+    setValueOfSelect({ label: "None" }, "label");
 
     taskDialogContent.showModal();
   };
