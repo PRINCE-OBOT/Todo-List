@@ -1,5 +1,6 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
+import se from "date-fns/locale/se";
 
 function TaskDialog() {
   const init = () => {
@@ -52,9 +53,7 @@ function TaskDialog() {
       </div>
 
       <div class="label">
-        <span>🏷️</span>
-          <select name="label">
-          </select>
+        <span class="label_tag">🏷️</span>
       </div>
 
       <section>
@@ -63,10 +62,18 @@ function TaskDialog() {
     </form>
   `;
 
+  const selectLabel = document.createElement("select");
+  selectLabel.name = "label";
+
+  const inputLabel = document.createElement("input");
+  inputLabel.placeholder = "Label";
+  inputLabel.name = "label";
+
   document.body.append(taskDialogContent);
 
   const form = taskDialogContent.querySelector("form");
   const categoryTitle = taskDialogContent.querySelector(".categoryTitle");
+  const label_tag = taskDialogContent.querySelector(".label_tag");
 
   let currentTaskSection;
 
@@ -74,25 +81,27 @@ function TaskDialog() {
 
   form.addEventListener("click", handleTaskAction);
 
-  function handleTaskAction(e) {
-    const taskAction = e.target.dataset.taskAction;
-
-    if (!taskAction) return;
-
-    TaskAction[taskAction](e.target);
-  }
+  let MSG;
 
   function saveTask() {
-    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.EDIT, {
+    const taskData = {
       title: form.title.value,
       description: form.description.value,
       label: form.label.value,
       status: form.label.checked,
       date: form.date.value,
       priority: form.priority.value
-    });
+    };
 
-    PubSub.publishSync(EVENTS.PAGE.LOAD.TODAY);
+    if (MSG === EVENTS.TODO_LIST.CATEGORY.VIEW_TASK_DIALOG) {
+      PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.EDIT, taskData);
+    } else {
+      taskData.id = crypto.randomUUID();
+
+      PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.ADD, taskData);
+    }
+
+    PubSub.publish(EVENTS.PAGE.LOAD.TODAY);
   }
 
   const markStatus = (target) => {
@@ -101,11 +110,6 @@ function TaskDialog() {
       taskSection: currentTaskSection
     });
     taskDialogContent.close();
-  };
-
-  const TaskAction = {
-    saveTask,
-    markStatus
   };
 
   const setValueOfSelect = (category, element) => {
@@ -121,7 +125,7 @@ function TaskDialog() {
 
   const labelsSent = (msg, label) => {
     labels.splice(0);
-    labels.push(...label, "None");
+    labels.push(...label);
   };
 
   const resetLabel = () => {
@@ -140,6 +144,7 @@ function TaskDialog() {
   };
 
   const displayViewTaskDialog = (msg, { category, taskSection }) => {
+    MSG = msg;
     currentTaskSection = taskSection;
 
     categoryTitle.textContent = category.categoryTitleFormatted;
@@ -147,18 +152,22 @@ function TaskDialog() {
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
 
-    setValueOfSelect(category, 'priority');
+    inputLabel.remove();
+    label_tag.after(selectLabel);
+    setValueOfSelect(category, "priority");
 
     form.markStatus.setAttribute("data-priority", category?.priority);
 
     resetLabel();
 
     setValueOfSelect(category, "label");
-    
+
     taskDialogContent.showModal();
   };
 
-  const displayAddTaskDialog = () => {
+  const displayAddTaskDialog = (msg) => {
+    MSG = msg;
+
     form.title.value = "";
     form.date.value = "";
     form.description.value = "";
@@ -167,9 +176,9 @@ function TaskDialog() {
 
     setValueOfSelect({ priority: "2" }, "priority");
 
-    resetLabel();
+    selectLabel.remove();
 
-    setValueOfSelect({ label: "None" }, "label");
+    label_tag.after(inputLabel);
 
     taskDialogContent.showModal();
   };
@@ -177,6 +186,19 @@ function TaskDialog() {
   const removeTaskDialog = () => {
     taskDialogContent.remove();
   };
+
+  const TaskAction = {
+    saveTask,
+    markStatus
+  };
+
+  function handleTaskAction(e) {
+    const taskAction = e.target.dataset.taskAction;
+
+    if (!taskAction) return;
+
+    TaskAction[taskAction](e.target);
+  }
 
   return { init };
 }
