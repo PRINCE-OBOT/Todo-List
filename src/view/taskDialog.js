@@ -70,7 +70,7 @@ function TaskDialog() {
           placeholder="Enter new label"
         />
 
-        <select name="label"></select>
+        <select name="label" data-task-action="changeLabel"></select>
       </div>
 
       <section>
@@ -95,6 +95,8 @@ function TaskDialog() {
   const labels = [];
 
   form.addEventListener("click", handleTaskAction);
+
+  form.addEventListener("change", handleTaskAction);
 
   let MSG;
 
@@ -125,6 +127,10 @@ function TaskDialog() {
       taskSection: currentTaskSection
     });
     taskDialogContent.close();
+  };
+
+  const changeLabel = () => {
+    form.input_label.value = form.label.value;
   };
 
   const setValueOfSelect = (category, element) => {
@@ -175,10 +181,7 @@ function TaskDialog() {
 
     setValueOfSelect(category, "label");
 
-    const selectedLabelIndex = form.label.selectedIndex;
-
-    form.input_label.value =
-      selectedLabelIndex === -1 ? "" : form.label[selectedLabelIndex].value;
+    form.input_label.value = form.label.value;
 
     taskDialogContent.showModal();
   };
@@ -203,7 +206,8 @@ function TaskDialog() {
 
   const TaskAction = {
     saveTask,
-    markStatus
+    markStatus,
+    changeLabel
   };
 
   function handleTaskAction(e) {
