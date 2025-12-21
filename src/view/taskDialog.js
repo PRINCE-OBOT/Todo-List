@@ -1,6 +1,5 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
-import se from "date-fns/locale/se";
 
 function TaskDialog() {
   const init = () => {
@@ -27,53 +26,69 @@ function TaskDialog() {
         <span>📫</span>
         <p class="categoryTitle"></p>
       </div>
-      
+
       <div>
-          <input type="checkbox" name="markStatus" class="mark-status" data-task-action="markStatus" />
-          <input name="title" type="text" class="title" placeholder="Title" />
+        <input
+          type="checkbox"
+          name="markStatus"
+          class="mark-status"
+          data-task-action="markStatus"
+        />
+        <input name="title" type="text" class="title" placeholder="Title" />
       </div>
-      
+
       <div>
         <span>📝</span
-        ><textarea name="description" class="description" placeholder="Description"></textarea>
+        ><textarea
+          name="description"
+          class="description"
+          placeholder="Description"
+        ></textarea>
       </div>
-      
+
       <div class="date">
         <span>📅</span>
-        <input name="date" type="date"/>
+        <input name="date" type="date" />
       </div>
 
       <div>
         <span>🏳️</span>
         <select name="priority">
-        <option value="1">High Priority</option>
-        <option value="2">Normal Priority</option>
-        <option value="3">Low Priority</option>
+          <option value="1">High Priority</option>
+          <option value="2">Normal Priority</option>
+          <option value="3">Low Priority</option>
         </select>
       </div>
 
       <div class="label">
         <span class="label_tag">🏷️</span>
+
+        <input
+          class="input_"
+          type="text"
+          name="input_label"
+          placeholder="Enter new label"
+        />
+
+        <select name="label"></select>
       </div>
 
       <section>
-        <button name="saveTaskButton" data-task-action="saveTask" class="btn-save_task">Save</button>
+        <button
+          name="saveTaskButton"
+          data-task-action="saveTask"
+          class="btn-save_task"
+        >
+          Save
+        </button>
       </section>
     </form>
   `;
-
-  const selectLabel = document.createElement("select");
-  selectLabel.name = "label";
-
-  const inputLabel = document.createElement("input");
-  inputLabel.placeholder = "Label";
-  inputLabel.name = "label";
 
   document.body.append(taskDialogContent);
 
   const form = taskDialogContent.querySelector("form");
   const categoryTitle = taskDialogContent.querySelector(".categoryTitle");
-  const label_tag = taskDialogContent.querySelector(".label_tag");
 
   let currentTaskSection;
 
@@ -87,8 +102,8 @@ function TaskDialog() {
     const taskData = {
       title: form.title.value,
       description: form.description.value,
-      label: form.label.value,
-      status: form.label.checked,
+      label: form.input_label.value,
+      status: form.markStatus.checked,
       date: form.date.value,
       priority: form.priority.value
     };
@@ -113,9 +128,9 @@ function TaskDialog() {
   };
 
   const setValueOfSelect = (category, element) => {
-    const indexOfPriority = [...form[element].options].findIndex(
-      (option) => option.value == category[element]
-    );
+    const indexOfPriority = [...form[element].options].findIndex((option) => {
+      return option.value == category[element];
+    });
     form[element].selectedIndex = indexOfPriority;
   };
 
@@ -152,8 +167,6 @@ function TaskDialog() {
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
 
-    inputLabel.remove();
-    label_tag.after(selectLabel);
     setValueOfSelect(category, "priority");
 
     form.markStatus.setAttribute("data-priority", category?.priority);
@@ -161,6 +174,11 @@ function TaskDialog() {
     resetLabel();
 
     setValueOfSelect(category, "label");
+
+    const selectedLabelIndex = form.label.selectedIndex;
+
+    form.input_label.value =
+      selectedLabelIndex === -1 ? "" : form.label[selectedLabelIndex].value;
 
     taskDialogContent.showModal();
   };
@@ -175,10 +193,6 @@ function TaskDialog() {
     form.markStatus.setAttribute("data-priority", "2");
 
     setValueOfSelect({ priority: "2" }, "priority");
-
-    selectLabel.remove();
-
-    label_tag.after(inputLabel);
 
     taskDialogContent.showModal();
   };
