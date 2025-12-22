@@ -1,5 +1,4 @@
 const CATEGORIES = {
-  SUBTASKS: "subtasks",
   TASKS: "tasks",
   SECTIONS: "sections"
 };
@@ -19,9 +18,7 @@ const getTasks = (categories, callback, context, categoryTitles) => {
     } else {
       const categorySectionKey = category.categoryTitle
         ? CATEGORIES.SECTIONS
-        : category.sectionTitle
-        ? CATEGORIES.TASKS
-        : CATEGORIES.SUBTASKS;
+        : CATEGORIES.TASKS
 
       if (!category.title) {
         const categoryTitle = category.categoryTitle

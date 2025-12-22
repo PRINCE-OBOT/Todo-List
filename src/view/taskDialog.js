@@ -82,21 +82,33 @@ function TaskDialog() {
           Save
         </button>
       </section>
-    </form>
-  `;
+
+      <hr>
+
+      </form>
+      `;
+
+  const addSubtaskBtn = (function createAddSubTaskBtn() {
+    const div = document.createElement("div");
+    div.classList.add("btn_add_subtask");
+
+    div.innerHTML = `
+      <span>&#10011; </span>
+      <span>Add sub-task</span>
+    `;
+
+    return div;
+  })();
 
   document.body.append(taskDialogContent);
 
   const form = taskDialogContent.querySelector("form");
   const categoryTitle = taskDialogContent.querySelector(".categoryTitle");
+  const hr = taskDialogContent.querySelector("hr");
 
   let currentTaskSection;
 
   const labels = [];
-
-  form.addEventListener("click", handleTaskAction);
-
-  form.addEventListener("change", handleTaskAction);
 
   let MSG;
 
@@ -151,7 +163,9 @@ function TaskDialog() {
 
   const resetLabel = () => {
     PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL);
+
     form.label.innerHTML = "";
+
     labels.forEach(setLabelValueInSelect);
   };
 
@@ -172,6 +186,7 @@ function TaskDialog() {
     form.title.value = category.title;
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
+    hr.after(addSubtaskBtn);
 
     setValueOfSelect(category, "priority");
 
@@ -193,6 +208,12 @@ function TaskDialog() {
     form.date.value = "";
     form.description.value = "";
     categoryTitle.textContent = "Inbox";
+    form.input_label.value = "";
+
+    addSubtaskBtn.remove();
+    
+    resetLabel();
+
     form.markStatus.setAttribute("data-priority", "2");
 
     setValueOfSelect({ priority: "2" }, "priority");
@@ -218,6 +239,10 @@ function TaskDialog() {
     TaskAction[taskAction](e.target);
   }
 
+  form.addEventListener("click", handleTaskAction);
+  form.addEventListener("change", handleTaskAction);
+  addSubtaskBtn.addEventListener("click", displayAddTaskDialog);
+  
   return { init };
 }
 

@@ -149,7 +149,7 @@ function Category() {
       category: lastReferenceCategory[indexOfCategory],
       taskSection
     });
-    
+
     categoryReferences.push(id);
   };
 
@@ -160,9 +160,27 @@ function Category() {
   const addTaskCategory = (msg, task) => {
     task.category = [...categoryReferences, task.id];
 
-    const lastReferenceCategory = getLastReferenceCategory(msg);
-    lastReferenceCategory.push(task);
-    lastReferenceCategory.sort(sortTaskBaseOnPriority);
+    const isLastReferenceHasID =
+      categoryReferences[categoryReferences.length - 1];
+
+    let id;
+    if (typeof isLastReferenceHasID !== "number") {
+      id = categoryReferences.pop();
+    }
+
+    let lastReferenceCategory = getLastReferenceCategory(msg);
+
+    if (id) {
+      const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
+      lastReferenceCategory = lastReferenceCategory[indexOfCategory];
+
+      if (!lastReferenceCategory.subtasks) lastReferenceCategory.subtasks = [];
+      lastReferenceCategory.subtasks.push(task);
+      lastReferenceCategory.subtasks.sort(sortTaskBaseOnPriority);
+    } else {
+      lastReferenceCategory.push(task);
+      lastReferenceCategory.sort(sortTaskBaseOnPriority);
+    }
   };
 
   const deleteTaskCategory = (msg) => {

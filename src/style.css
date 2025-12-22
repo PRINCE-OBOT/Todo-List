@@ -363,7 +363,7 @@ dialog::backdrop {
 
 .btn-save_task {
   border: none;
-  margin-top: 40px;
+  margin-top: 5px;
   border-radius: var(--br-sm);
   padding: var(--pd-xxsm) var(--pd-lg);
   background-color: var(--primary-accent);
