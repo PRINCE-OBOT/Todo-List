@@ -190,7 +190,7 @@ main {
   padding-top: 20px;
 }
 
-.today_page .task {
+.task {
   background-color: var(--transparent);
   padding: var(--pd-lg);
   display: grid;
@@ -370,5 +370,9 @@ dialog::backdrop {
 }
 
 ::-webkit-scrollbar {
+  display: none;
+}
+
+.hide{
   display: none;
 }

@@ -1,5 +1,6 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
+import { taskTemplate } from "../config/constant";
 
 function TaskDialog() {
   const init = () => {
@@ -106,7 +107,13 @@ function TaskDialog() {
   const categoryTitle = taskDialogContent.querySelector(".categoryTitle");
   const hr = taskDialogContent.querySelector("hr");
 
+  const subtaskSection = document.createElement("div");
+
+  hr.after(subtaskSection);
+
   let currentTaskSection;
+  
+  const DATA_CAT_REF = "data-category-reference";
 
   const labels = [];
 
@@ -178,6 +185,38 @@ function TaskDialog() {
     form.label.append(option);
   };
 
+  const addLabelValue = (category) => {
+    if (!labels.includes(category.label)) {
+      labels.push(category.label);
+    }
+  };
+
+  const setTaskValue = (category) => {
+    const task = taskTemplate.getTaskTemplate();
+    task.setAttribute(DATA_CAT_REF, category.category);
+
+    const priority = task.querySelector("[data-priority]");
+    const title = task.querySelector(".title");
+    const description = task.querySelector(".description");
+    const categoryTitle = task.querySelector(".categoryTitle");
+
+    priority.setAttribute("data-priority", category.priority);
+
+    title.textContent = category.title;
+    categoryTitle.textContent = category.categoryTitleFormatted;
+    description.textContent = category.description;
+
+    addLabelValue(category);
+
+    subtaskSection.append(task);
+  };
+
+  const isSubtask = (subtasks) => {
+    if (!subtasks) return;
+
+    subtasks.forEach(setTaskValue);
+  };
+
   const displayViewTaskDialog = (msg, { category, taskSection }) => {
     MSG = msg;
     currentTaskSection = taskSection;
@@ -186,7 +225,9 @@ function TaskDialog() {
     form.title.value = category.title;
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
-    hr.after(addSubtaskBtn);
+    subtaskSection.after(addSubtaskBtn);
+
+    hr.classList.remove("hide");
 
     setValueOfSelect(category, "priority");
 
@@ -197,6 +238,8 @@ function TaskDialog() {
     setValueOfSelect(category, "label");
 
     form.input_label.value = form.label.value;
+
+    isSubtask(category.subtasks);
 
     taskDialogContent.showModal();
   };
@@ -210,8 +253,11 @@ function TaskDialog() {
     categoryTitle.textContent = "Inbox";
     form.input_label.value = "";
 
+    hr.classList.add("hide");
+
+    subtaskSection.remove();
     addSubtaskBtn.remove();
-    
+
     resetLabel();
 
     form.markStatus.setAttribute("data-priority", "2");
@@ -242,8 +288,9 @@ function TaskDialog() {
   form.addEventListener("click", handleTaskAction);
   form.addEventListener("change", handleTaskAction);
   addSubtaskBtn.addEventListener("click", displayAddTaskDialog);
-  
+
   return { init };
 }
 
 export default TaskDialog;
+// continue from display subtask in the task 

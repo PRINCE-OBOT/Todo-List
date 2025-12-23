@@ -70,54 +70,6 @@ function Category() {
   const TASK_DELETED = "LAST TASK IN SECTION DELETED";
 
   // Utility Function
-  const getLastReference = (
-    msg,
-    lastReferenceCategory,
-    indexOfCategoryReferenceLast,
-    key
-  ) => {
-    const category = lastReferenceCategory[indexOfCategoryReferenceLast][key];
-
-    if (!category) {
-      lastReferenceCategory[indexOfCategoryReferenceLast][key] = [];
-    }
-
-    return lastReferenceCategory[indexOfCategoryReferenceLast][key];
-  };
-
-  const getLastReferenceCategory = (msg) => {
-    let lastReferenceCategory = Categories[categoryReferences[0]];
-
-    for (let i = 1; i < categoryReferences.length; i++) {
-      const indexOfCategoryReferenceLast = +categoryReferences[i];
-
-      const category = lastReferenceCategory[indexOfCategoryReferenceLast];
-
-      if (category === undefined) return Categories.Inbox[0];
-
-      if (Array.isArray(category)) {
-        lastReferenceCategory = category;
-      } else {
-        const key = category.categoryTitle
-          ? CATEGORIES.SECTIONS
-          : category.sectionTitle
-          ? CATEGORIES.TASKS
-          : CATEGORIES.SUBTASKS;
-
-        lastReferenceCategory = getLastReference(
-          msg,
-          lastReferenceCategory,
-          indexOfCategoryReferenceLast,
-          key
-        );
-      }
-    }
-
-    return lastReferenceCategory === Categories.Inbox
-      ? Categories.Inbox[0]
-      : lastReferenceCategory;
-  };
-
   const getCategoryIndex = (lastReferenceCategory, id) =>
     lastReferenceCategory.findIndex((category) => category.id === id);
 
@@ -131,6 +83,41 @@ function Category() {
       return CATEGORY_VOID;
     }
     return category;
+  };
+
+  const getLastReferenceCategory = (msg) => {
+    let lastReferenceCategory = Categories[categoryReferences[0]];
+
+    for (let i = 1; i < categoryReferences.length; i++) {
+      let indexOfCategory = +categoryReferences[i];
+
+      let category = lastReferenceCategory[indexOfCategory];
+
+      if (category === undefined) return Categories.Inbox[0];
+
+      if (Number.isNaN(indexOfCategory)) {
+        indexOfCategory = getCategoryIndex(
+          lastReferenceCategory,
+          indexOfCategory
+        );
+      }
+
+      if (Array.isArray(category)) {
+        lastReferenceCategory = category;
+      } else {
+        const subSection = category.categoryTitle
+          ? CATEGORIES.SECTIONS
+          : category.sectionTitle
+          ? CATEGORIES.TASKS
+          : CATEGORIES.SUBTASKS;
+
+        if (!category[subSection]) category[subSection] = [];
+
+        lastReferenceCategory = category[subSection];
+      }
+    }
+
+    return lastReferenceCategory;
   };
 
   const handleLastReferenceCategory = (msg) => {
@@ -160,27 +147,10 @@ function Category() {
   const addTaskCategory = (msg, task) => {
     task.category = [...categoryReferences, task.id];
 
-    const isLastReferenceHasID =
-      categoryReferences[categoryReferences.length - 1];
-
-    let id;
-    if (typeof isLastReferenceHasID !== "number") {
-      id = categoryReferences.pop();
-    }
-
     let lastReferenceCategory = getLastReferenceCategory(msg);
 
-    if (id) {
-      const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
-      lastReferenceCategory = lastReferenceCategory[indexOfCategory];
-
-      if (!lastReferenceCategory.subtasks) lastReferenceCategory.subtasks = [];
-      lastReferenceCategory.subtasks.push(task);
-      lastReferenceCategory.subtasks.sort(sortTaskBaseOnPriority);
-    } else {
-      lastReferenceCategory.push(task);
-      lastReferenceCategory.sort(sortTaskBaseOnPriority);
-    }
+    lastReferenceCategory.push(task);
+    lastReferenceCategory.sort(sortTaskBaseOnPriority);
   };
 
   const deleteTaskCategory = (msg) => {
@@ -309,7 +279,6 @@ export { category };
       
       The category in index 1 of `inbox`  is been reference here
       Note: If a category is not reference correctly, the `inbox` categories (array) is used
-
 
 3.  To add a section to inbox  
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.INBOX.ADD_SECTION, { sectionTitle: 'gym'});

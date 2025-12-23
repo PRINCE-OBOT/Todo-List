@@ -1,6 +1,6 @@
 import EVENTS from "../config/EVENTS";
 import { category } from "../Todo-List/todo-list";
-import { getTasks, Context } from "../config/constant";
+import { getTasks, Context, taskTemplate } from "../config/constant";
 import { startOfDay, isToday, isBefore } from "date-fns";
 import PubSub from "pubsub-js";
 
@@ -168,41 +168,7 @@ function Today(main) {
     todayAndOverdueTask.push(category);
   };
 
-  const CreateTaskTemplate = () => {
-    const task = document.createElement("div");
-    task.classList.add("task");
-
-    task.innerHTML = `
-      <input class="mark-status" data-task-action="mark" type="checkbox" data-priority />
-      
-      <div class="title-and-date-section">
-        <div class="title"></div>
-        <p class="description"></p>
-      </div>
-      
-      <div class="task-right-side">
-        <div class="more_options_section">
-          
-          <div class="more_options_action hide">
-            <span class="delete_task" data-task-action="delete">Delete</span>
-            <span class="view_task" data-task-action="view">View</span>
-          </div>
-          
-          <div class="show_more_options" data-more-option="toggle">
-            &vellip;
-          </div>
-        </div>
-
-        <p class="categoryTitle"></p>
-      </div>
-    `;
-
-    const getTaskTemplate = () => task.cloneNode(true);
-
-    return { getTaskTemplate };
-  };
-
-  const taskTemplate = CreateTaskTemplate();
+  
 
   const addLabelValue = (category) => {
     if (!labels.includes(category.label)) {
