@@ -83,15 +83,19 @@ function TaskDialog() {
           Save
         </button>
       </section>
-
-      <hr>
-
+      
       </form>
+
+      <br>
+      
+      <hr>
+      
+      <br>
       `;
 
   const addSubtaskBtn = (function createAddSubTaskBtn() {
     const div = document.createElement("div");
-    div.classList.add("btn_add_subtask");
+    div.classList.add("btn_add_subtask", "cursor_pointer");
 
     div.innerHTML = `
       <span>&#10011; </span>
@@ -108,6 +112,7 @@ function TaskDialog() {
   const hr = taskDialogContent.querySelector("hr");
 
   const subtaskSection = document.createElement("div");
+  subtaskSection.classList.add("subtaskSection");
 
   let currentTaskSection;
 

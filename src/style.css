@@ -104,7 +104,7 @@ h6 {
   --br-sm: 10px;
   --br-xlg: 40px;
 
-  --mark-priority-dim: 12px;
+  --mark-priority-dim: 20px;
 
   --container_width: min(550px, 100%);
 }
@@ -154,12 +154,16 @@ main {
 .today_page p {
   opacity: 0.7;
 }
+.title {
+  color: var(--white);
+}
 
-[data-tasks-section] {
+[data-tasks-section], .subtaskSection {
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-sm);
 }
+
 [data-priority] {
   appearance: none;
   background-color: var(--white);
@@ -194,7 +198,7 @@ main {
   background-color: var(--transparent);
   padding: var(--pd-lg);
   display: grid;
-  grid-template-columns: 15px 2fr 1fr;
+  grid-template-columns: var(--mark-priority-dim) 2fr 1fr;
   gap: var(--gp-lg);
   border-radius: var(--br-sm);
   border: 2px solid var(--transparent-white);
@@ -276,7 +280,7 @@ main {
   color: var(--white);
 }
 
-.btn_add_task{
+.btn_add_task {
   position: sticky;
   bottom: 5px;
   margin-left: auto;
@@ -298,10 +302,10 @@ main {
   translate: -50% 100%;
   height: 70%;
   background: var(--fade-black);
+  color: var(--transparent-white);
   width: var(--container_width);
   border-radius: var(--br-lg) var(--br-lg) 0 0;
   border: 2px solid var(--transparent-white);
-  
 
   &:focus {
     outline: none;
@@ -325,7 +329,6 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   gap: var(--br-lg);
-  font-size: var(--fs-sz-lg);
   padding: var(--pd-lg);
 }
 
@@ -342,20 +345,21 @@ dialog::backdrop {
   flex: 1;
 }
 
-.dialog_form :is(input, textarea, select) {
+.dialog_form :where(input:not([type="checkbox"]), textarea, select) {
   padding: var(--pd-sm) 0;
+  background-color: var(--fade-black);
+    color: var(--white);
+
+  border: none;
   
-  &:focus{
+  &:focus {
     outline: none;
+  }
+  &::placeholder {
+    color: var(--transparent-white);
   }
 }
 
-.dialog_form > div * {
-  background-color: var(--fade-black);
-  color: var(--white);
-  opacity: 0.8;
-  border: none;
-}
 .dialog_form .description {
   height: 50px;
 }
@@ -368,10 +372,11 @@ dialog::backdrop {
   background-color: var(--primary-accent);
 }
 
-::-webkit-scrollbar {
-  display: none;
+.btn_add_subtask {
+  padding: var(--pd-lg) 0;
 }
 
-.hide{
+::-webkit-scrollbar,
+.hide {
   display: none;
 }
