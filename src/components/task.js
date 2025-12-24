@@ -56,6 +56,7 @@ const getAttributeFromClosestParent = (target, value) => {
 const TaskAction = {
   delete: (target) => {
     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
+    
     const taskSection = target.closest(".task");
 
     taskSection.remove();

@@ -33,7 +33,7 @@ function TaskDialog() {
           type="checkbox"
           name="markStatus"
           class="mark-status"
-          data-task-action="markStatus"
+          data-task-dialog="markStatus"
         />
         <input name="title" type="text" class="title" placeholder="Title" />
       </div>
@@ -71,13 +71,13 @@ function TaskDialog() {
           placeholder="Enter new label"
         />
 
-        <select name="label" data-task-action="changeLabel"></select>
+        <select name="label" data-task-dialog="changeLabel"></select>
       </div>
 
       <section>
         <button
           name="saveTaskButton"
-          data-task-action="saveTask"
+          data-task-dialog="saveTask"
           class="btn-save_task"
         >
           Save
@@ -279,7 +279,7 @@ function TaskDialog() {
   };
 
   function handleTaskAction(e) {
-    const taskAction = e.target.dataset.taskAction;
+    const taskAction = e.target.dataset.taskDialog;
 
     if (!taskAction) return;
 
@@ -294,4 +294,3 @@ function TaskDialog() {
 }
 
 export default TaskDialog;
-// continue from display subtask in the task 
