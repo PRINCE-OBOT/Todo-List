@@ -243,8 +243,7 @@ main {
   overflow: hidden;
 }
 
-[data-task-action],
-.show_more_options {
+.cursor_pointer {
   cursor: pointer;
 }
 

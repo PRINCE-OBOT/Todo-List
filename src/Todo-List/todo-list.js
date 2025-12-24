@@ -1,6 +1,6 @@
 import { CATEGORIES } from "../config/constant";
-import EVENTS from "../config/EVENTS";
 import PubSub from "pubsub-js";
+import EVENTS from "../config/EVENTS";
 
 const category = Category();
 
@@ -71,7 +71,9 @@ function Category() {
 
   // Utility Function
   const getCategoryIndex = (lastReferenceCategory, id) =>
-    lastReferenceCategory.findIndex((category) => category.id === id);
+    lastReferenceCategory.findIndex((category) => {
+      return category.id === id;
+    });
 
   const isCategoryExist = () => {
     const categoryReferenceIndex = categoryReferences.pop();
@@ -89,18 +91,16 @@ function Category() {
     let lastReferenceCategory = Categories[categoryReferences[0]];
 
     for (let i = 1; i < categoryReferences.length; i++) {
-      let indexOfCategory = +categoryReferences[i];
+      let indexOfCategory = categoryReferences[i];
 
-      let category = lastReferenceCategory[indexOfCategory];
-
-      if (category === undefined) return Categories.Inbox[0];
-
-      if (Number.isNaN(indexOfCategory)) {
+      if (Number.isNaN(+indexOfCategory)) {
         indexOfCategory = getCategoryIndex(
           lastReferenceCategory,
           indexOfCategory
         );
       }
+
+      let category = lastReferenceCategory[indexOfCategory];
 
       if (Array.isArray(category)) {
         lastReferenceCategory = category;
@@ -115,6 +115,8 @@ function Category() {
 
         lastReferenceCategory = category[subSection];
       }
+
+      if (category === undefined) return Categories.Inbox[0];
     }
 
     return lastReferenceCategory;
@@ -157,11 +159,10 @@ function Category() {
     const lastReferenceCategoryValue = handleLastReferenceCategory(msg);
 
     const { lastReferenceCategory, id } = lastReferenceCategoryValue;
+    
+    const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
 
-    if (lastReferenceCategory !== TASK_DELETED) {
-      const indexOfCategory = getCategoryIndex(lastReferenceCategory, id);
-      lastReferenceCategory.splice(indexOfCategory, 1);
-    }
+    lastReferenceCategory.splice(indexOfCategory, 1);
   };
 
   const markCategoryStatus = (msg, status) => {

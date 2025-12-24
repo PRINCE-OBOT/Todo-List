@@ -1,6 +1,6 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
-import { taskTemplate } from "../config/constant";
+import { taskTemplate } from "../components/task";
 
 function TaskDialog() {
   const init = () => {
@@ -108,8 +108,6 @@ function TaskDialog() {
   const hr = taskDialogContent.querySelector("hr");
 
   const subtaskSection = document.createElement("div");
-
-  hr.after(subtaskSection);
 
   let currentTaskSection;
   
@@ -225,6 +223,9 @@ function TaskDialog() {
     form.title.value = category.title;
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
+    
+    hr.after(subtaskSection);
+
     subtaskSection.after(addSubtaskBtn);
 
     hr.classList.remove("hide");

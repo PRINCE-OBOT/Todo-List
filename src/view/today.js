@@ -1,8 +1,9 @@
 import EVENTS from "../config/EVENTS";
 import { category } from "../Todo-List/todo-list";
-import { getTasks, Context, taskTemplate } from "../config/constant";
+import { getTasks, Context } from "../config/constant";
 import { startOfDay, isToday, isBefore } from "date-fns";
 import PubSub from "pubsub-js";
+import { taskTemplate } from "../components/task";
 
 function Today(main) {
   const init = () => {
@@ -10,8 +11,6 @@ function Today(main) {
     PubSub.subscribe(EVENTS.PAGE.REMOVE.TODAY, removeToday);
 
     PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL, sendLabels);
-
-    PubSub.subscribe(EVENTS.UI.MARK, markTask);
   };
 
   const todayDate = new Date().toDateString();
@@ -46,7 +45,7 @@ function Today(main) {
         <div data-tasks-section="overdue"></div>
       </div>
 
-      <div class="btn_add_task">
+      <div class="btn_add_task cursor_pointer">
         &#10011; Add Task
       </div>
 
@@ -65,8 +64,6 @@ function Today(main) {
 
   const btnAddTask = todayContent.querySelector(".btn_add_task");
 
-  todayContent.addEventListener("click", handleTaskAction);
-  todayContent.addEventListener("click", showMoreOptions);
   btnAddTask.addEventListener("click", addTask);
 
   const DEFAULT_REFERENCE = ["Inbox", 0];
@@ -75,77 +72,6 @@ function Today(main) {
     PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.REFERENCE, DEFAULT_REFERENCE);
 
     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG);
-  }
-
-  const getClosestElement = (target, value) => {
-    return target.closest(`[${value}]`);
-  };
-
-  const getAttributeFromClosestParent = (target, value) => {
-    const closestParent = getClosestElement(target, value);
-    const attribute = closestParent.getAttribute(value);
-    return attribute;
-  };
-
-  const TaskAction = {
-    delete: (target) => {
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
-
-      const taskSection = getClosestElement(target);
-
-      taskSection.remove();
-    },
-    view: (target) => {
-      const taskSection = getClosestElement(target, DATA_CAT_REF);
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.GET_TASK, taskSection);
-    },
-    mark: (target) => {
-      markTask(null, { target });
-    }
-  };
-
-  const markTask = (msg, { target, taskSection }) => {
-    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.MARK, target.checked);
-
-    if (!msg) {
-      taskSection = getClosestElement(target, DATA_CAT_REF);
-    }
-
-    taskSection.textContent = "Task ";
-
-    taskSection.textContent += target.checked ? "Completed" : "Not completed";
-
-    setTimeout(() => taskSection.classList.add("task_mark"), 1000);
-
-    setTimeout(() => taskSection.remove(), 1290);
-  };
-
-  function showMoreOptions(e) {
-    const moreOption = e.target.dataset.moreOption;
-
-    if (!moreOption) return;
-
-    const taskSection = getClosestElement(e.target, "data-category-reference");
-
-    const moreOptionsAction = taskSection.querySelector(".more_options_action");
-
-    moreOptionsAction.classList.toggle("hide");
-  }
-
-  function handleTaskAction(e) {
-    const taskDataset = e.target.dataset;
-
-    if (!taskDataset.taskAction) return;
-
-    const attribute = getAttributeFromClosestParent(e.target, DATA_CAT_REF);
-
-    const categoryPath = attribute
-      .split(",")
-      .map((index) => (Number.isNaN(+index) ? index : +index));
-
-    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.REFERENCE, categoryPath);
-
-    TaskAction[taskDataset.taskAction](e.target);
   }
 
   const appendTodayTask = (task) => {
@@ -168,8 +94,6 @@ function Today(main) {
     todayAndOverdueTask.push(category);
   };
 
-  
-
   const addLabelValue = (category) => {
     if (!labels.includes(category.label)) {
       labels.push(category.label);
@@ -178,6 +102,7 @@ function Today(main) {
 
   const setTaskValue = (category) => {
     const task = taskTemplate.getTaskTemplate();
+    
     task.setAttribute(DATA_CAT_REF, category.category);
 
     const priority = task.querySelector("[data-priority]");
