@@ -110,7 +110,7 @@ function TaskDialog() {
   const subtaskSection = document.createElement("div");
 
   let currentTaskSection;
-  
+
   const DATA_CAT_REF = "data-category-reference";
 
   const labels = [];
@@ -215,6 +215,15 @@ function TaskDialog() {
     subtasks.forEach(setTaskValue);
   };
 
+  const resetSubtaskSection = () => {
+    subtaskSection.innerHTML = "";
+    hr.after(subtaskSection);
+  };
+
+  const resetTaskDialog = (category) => {
+    resetLabel();
+    resetSubtaskSection();
+  };
   const displayViewTaskDialog = (msg, { category, taskSection }) => {
     MSG = msg;
     currentTaskSection = taskSection;
@@ -223,21 +232,16 @@ function TaskDialog() {
     form.title.value = category.title;
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
-    
-    hr.after(subtaskSection);
-
-    subtaskSection.after(addSubtaskBtn);
 
     hr.classList.remove("hide");
 
-    setValueOfSelect(category, "priority");
+    resetTaskDialog(category);
+    hr.after(addSubtaskBtn);
 
+    setValueOfSelect(category, "priority");
     form.markStatus.setAttribute("data-priority", category?.priority);
 
-    resetLabel();
-
     setValueOfSelect(category, "label");
-
     form.input_label.value = form.label.value;
 
     isSubtask(category.subtasks);
