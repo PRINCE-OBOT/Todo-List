@@ -152,13 +152,26 @@ main {
 }
 
 .today_page p {
-  opacity: 0.7;
+  color: var(--transparent-white);
 }
 .title {
   color: var(--white);
 }
+.task :where(title, .description) {
+  max-width: 10ch;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+}
 
-[data-tasks-section], .subtaskSection {
+.title-and-date-section {
+  pointer-events: none;
+}
+
+.description {
+  padding-top: var(--pd-sm);
+}
+[data-tasks-section],
+.subtaskSection {
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-sm);
@@ -167,7 +180,7 @@ main {
 [data-priority] {
   appearance: none;
   background-color: var(--white);
-  width: var(--mark-priority-dim);
+  min-width: var(--mark-priority-dim);
   height: var(--mark-priority-dim);
   border-radius: 50%;
   outline: 2px solid;
@@ -198,10 +211,12 @@ main {
   background-color: var(--transparent);
   padding: var(--pd-lg);
   display: grid;
-  grid-template-columns: var(--mark-priority-dim) 2fr 1fr;
+  grid-template-columns: var(--mark-priority-dim) 1fr 1fr;
   gap: var(--gp-lg);
   border-radius: var(--br-sm);
   border: 2px solid var(--transparent-white);
+  overflow-x: auto;
+  position: relative;
 }
 
 .today_page .task.task_mark {
@@ -226,12 +241,6 @@ main {
   align-self: start;
 }
 
-.more_options_section {
-  display: flex;
-  justify-content: end;
-  gap: var(--gp-sm);
-}
-
 .task-right-side {
   display: flex;
   flex-direction: column;
@@ -239,20 +248,12 @@ main {
   align-items: flex-end;
 }
 
-.more_options_action {
-  display: flex;
-  gap: var(--gp-lg);
-  width: calc-size(auto, size);
-  transition: 100ms;
-  overflow: hidden;
-}
-
 .cursor_pointer {
   cursor: pointer;
 }
 
-.more_options_action.hide {
-  width: calc-size(auto, size * 0);
+.more_options_action.below {
+  transform: translateY(100%);
 }
 
 .delete_task {
@@ -338,20 +339,13 @@ dialog::backdrop {
   align-items: center;
 }
 
-.dialog_form > div > *:first-child {
-  width: 20px;
-}
-.dialog_form > div > *:last-child {
-  flex: 1;
-}
-
 .dialog_form :where(input:not([type="checkbox"]), textarea, select) {
   padding: var(--pd-sm) 0;
   background-color: var(--fade-black);
-    color: var(--white);
+  color: var(--white);
 
   border: none;
-  
+
   &:focus {
     outline: none;
   }

@@ -1,4 +1,4 @@
-import { CATEGORIES } from "../config/constant";
+import { Categories, CATEGORIES, CATEGORY } from "../config/constant";
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
 
@@ -34,28 +34,16 @@ function Category() {
       handleDisplayAllCategory
     );
 
-    initializeCategory();
   };
 
-  const CATEGORY = "CATEGORY";
 
   const DEFAULT_REFERENCE = ["Inbox", 0];
   let categoryReferences = DEFAULT_REFERENCE;
 
   // The first category in the array is classified as the category
   // if the first index is not in the Categories key, then it get added to the inbox first index array
-  let Categories = {
-    Inbox: [[]],
-    My_Project: []
-  };
 
-  function initializeCategory() {
-    const categories = localStorage.getItem(CATEGORY);
 
-    if (!categories) return;
-
-    Categories = JSON.parse(categories);
-  }
 
   const referenceCategory = (_, categoryReference) => {
     categoryReferences.splice(

@@ -1,6 +1,11 @@
 import EVENTS from "../config/EVENTS";
 import { category } from "../Todo-List/todo-list";
-import { getTasks, Context } from "../config/constant";
+import {
+  getTasks,
+  Context,
+  generateCategoryPath,
+  getPathArrayFormat
+} from "../config/constant";
 import { startOfDay, isToday, isBefore } from "date-fns";
 import PubSub from "pubsub-js";
 import { taskTemplate } from "../components/task";
@@ -89,8 +94,7 @@ function Today(main) {
     overdueTaskSection.append(task);
   };
 
-  const handleSortOfTask = (category, categoryTitles) => {
-    category.categoryTitleFormatted = categoryTitles;
+  const handleSortOfTask = (category) => {
     todayAndOverdueTask.push(category);
   };
 
@@ -102,7 +106,7 @@ function Today(main) {
 
   const setTaskValue = (category) => {
     const task = taskTemplate.getTaskTemplate();
-    
+
     task.setAttribute(DATA_CAT_REF, category.category);
 
     const priority = task.querySelector("[data-priority]");
@@ -114,7 +118,9 @@ function Today(main) {
     priority.setAttribute("data-priority", category.priority);
 
     title.textContent = category.title;
-    categoryTitle.textContent = category.categoryTitleFormatted;
+
+    categoryTitle.textContent = generateCategoryPath(getPathArrayFormat(task));
+
     description.textContent = category.description;
 
     addLabelValue(category);

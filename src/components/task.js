@@ -5,31 +5,33 @@ const DATA_CAT_REF = "data-category-reference";
 const CreateTaskTemplate = () => {
   const task = document.createElement("div");
   task.classList.add("task");
+  task.setAttribute("data-task-action", "view");
 
   task.innerHTML = `
-      <input class="mark-status" data-task-action="mark" type="checkbox" data-priority />
-      
-      <div class="title-and-date-section">
-        <div class="title"></div>
-        <p class="description"></p>
-      </div>
-      
-      <div class="task-right-side">
-        <div class="more_options_section">
-          
-          <div class="more_options_action hide">
-            <span class="delete_task cursor_pointer" data-task-action="delete">Delete</span>
-            <span class="view_task cursor_pointer" data-task-action="view">View</span>
-          </div>
-          
-          <div class="show_more_options cursor_pointer" data-more-option="toggle">
-            &vellip;
-          </div>
-        </div>
+    <input
+      class="mark-status"
+      data-task-action="mark"
+      type="checkbox"
+      data-priority
+    />
 
-        <p class="categoryTitle"></p>
+    <div class="title-and-date-section">
+      <div class="title"></div>
+      <p class="description"></p>
+    </div>
+
+    <div class="task-right-side">
+      <div class="more_options_section">
+        <div>
+          <span class="delete_task cursor_pointer" data-task-action="delete"
+            >Delete</span
+          >
+        </div>
       </div>
-    `;
+
+      <p class="categoryTitle"></p>
+    </div>
+  `;
 
   const getTaskTemplate = () => {
     const cloneTask = task.cloneNode(true);
@@ -56,7 +58,7 @@ const getAttributeFromClosestParent = (target, value) => {
 const TaskAction = {
   delete: (target) => {
     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
-    
+
     const taskSection = target.closest(".task");
 
     taskSection.remove();
@@ -95,7 +97,7 @@ function showMoreOptions(e) {
 
   const moreOptionsAction = taskSection.querySelector(".more_options_action");
 
-  moreOptionsAction.classList.toggle("hide");
+  moreOptionsAction.classList.toggle("below");
 }
 
 function handleTaskAction(e) {

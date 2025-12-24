@@ -1,6 +1,7 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
 import { taskTemplate } from "../components/task";
+import { generateCategoryPath, getPathArrayFormat } from "../config/constant";
 
 function TaskDialog() {
   const init = () => {
@@ -206,8 +207,8 @@ function TaskDialog() {
     priority.setAttribute("data-priority", category.priority);
 
     title.textContent = category.title;
-    categoryTitle.textContent = category.categoryTitleFormatted;
     description.textContent = category.description;
+    categoryTitle.textContent = generateCategoryPath(getPathArrayFormat(task));
 
     addLabelValue(category);
 
@@ -229,11 +230,14 @@ function TaskDialog() {
     resetLabel();
     resetSubtaskSection();
   };
+
   const displayViewTaskDialog = (msg, { category, taskSection }) => {
     MSG = msg;
     currentTaskSection = taskSection;
 
-    categoryTitle.textContent = category.categoryTitleFormatted;
+    categoryTitle.textContent = generateCategoryPath(
+      getPathArrayFormat(taskSection)
+    );
     form.title.value = category.title;
     form.date.value = formatDate(category.date);
     form.description.value = category.description;
