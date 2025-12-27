@@ -1,3 +1,8 @@
+import {
+  categoryReference,
+  path,
+  taskAndCategoryHandler
+} from "../config/constant";
 import EVENTS from "../config/EVENTS";
 
 const DATA_CAT_REF = "data-category-reference";
@@ -37,7 +42,6 @@ const CreateTaskTemplate = () => {
     const cloneTask = task.cloneNode(true);
 
     cloneTask.addEventListener("click", handleTaskAction);
-    cloneTask.addEventListener("click", showMoreOptions);
 
     return cloneTask;
   };
@@ -49,23 +53,22 @@ const getClosestElement = (target, value) => {
   return target.closest(`[${value}]`);
 };
 
-const getAttributeFromClosestParent = (target, value) => {
-  const closestParent = getClosestElement(target, value);
-  const attribute = closestParent.getAttribute(value);
-  return attribute;
-};
-
 const TaskAction = {
   delete: (target) => {
     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
-
     const taskSection = target.closest(".task");
-
     taskSection.remove();
   },
   view: (target) => {
-    const taskSection = getClosestElement(target, DATA_CAT_REF);
-    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.GET_TASK, taskSection);
+    const task = taskAndCategoryHandler.getTask();
+    const taskSection = target.closest(`[${DATA_CAT_REF}]`);
+
+    categoryReference.update(path.constructCategoryReference(taskSection));
+
+    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.VIEW_TASK_DIALOG, {
+      task,
+      taskSection
+    });
   },
   mark: (target) => {
     markTask(null, { target });
@@ -88,30 +91,16 @@ const markTask = (msg, { target, taskSection }) => {
   setTimeout(() => taskSection.remove(), 1290);
 };
 
-function showMoreOptions(e) {
-  const moreOption = e.target.dataset.moreOption;
-
-  if (!moreOption) return;
-
-  const taskSection = getClosestElement(e.target, "data-category-reference");
-
-  const moreOptionsAction = taskSection.querySelector(".more_options_action");
-
-  moreOptionsAction.classList.toggle("below");
-}
-
 function handleTaskAction(e) {
   const taskDataset = e.target.dataset;
 
   if (!taskDataset.taskAction) return;
 
-  const attribute = getAttributeFromClosestParent(e.target, DATA_CAT_REF);
+  const taskSection = e.target.closest(`[${DATA_CAT_REF}]`);
 
-  const categoryPath = attribute
-    .split(",")
-    .map((index) => (Number.isNaN(+index) ? index : +index));
+  const referenceArrayFormat = path.constructCategoryReference(taskSection);
 
-  PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.REFERENCE, categoryPath);
+  categoryReference.update(referenceArrayFormat);
 
   TaskAction[taskDataset.taskAction](e.target);
 }
@@ -120,4 +109,25 @@ PubSub.subscribe(EVENTS.UI.MARK, markTask);
 
 const taskTemplate = CreateTaskTemplate();
 
-export { taskTemplate };
+const setTaskValue = (category, callback) => {
+  const task = taskTemplate.getTaskTemplate();
+
+  task.setAttribute(DATA_CAT_REF, category.category);
+
+  const priority = task.querySelector("[data-priority]");
+  const title = task.querySelector(".title");
+  const description = task.querySelector(".description");
+  const categoryTitle = task.querySelector(".categoryTitle");
+
+  priority.setAttribute("data-priority", category.priority);
+
+  title.textContent = category.title || category.subtitle;
+
+  categoryTitle.textContent = path.generateCategory(task);
+
+  description.textContent = category.description;
+
+  callback(task, category);
+};
+
+export { setTaskValue };

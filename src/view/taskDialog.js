@@ -1,7 +1,7 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
-import { taskTemplate } from "../components/task";
-import { generateCategoryPath, getPathArrayFormat } from "../config/constant";
+import { label, path, taskAndCategoryHandler } from "../config/constant";
+import { setTaskValue } from "../components/task";
 
 function TaskDialog() {
   const init = () => {
@@ -14,7 +14,6 @@ function TaskDialog() {
       EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG,
       displayAddTaskDialog
     );
-    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.LABEL_SENT, labelsSent);
   };
 
   const taskDialogContent = document.createElement("dialog");
@@ -26,7 +25,7 @@ function TaskDialog() {
     <form method="dialog" class="dialog_form">
       <div>
         <span>📫</span>
-        <p class="categoryTitle"></p>
+        <p class="taskTitle"></p>
       </div>
 
       <div>
@@ -79,20 +78,20 @@ function TaskDialog() {
         <button
           name="saveTaskButton"
           data-task-dialog="saveTask"
+          data-save-btn-action=""
           class="btn-save_task"
         >
           Save
         </button>
       </section>
-      
-      </form>
+    </form>
 
-      <br>
-      
-      <hr>
-      
-      <br>
-      `;
+    <br />
+
+    <hr />
+
+    <br />
+  `;
 
   const addSubtaskBtn = (function createAddSubTaskBtn() {
     const div = document.createElement("div");
@@ -109,7 +108,7 @@ function TaskDialog() {
   document.body.append(taskDialogContent);
 
   const form = taskDialogContent.querySelector("form");
-  const categoryTitle = taskDialogContent.querySelector(".categoryTitle");
+  const taskTitle = taskDialogContent.querySelector(".taskTitle");
   const hr = taskDialogContent.querySelector("hr");
 
   const subtaskSection = document.createElement("div");
@@ -117,11 +116,20 @@ function TaskDialog() {
 
   let currentTaskSection;
 
-  const DATA_CAT_REF = "data-category-reference";
+  const isAddingSubtask = (taskData) => {
+    const tasksID = path.getTasksID();
 
-  const labels = [];
+    const modify = ({ taskData, deleteKey, setKey }) => {
+      delete taskData[deleteKey];
+      taskData[setKey] = form.title.value;
+    };
 
-  let MSG;
+    if (tasksID.length >= 1) {
+      modify({ taskData, deleteKey: "title", setKey: "subtitle" });
+    } else {
+      modify({ taskData, deleteKey: "subtitle", setKey: "title" });
+    }
+  };
 
   function saveTask() {
     const taskData = {
@@ -133,14 +141,17 @@ function TaskDialog() {
       priority: form.priority.value
     };
 
-    if (MSG === EVENTS.TODO_LIST.CATEGORY.VIEW_TASK_DIALOG) {
-      PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.EDIT, taskData);
+    const saveBtnAction = form.saveTaskButton.getAttribute(
+      "data-save-btn-action"
+    );
+
+    if (saveBtnAction === "edit") {
+      taskAndCategoryHandler.editTask(taskData);
     } else {
+      isAddingSubtask(taskData);
       taskData.id = crypto.randomUUID();
-
-      PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.ADD, taskData);
+      taskAndCategoryHandler.addTask(taskData);
     }
-
     PubSub.publish(EVENTS.PAGE.LOAD.TODAY);
   }
 
@@ -156,28 +167,15 @@ function TaskDialog() {
     form.input_label.value = form.label.value;
   };
 
-  const setValueOfSelect = (category, element) => {
+  const setValueOfSelect = (task, element) => {
     const indexOfPriority = [...form[element].options].findIndex((option) => {
-      return option.value == category[element];
+      return option.value == task[element];
     });
     form[element].selectedIndex = indexOfPriority;
   };
 
   const formatDate = (date) => {
     return date.split("T")[0];
-  };
-
-  const labelsSent = (msg, label) => {
-    labels.splice(0);
-    labels.push(...label);
-  };
-
-  const resetLabel = () => {
-    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL);
-
-    form.label.innerHTML = "";
-
-    labels.forEach(setLabelValueInSelect);
   };
 
   const setLabelValueInSelect = (label) => {
@@ -189,36 +187,22 @@ function TaskDialog() {
     form.label.append(option);
   };
 
-  const addLabelValue = (category) => {
-    if (!labels.includes(category.label)) {
-      labels.push(category.label);
-    }
+  const resetLabel = () => {
+    form.label.innerHTML = "";
+
+    label.get().forEach(setLabelValueInSelect);
   };
 
-  const setTaskValue = (category) => {
-    const task = taskTemplate.getTaskTemplate();
-    task.setAttribute(DATA_CAT_REF, category.category);
-
-    const priority = task.querySelector("[data-priority]");
-    const title = task.querySelector(".title");
-    const description = task.querySelector(".description");
-    const categoryTitle = task.querySelector(".categoryTitle");
-
-    priority.setAttribute("data-priority", category.priority);
-
-    title.textContent = category.title;
-    description.textContent = category.description;
-    categoryTitle.textContent = generateCategoryPath(getPathArrayFormat(task));
-
-    addLabelValue(category);
-
-    subtaskSection.append(task);
+  const appendSubtaskToSubtaskSection = (subtask) => {
+    subtaskSection.append(subtask);
   };
 
   const isSubtask = (subtasks) => {
     if (!subtasks) return;
 
-    subtasks.forEach(setTaskValue);
+    subtasks.forEach((subtask) => {
+      setTaskValue(subtask, appendSubtaskToSubtaskSection);
+    });
   };
 
   const resetSubtaskSection = () => {
@@ -226,51 +210,54 @@ function TaskDialog() {
     hr.after(subtaskSection);
   };
 
-  const resetTaskDialog = (category) => {
+  const resetTaskDialog = () => {
     resetLabel();
     resetSubtaskSection();
   };
 
-  const displayViewTaskDialog = (msg, { category, taskSection }) => {
-    MSG = msg;
+  const modifySaveBtnAction = (saveBtnAction) => {
+    form.saveTaskButton.setAttribute("data-save-btn-action", saveBtnAction);
+  };
+
+  const displayViewTaskDialog = (msg, { task, taskSection }) => {
     currentTaskSection = taskSection;
 
-    categoryTitle.textContent = generateCategoryPath(
-      getPathArrayFormat(taskSection)
-    );
-    form.title.value = category.title;
-    form.date.value = formatDate(category.date);
-    form.description.value = category.description;
+    taskTitle.textContent = path.generateCategory(taskSection);
+    form.title.value = task.title || task.subtitle;
+    form.date.value = formatDate(task.date);
+    form.description.value = task.description;
 
     hr.classList.remove("hide");
 
-    resetTaskDialog(category);
+    modifySaveBtnAction("edit");
+
+    resetTaskDialog(task);
     hr.after(addSubtaskBtn);
 
-    setValueOfSelect(category, "priority");
-    form.markStatus.setAttribute("data-priority", category?.priority);
+    setValueOfSelect(task, "priority");
+    form.markStatus.setAttribute("data-priority", task?.priority);
 
-    setValueOfSelect(category, "label");
+    setValueOfSelect(task, "label");
     form.input_label.value = form.label.value;
 
-    isSubtask(category.subtasks);
+    isSubtask(task.subtasks);
 
     taskDialogContent.showModal();
   };
 
   const displayAddTaskDialog = (msg) => {
-    MSG = msg;
-
     form.title.value = "";
     form.date.value = "";
     form.description.value = "";
-    categoryTitle.textContent = "Inbox";
+    taskTitle.textContent = "Inbox";
     form.input_label.value = "";
 
     hr.classList.add("hide");
 
     subtaskSection.remove();
     addSubtaskBtn.remove();
+
+    modifySaveBtnAction("add");
 
     resetLabel();
 

@@ -1,59 +1,63 @@
+import { setTaskValue } from "../components/task";
+import {
+  taskAndCategoryHandler,
+  getTasks,
+  sortTaskBaseOnPriority
+} from "../config/constant";
 import EVENTS from "../config/EVENTS";
-import { category } from "../Todo-List/todo-list";
 
 function Search(main) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.SEARCH, render);
   };
 
-  const div = document.createElement("div");
-  div.classList.add("search_page");
+  const searchContent = document.createElement("div");
+  searchContent.classList.add("search_page");
 
-  div.innerHTML = `
+  searchContent.innerHTML = `
     <div>
       <div>
-        <input type="search" />
+        <input type="search" class="search" />
         🔍
       </div>
-      <div class="search-item"></div>
+      <div class="searchSection"></div>
     </div>
   `;
 
-  const getTasks = (categories, filterKey, filterValue) => {
-    categories.forEach((category) => {
-      if (Array.isArray(category)) {
-        getTasks(category, filterKey, filterValue);
-      } else {
-        const categorySectionKey = category.categoryTitle
-          ? SECTIONS
-          : category.sectionTitle
-          ? TASKS
-          : SUBTASKS;
+  const searchBar = searchContent.querySelector(".search");
+  const searchSection = searchContent.querySelector(".searchSection");
 
-        if (category.title) {
-          if (category[filterKey] === filterValue) {
-            console.log(category);
-          }
-        }
+  const searchTaskToBeAdjusted = [];
 
-        if (category[categorySectionKey]) {
-          getTasks(category[categorySectionKey], filterKey, filterValue);
-        }
-      }
-    });
+  const pushSearchTaskToArrForAdjustment = (task) => {
+    searchTaskToBeAdjusted.push(task);
   };
 
-  const filterTask = () => {
-    const Categories = category.getCategories();
+  const displayTaskInSearchSection = (task) => {
+    searchSection.append(task);
+  };
 
-    for (let key in Categories) {
-      getTasks(Categories[key], "title", "");
+  const handleDisplayTaskInSearchSection = (category) => {
+    setTaskValue(category, displayTaskInSearchSection);
+  };
+
+  const handleSearchTask = () => {
+    for (let key in taskAndCategoryHandler.getCategories()) {
+      getTasks(
+        taskAndCategoryHandler.getCategories()[key],
+        "title",
+        "one",
+        pushSearchTaskToArrForAdjustment
+      );
     }
+
+    searchTaskToBeAdjusted.sort(sortTaskBaseOnPriority);
+    searchTaskToBeAdjusted.forEach(handleDisplayTaskInSearchSection);
   };
 
   const render = () => {
-    main.append(div);
-    filterTask();
+    main.append(searchContent);
+    handleSearchTask();
   };
 
   return { init };

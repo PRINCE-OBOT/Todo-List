@@ -1,29 +1,22 @@
+import { setTaskValue } from "../components/task";
 import EVENTS from "../config/EVENTS";
-import { category } from "../Todo-List/todo-list";
 import {
+  taskAndCategoryHandler,
+  categoryReference,
   getTasks,
-  Context,
-  generateCategoryPath,
-  getPathArrayFormat
+  sortTaskBaseOnPriority
 } from "../config/constant";
 import { startOfDay, isToday, isBefore } from "date-fns";
 import PubSub from "pubsub-js";
-import { taskTemplate } from "../components/task";
 
 function Today(main) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.TODAY, render);
     PubSub.subscribe(EVENTS.PAGE.REMOVE.TODAY, removeToday);
-
-    PubSub.subscribe(EVENTS.TODO_LIST.CATEGORY.SEND_LABEL, sendLabels);
   };
 
   const todayDate = new Date().toDateString();
   const today = startOfDay(new Date());
-
-  const todayAndOverdueTask = [];
-  const labels = [];
-  const DATA_CAT_REF = "data-category-reference";
 
   const todayContent = document.createElement("div");
   todayContent.classList.add("today_page");
@@ -35,25 +28,19 @@ function Today(main) {
     </div>
 
     <div>
-    
-    <div>
-      <h3 data-date="today">${todayDate}</h3>
-      <br>
-      <div data-tasks-section="today"></div>
+      <div>
+        <h3 data-date="today">${todayDate}</h3>
+        <br />
+        <div data-tasks-section="today"></div>
       </div>
 
       <div>
-        <h3 class="overdue-title">
-          Overdue
-        </h3>
-        <br>
+        <h3 class="overdue-title">Overdue</h3>
+        <br />
         <div data-tasks-section="overdue"></div>
       </div>
 
-      <div class="btn_add_task cursor_pointer">
-        &#10011; Add Task
-      </div>
-
+      <div class="btn_add_task cursor_pointer">&#10011; Add Task</div>
     </div>
   `;
 
@@ -71,10 +58,10 @@ function Today(main) {
 
   btnAddTask.addEventListener("click", addTask);
 
-  const DEFAULT_REFERENCE = ["Inbox", 0];
+  const taskToBeAdjusted = [];
 
   function addTask() {
-    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.REFERENCE, DEFAULT_REFERENCE);
+    categoryReference.update(categoryReference.getDefault());
 
     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG);
   }
@@ -83,86 +70,60 @@ function Today(main) {
     todayTaskSection.append(task);
   };
 
-  const appendOverdueTask = (category, task, titleAndDateSection) => {
+  const appendOverdueTask = (task, category) => {
     const p = document.createElement("p");
 
     p.classList.add("task_overdue_date");
     p.textContent = new Date(category.date).toDateString();
+
+    const titleAndDateSection = task.querySelector(".title-and-date-section");
 
     titleAndDateSection.append(p);
 
     overdueTaskSection.append(task);
   };
 
-  const handleSortOfTask = (category) => {
-    todayAndOverdueTask.push(category);
-  };
-
-  const addLabelValue = (category) => {
-    if (!labels.includes(category.label)) {
-      labels.push(category.label);
-    }
-  };
-
-  const setTaskValue = (category) => {
-    const task = taskTemplate.getTaskTemplate();
-
-    task.setAttribute(DATA_CAT_REF, category.category);
-
-    const priority = task.querySelector("[data-priority]");
-    const title = task.querySelector(".title");
-    const description = task.querySelector(".description");
-    const categoryTitle = task.querySelector(".categoryTitle");
-    const titleAndDateSection = task.querySelector(".title-and-date-section");
-
-    priority.setAttribute("data-priority", category.priority);
-
-    title.textContent = category.title;
-
-    categoryTitle.textContent = generateCategoryPath(getPathArrayFormat(task));
-
-    description.textContent = category.description;
-
-    addLabelValue(category);
-
+  const handleDisplayTaskInTodayAndOverSection = (category) => {
+    console.log(category);
     if (isBefore(new Date(category.date), today))
-      appendOverdueTask(category, task, titleAndDateSection);
-    if (isToday(category.date)) appendTodayTask(task);
+      setTaskValue(category, appendOverdueTask);
+    if (isToday(category.date)) setTaskValue(category, appendTodayTask);
   };
 
-  const sortTaskBaseOnPriority = (currentTask, nextTask) =>
-    currentTask.priority - nextTask.priority;
+  const pushTaskToArrForAdjustment = (task) => {
+    taskToBeAdjusted.push(task);
+  };
 
-  const handleGetTask = () => {
+  const resetTodayAndOverdueTask = () => {
     overdueTaskSection.innerHTML = "";
     todayTaskSection.innerHTML = "";
 
-    todayAndOverdueTask.splice(0);
-    labels.splice(0);
+    taskToBeAdjusted.splice(0);
+  };
 
-    const Categories = category.getCategories();
+  const handleTodayAndOverdueTask = () => {
+    resetTodayAndOverdueTask();
 
-    for (let categoryTitle in Categories) {
+    console.log(taskAndCategoryHandler.getCategories());
+
+    for (let key in taskAndCategoryHandler.getCategories()) {
       getTasks(
-        Categories[categoryTitle],
-        handleSortOfTask,
-        Context.NEW,
-        categoryTitle
+        taskAndCategoryHandler.getCategories()[key],
+        undefined,
+        undefined,
+        pushTaskToArrForAdjustment
       );
     }
 
-    todayAndOverdueTask.sort(sortTaskBaseOnPriority);
-    todayAndOverdueTask.forEach(setTaskValue);
-    today_and_overdue_task.textContent = todayAndOverdueTask.length;
-  };
+    taskToBeAdjusted.sort(sortTaskBaseOnPriority);
+    taskToBeAdjusted.forEach(handleDisplayTaskInTodayAndOverSection);
 
-  const sendLabels = () => {
-    PubSub.publishSync(EVENTS.TODO_LIST.CATEGORY.LABEL_SENT, labels);
+    today_and_overdue_task.textContent = taskToBeAdjusted.length;
   };
 
   const render = () => {
     main.append(todayContent);
-    handleGetTask();
+    handleTodayAndOverdueTask();
   };
 
   const removeToday = () => {
