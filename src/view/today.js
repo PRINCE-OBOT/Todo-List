@@ -83,11 +83,10 @@ function Today(main) {
     overdueTaskSection.append(task);
   };
 
-  const handleDisplayTaskInTodayAndOverSection = (category) => {
-    console.log(category);
-    if (isBefore(new Date(category.date), today))
-      setTaskValue(category, appendOverdueTask);
-    if (isToday(category.date)) setTaskValue(category, appendTodayTask);
+  const handleDisplayTaskInTodayAndOverSection = (task) => {
+    if (isBefore(new Date(task.date), today))
+      setTaskValue(task, appendOverdueTask);
+    if (isToday(task.date)) setTaskValue(task, appendTodayTask);
   };
 
   const pushTaskToArrForAdjustment = (task) => {

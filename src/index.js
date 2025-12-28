@@ -22,11 +22,6 @@ const components = [homePage, mainNavController];
   components.forEach((component) => component.init());
 })();
 
-// PubSub.publish(EVENTS.PAGE.LOAD.HERO);
-
-// setTimeout(() => PubSub.publish(EVENTS.PAGE.REMOVE.HERO), 2000);
-
-PubSub.publish(EVENTS.PAGE.LOAD.SEARCH);
 PubSub.publish(EVENTS.PAGE.LOAD.MAIN_NAV_CONTROLLER);
+PubSub.publish(EVENTS.PAGE.LOAD.SEARCH, 'SEARCH');
 
-window.EVENTS = EVENTS;

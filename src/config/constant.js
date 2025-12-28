@@ -19,7 +19,7 @@ const getCategoryKey = (category, categoryKeys) => {
       return key;
     }
   }
-  return categoryKeys[categoryKeys.length-1];
+  return categoryKeys[categoryKeys.length - 1];
 };
 
 function CategoryReference() {
@@ -244,7 +244,12 @@ const taskAndCategoryHandler = TaskAndCategoryHandler();
 
 const hasTitle = (category, filterKey, filterValue, callback) => {
   if (category.title) {
-    if (category[filterKey] === filterValue) {
+    const filterKeyValue = category[filterKey];
+    if (filterKeyValue) {
+      if (filterKeyValue.toLowerCase().includes(filterValue.toLowerCase())) {
+        callback(category);
+      }
+    } else {
       callback(category);
     }
   }

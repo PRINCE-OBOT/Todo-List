@@ -14,6 +14,8 @@ function TaskDialog() {
       EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG,
       displayAddTaskDialog
     );
+
+    PubSub.subscribe(EVENTS.PAGE.CHANGE, updateActivePageViewValue);
   };
 
   const taskDialogContent = document.createElement("dialog");
@@ -152,7 +154,12 @@ function TaskDialog() {
       taskData.id = crypto.randomUUID();
       taskAndCategoryHandler.addTask(taskData);
     }
-    PubSub.publish(EVENTS.PAGE.LOAD.TODAY);
+
+    const changeMainView = form.saveTaskButton.getAttribute(
+      "data-change-main-view"
+    );
+    
+    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView]);
   }
 
   const markStatus = (target) => {
@@ -276,6 +283,11 @@ function TaskDialog() {
     saveTask,
     markStatus,
     changeLabel
+  };
+
+  const updateActivePageViewValue = (msg, value) => {
+    console.log(value)
+    form.saveTaskButton.setAttribute("data-change-main-view", value);
   };
 
   function handleTaskAction(e) {

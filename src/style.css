@@ -124,6 +124,7 @@ html,
 main {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 .hero_page_text {
@@ -375,35 +376,41 @@ dialog::backdrop {
 
 .search_page {
   flex: 1;
+}
+.heading_section {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-sm);
+  justify-content: center;
+}
+.heading {
+  color: var(--white);
+}
+.searchBar_section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gp-sm);
+}
 
-  .heading_section {
-    display: flex;
-    flex-direction: column;
-    row-gap: var(--gp-sm);
-    justify-content: center;
-  }
-  .heading {
+.searchBar {
+  background-color: var(--transparent-white);
+  padding: var(--pd-sm);
+  border-radius: var(--br-lg);
+  border: none;
+  flex: 1;
+  max-width: 300px;
+
+  &::placeholder {
     color: var(--white);
   }
-  .searchBar_section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--gp-sm);
-  }
+}
 
-  .searchBar {
-    background-color: var(--transparent-white);
-    padding: var(--pd-sm);
-    border-radius: var(--br-lg);
-    border: none;
-    flex: 1;
-    max-width: 300px;
-
-    &::placeholder {
-      color: var(--white);
-    }
-  }
+.searchContentHolder{
+  padding-top: var(--pd-lg);
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-sm);
 }
 
 ::-webkit-scrollbar,

@@ -20,12 +20,14 @@ function Search(main) {
       <div class="searchBar_section">
         <input type="search" class="searchBar" placeholder="Search tasks" />
       </div>
-      <div class="searchSection"></div>
+      <div class="searchContentHolder"></div>
     </div>
   `;
 
-  const searchBar = searchContent.querySelector(".search");
-  const searchSection = searchContent.querySelector(".searchSection");
+  const searchBar = searchContent.querySelector(".searchBar");
+  const searchContentHolder = searchContent.querySelector(
+    ".searchContentHolder"
+  );
 
   const searchTaskToBeAdjusted = [];
 
@@ -33,32 +35,45 @@ function Search(main) {
     searchTaskToBeAdjusted.push(task);
   };
 
-  const displayTaskInSearchSection = (task) => {
-    searchSection.append(task);
+  const appendTaskInSearchSection = (task) => {
+    searchContentHolder.append(task);
   };
 
-  const handleDisplayTaskInSearchSection = (category) => {
-    setTaskValue(category, displayTaskInSearchSection);
+  const handleDisplayTaskInSearchSection = (task, _, arr) => {
+    setTaskValue(task, appendTaskInSearchSection);
   };
 
-  const handleSearchTask = () => {
+  const resetSearchHolder = () => {
+    searchTaskToBeAdjusted.splice(0);
+    searchContentHolder.innerHTML = "";
+  };
+
+  function handleSearchTask(e) {
+    resetSearchHolder();
+    
+    const searchTaskValue = searchBar.value
+    
+    if (searchTaskValue.trim() === "") return;
+
     for (let key in taskAndCategoryHandler.getCategories()) {
       filterTasks(
         taskAndCategoryHandler.getCategories()[key],
         "title",
-        "one",
+        searchTaskValue,
         pushSearchTaskToArrForAdjustment
       );
     }
 
     searchTaskToBeAdjusted.sort(sortTaskBaseOnPriority);
     searchTaskToBeAdjusted.forEach(handleDisplayTaskInSearchSection);
-  };
+  }
 
   const render = () => {
     main.append(searchContent);
     handleSearchTask();
   };
+
+  searchBar.addEventListener("input", handleSearchTask);
 
   return { init };
 }

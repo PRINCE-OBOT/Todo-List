@@ -35,11 +35,13 @@ function MainNavController(mainNavigation, changeViewHolder) {
   function mainView(e) {
     const changeMainView = e.target.dataset.changeMainView;
 
+    console.log('run')
+
     if (!changeMainView) return;
 
     changeViewHolder.innerHTML = "";
 
-    PubSub.publish(EVENTS.PAGE.LOAD[changeMainView]);
+    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], changeMainView);
   }
 
   div.addEventListener("click", mainView);
