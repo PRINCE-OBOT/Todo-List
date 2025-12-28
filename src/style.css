@@ -152,7 +152,7 @@ main {
   position: relative;
 }
 
-.today_page p {
+p {
   color: var(--transparent-white);
 }
 .title {
@@ -220,7 +220,7 @@ main {
   position: relative;
 }
 
-.today_page .task.task_mark {
+.task.task_mark {
   transition: 300ms;
   padding: 0;
   overflow: hidden;
@@ -231,7 +231,7 @@ main {
   color: var(--warning);
 }
 
-.today_page .description {
+.description {
   max-width: 300px;
   overflow: hidden;
   text-wrap: nowrap;
@@ -382,6 +382,7 @@ dialog::backdrop {
   flex-direction: column;
   row-gap: var(--gp-sm);
   justify-content: center;
+  height: 100%;
 }
 .heading {
   color: var(--white);
@@ -406,11 +407,23 @@ dialog::backdrop {
   }
 }
 
+.heading_tasks{
+  color: var(--transparent-white);
+}
+
 .searchContentHolder{
   padding-top: var(--pd-lg);
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-sm);
+  height: 100%;
+}
+.searchContentEmpty{
+  font-size: 100px;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  opacity: 0.5;
 }
 
 ::-webkit-scrollbar,

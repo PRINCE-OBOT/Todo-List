@@ -19,7 +19,13 @@ function Search(main) {
       <h2 class="heading">Search</h2>
       <div class="searchBar_section">
         <input type="search" class="searchBar" placeholder="Search tasks" />
-      </div>
+      
+        </div>
+      
+        <br>
+
+      <h2 class="heading_tasks">Tasks</h2>
+      
       <div class="searchContentHolder"></div>
     </div>
   `;
@@ -28,6 +34,10 @@ function Search(main) {
   const searchContentHolder = searchContent.querySelector(
     ".searchContentHolder"
   );
+
+  const searchContentEmpty = document.createElement("div");
+  searchContentEmpty.classList.add("searchContentEmpty");
+  searchContentEmpty.innerHTML = "🫗";
 
   const searchTaskToBeAdjusted = [];
 
@@ -48,12 +58,21 @@ function Search(main) {
     searchContentHolder.innerHTML = "";
   };
 
+  const isSearchTaskToBeAdjusted = () => {
+    if (searchTaskToBeAdjusted.length === 0) {
+      searchContentHolder.append(searchContentEmpty);
+    }
+  };
+
   function handleSearchTask(e) {
     resetSearchHolder();
-    
-    const searchTaskValue = searchBar.value
-    
-    if (searchTaskValue.trim() === "") return;
+
+    const searchTaskValue = searchBar.value;
+
+    if (searchTaskValue.trim() === "") {
+      searchContentHolder.append(searchContentEmpty);
+      return;
+    }
 
     for (let key in taskAndCategoryHandler.getCategories()) {
       filterTasks(
@@ -66,6 +85,8 @@ function Search(main) {
 
     searchTaskToBeAdjusted.sort(sortTaskBaseOnPriority);
     searchTaskToBeAdjusted.forEach(handleDisplayTaskInSearchSection);
+
+    isSearchTaskToBeAdjusted();
   }
 
   const render = () => {
