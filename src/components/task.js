@@ -55,7 +55,7 @@ const getClosestElement = (target, value) => {
 
 const TaskAction = {
   delete: (target) => {
-    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.DELETE);
+    taskAndCategoryHandler.deleteTask();
     const taskSection = target.closest(".task");
     taskSection.remove();
   },

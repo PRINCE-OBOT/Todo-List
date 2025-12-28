@@ -11,6 +11,17 @@ const DATA_CAT_REF = "data-category-reference";
 const sortTaskBaseOnPriority = (currentTask, nextTask) =>
   currentTask.priority - nextTask.priority;
 
+const getCategoryKey = (category, categoryKeys) => {
+  for (let i = 0; i < categoryKeys.length - 1; i++) {
+    const key = categoryKeys[i];
+
+    if (category[key]) {
+      return key;
+    }
+  }
+  return categoryKeys[categoryKeys.length-1];
+};
+
 function CategoryReference() {
   const DEFAULT_CATEGORY_REFERENCE = ["Inbox", 0];
 
@@ -53,6 +64,63 @@ function TaskAndCategoryHandler() {
     return category;
   };
 
+  const updateStorage = (msg, category) => {
+    localStorage.setItem(
+      CATEGORY,
+      JSON.stringify(taskAndCategoryHandler.getCategories())
+    );
+
+    console.log("INBOX", taskAndCategoryHandler.getCategories().Inbox);
+    console.log(
+      "MY PROJECT",
+      taskAndCategoryHandler.getCategories().My_Project
+    );
+
+    categoryReference.update(categoryReference.getDefault());
+  };
+
+  const getIndexOfTask = (lastReferenceTaskSection, id) =>
+    lastReferenceTaskSection.findIndex((category) => {
+      return category.id === id;
+    });
+
+  const getSubsection = (category) => {
+    const key = getCategoryKey(category, ["sections", "tasks", "subtasks"]);
+
+    if (!category[key]) category[key] = [];
+
+    return category[key];
+  };
+
+  const isIndexID = (index, lastReferenceCategory) => {
+    if (Number.isNaN(+index)) {
+      return getIndexOfTask(lastReferenceCategory, index);
+    }
+    return index;
+  };
+
+  const getLastReferenceTask = () => {
+    let lastReferenceCategory = Categories[categoryReference.get()[0]];
+
+    for (let i = 1; i < categoryReference.get().length; i++) {
+      let index = categoryReference.get()[i];
+
+      index = isIndexID(index, lastReferenceCategory);
+
+      let category = lastReferenceCategory[index];
+
+      if (Array.isArray(category)) {
+        lastReferenceCategory = category;
+      } else {
+        lastReferenceCategory = getSubsection(category);
+      }
+
+      if (category === undefined) return Categories.Inbox[0];
+    }
+
+    return lastReferenceCategory;
+  };
+
   const addTask = (task) => {
     task.category = [...categoryReference.get(), task.id];
 
@@ -60,6 +128,9 @@ function TaskAndCategoryHandler() {
 
     lastReferenceTask.push(task);
     lastReferenceTask.sort(sortTaskBaseOnPriority);
+
+    updateStorage();
+    label.add(task);
   };
 
   const deleteTask = () => {
@@ -71,6 +142,8 @@ function TaskAndCategoryHandler() {
       getIndexOfTask(lastReferenceTaskSection, id),
       1
     );
+
+    updateStorage();
   };
 
   const markTask = (status) => {
@@ -82,6 +155,8 @@ function TaskAndCategoryHandler() {
       lastReferenceTaskSection[getIndexOfTask(lastReferenceTaskSection, id)];
 
     task.status = status;
+
+    updateStorage();
   };
 
   const editTask = (editedTask) => {
@@ -100,16 +175,17 @@ function TaskAndCategoryHandler() {
       });
 
       lastReferenceTaskSection.sort(sortTaskBaseOnPriority);
+
+      updateStorage();
+      label.add(task);
     } else {
       if (task.subtasks) {
         editedTask.subtask = task.subtask;
       }
 
-      deleteTask(EVENTS.TODO_LIST.CATEGORY.DELETE);
-
+      deleteTask();
       categoryReference.update(editedTask.category);
-
-      addTask(EVENTS.TODO_LIST.CATEGORY.ADD, editedTask);
+      addTask(editedTask);
     }
   };
 
@@ -117,7 +193,7 @@ function TaskAndCategoryHandler() {
     taskAndCategoryHandler.getCategories().Inbox.push(section);
   };
 
-  const addSectionToCategoryInMyProject = (_, section) => {
+  const addSectionToCategoryInMyProject = (section) => {
     const category = isCategoryExist();
     if (category === CATEGORY_VOID) return;
 
@@ -125,69 +201,19 @@ function TaskAndCategoryHandler() {
       category.sections = [];
     }
     category.sections.push(section);
+
+    updateStorage();
   };
 
   const addTaskToMyProject = (category) => {
     category.sections = [[]];
     taskAndCategoryHandler.getCategories().My_Project.push(category);
-  };
 
-  const storageChange = (msg, category) => {
-    localStorage.setItem(
-      CATEGORY,
-      JSON.stringify(taskAndCategoryHandler.getCategories())
-    );
-
-    console.log("INBOX", taskAndCategoryHandler.getCategories().Inbox);
-    console.log("MY PROJECT", taskAndCategoryHandler.getCategories().My_Project);
-
-    categoryReference.update(categoryReference.getDefault());
-
-    label.add(category);
+    updateStorage();
   };
 
   const setCategory = (categoriesInStorage) => {
     Categories = categoriesInStorage;
-  };
-
-  const getIndexOfTask = (lastReferenceTaskSection, id) =>
-    lastReferenceTaskSection.findIndex((category) => {
-      return category.id === id;
-    });
-
-  const getLastReferenceTask = () => {
-    let lastReferenceCategory = Categories[categoryReference.get()[0]];
-
-    for (let i = 1; i < categoryReference.get().length; i++) {
-      let indexOfCategory = categoryReference.get()[i];
-
-      if (Number.isNaN(+indexOfCategory)) {
-        indexOfCategory = getIndexOfTask(
-          lastReferenceCategory,
-          indexOfCategory
-        );
-      }
-
-      let category = lastReferenceCategory[indexOfCategory];
-
-      if (Array.isArray(category)) {
-        lastReferenceCategory = category;
-      } else {
-        const subSection = category.categoryTitle
-          ? CATEGORIES.SECTIONS
-          : category.sectionTitle
-          ? CATEGORIES.TASKS
-          : CATEGORIES.SUBTASKS;
-
-        if (!category[subSection]) category[subSection] = [];
-
-        lastReferenceCategory = category[subSection];
-      }
-
-      if (category === undefined) return Categories.Inbox[0];
-    }
-
-    return lastReferenceCategory;
   };
 
   const getTask = () => {
@@ -203,37 +229,38 @@ function TaskAndCategoryHandler() {
 
   const getCategories = () => Categories;
 
-  return { addTask, editTask, getTask, getCategories, setCategory };
+  return {
+    addTask,
+    editTask,
+    deleteTask,
+    getTask,
+    markTask,
+    getCategories,
+    setCategory
+  };
 }
 
 const taskAndCategoryHandler = TaskAndCategoryHandler();
 
-const getTasks = (categories, filterKey, filterValue, callback) => {
+const hasTitle = (category, filterKey, filterValue, callback) => {
+  if (category.title) {
+    if (category[filterKey] === filterValue) {
+      callback(category);
+    }
+  }
+};
+
+const filterTasks = (categories, filterKey, filterValue, callback) => {
   categories.forEach((category) => {
     if (Array.isArray(category)) {
-      getTasks(category, filterKey, filterValue, callback);
+      filterTasks(category, filterKey, filterValue, callback);
     } else {
-      const categorySectionKey = category.categoryTitle
-        ? CATEGORIES.SECTIONS
-        : CATEGORIES.TASKS;
+      hasTitle(category, filterKey, filterValue, callback);
 
-      if (category.title) {
-        if (category[filterKey] === filterValue) {
-          callback(category);
-        }
-      }
+      const key = getCategoryKey(category, ["sections", "tasks"]);
 
-      if (category.subtitle) {
-        // labels;
-      }
-
-      if (category[categorySectionKey]) {
-        getTasks(
-          category[categorySectionKey],
-          filterKey,
-          filterValue,
-          callback
-        );
+      if (category[key]) {
+        filterTasks(category[key], filterKey, filterValue, callback);
       }
     }
   });
@@ -254,7 +281,7 @@ function Path() {
   const getTasksID = () => {
     return categoryReference
       .get()
-      .slice(getLastIndexOfNumber(categoryReference.get())+1);
+      .slice(getLastIndexOfNumber(categoryReference.get()) + 1);
   };
 
   const generateCategory = (task) => {
@@ -304,6 +331,8 @@ function Label() {
   const get = () => labels;
 
   const add = (category) => {
+    const labels = get();
+
     if (!labels.includes(category.label)) {
       labels.push(category.label);
     }
@@ -325,7 +354,7 @@ const label = Label();
 export {
   CATEGORIES,
   CATEGORY,
-  getTasks,
+  filterTasks,
   taskAndCategoryHandler,
   sortTaskBaseOnPriority,
   categoryReference,

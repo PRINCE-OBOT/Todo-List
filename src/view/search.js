@@ -1,7 +1,7 @@
 import { setTaskValue } from "../components/task";
 import {
   taskAndCategoryHandler,
-  getTasks,
+  filterTasks,
   sortTaskBaseOnPriority
 } from "../config/constant";
 import EVENTS from "../config/EVENTS";
@@ -15,10 +15,10 @@ function Search(main) {
   searchContent.classList.add("search_page");
 
   searchContent.innerHTML = `
-    <div>
-      <div>
-        <input type="search" class="search" />
-        🔍
+    <div class="heading_section">
+      <h2 class="heading">Search</h2>
+      <div class="searchBar_section">
+        <input type="search" class="searchBar" placeholder="Search tasks" />
       </div>
       <div class="searchSection"></div>
     </div>
@@ -43,7 +43,7 @@ function Search(main) {
 
   const handleSearchTask = () => {
     for (let key in taskAndCategoryHandler.getCategories()) {
-      getTasks(
+      filterTasks(
         taskAndCategoryHandler.getCategories()[key],
         "title",
         "one",

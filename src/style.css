@@ -343,6 +343,7 @@ dialog::backdrop {
   padding: var(--pd-sm) 0;
   background-color: var(--fade-black);
   color: var(--white);
+  flex: 1;
 
   border: none;
 
@@ -368,6 +369,41 @@ dialog::backdrop {
 
 .btn_add_subtask {
   padding: var(--pd-lg) 0;
+}
+
+/* Search page styles */
+
+.search_page {
+  flex: 1;
+
+  .heading_section {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--gp-sm);
+    justify-content: center;
+  }
+  .heading {
+    color: var(--white);
+  }
+  .searchBar_section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gp-sm);
+  }
+
+  .searchBar {
+    background-color: var(--transparent-white);
+    padding: var(--pd-sm);
+    border-radius: var(--br-lg);
+    border: none;
+    flex: 1;
+    max-width: 300px;
+
+    &::placeholder {
+      color: var(--white);
+    }
+  }
 }
 
 ::-webkit-scrollbar,

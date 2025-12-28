@@ -3,7 +3,7 @@ import EVENTS from "../config/EVENTS";
 import {
   taskAndCategoryHandler,
   categoryReference,
-  getTasks,
+  filterTasks,
   sortTaskBaseOnPriority
 } from "../config/constant";
 import { startOfDay, isToday, isBefore } from "date-fns";
@@ -107,7 +107,7 @@ function Today(main) {
     console.log(taskAndCategoryHandler.getCategories());
 
     for (let key in taskAndCategoryHandler.getCategories()) {
-      getTasks(
+      filterTasks(
         taskAndCategoryHandler.getCategories()[key],
         undefined,
         undefined,
