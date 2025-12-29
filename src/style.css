@@ -140,6 +140,8 @@ main {
 .change-view-holder {
   flex: 1;
   display: flex;
+
+  padding-top: var(--pd-lg);
 }
 /* Today page */
 
@@ -158,6 +160,29 @@ p {
 .title {
   color: var(--white);
 }
+
+.task {
+  display: grid;
+  grid-template-columns: var(--mark-priority-dim) 1fr 1fr;
+  gap: var(--gp-lg);
+
+  overflow-x: auto;
+  position: relative;
+
+  background-color: var(--transparent);
+  padding: var(--pd-lg);
+  border-radius: var(--br-sm);
+  border: 2px solid var(--transparent-white);
+  color: var(--white);
+}
+
+.task.task_mark {
+  transition: 300ms;
+  padding: 0;
+  overflow: hidden;
+  max-height: 0;
+}
+
 .task :where(title, .description) {
   max-width: 10ch;
   text-overflow: ellipsis;
@@ -206,25 +231,6 @@ p {
 .overdue-title {
   color: var(--warning);
   padding-top: 20px;
-}
-
-.task {
-  background-color: var(--transparent);
-  padding: var(--pd-lg);
-  display: grid;
-  grid-template-columns: var(--mark-priority-dim) 1fr 1fr;
-  gap: var(--gp-lg);
-  border-radius: var(--br-sm);
-  border: 2px solid var(--transparent-white);
-  overflow-x: auto;
-  position: relative;
-}
-
-.task.task_mark {
-  transition: 300ms;
-  padding: 0;
-  overflow: hidden;
-  max-height: 0;
 }
 
 .task_overdue_date {
@@ -387,6 +393,7 @@ dialog::backdrop {
 .heading {
   color: var(--white);
 }
+
 .searchBar_section {
   display: flex;
   justify-content: center;
@@ -407,18 +414,18 @@ dialog::backdrop {
   }
 }
 
-.heading_tasks{
+.heading_tasks {
   color: var(--transparent-white);
 }
 
-.searchContentHolder{
+.searchContentHolder {
   padding-top: var(--pd-lg);
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-sm);
   height: 100%;
 }
-.searchContentEmpty{
+.searchContentEmpty {
   font-size: 100px;
   height: 100%;
   display: grid;
@@ -429,4 +436,35 @@ dialog::backdrop {
 ::-webkit-scrollbar,
 .hide {
   display: none;
+}
+
+/* Category page */
+.category_page{
+  flex: 1;
+}
+
+.category_page *{
+  color: var(--white);
+}
+
+.category_section_holder{
+  display: flex;  
+  flex-direction: column;
+  gap: var(--gp-lg);
+
+  padding-top: var(--pd-lg);
+}
+
+.inbox_filter_completed_section{
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-lg);
+}
+
+.icon_and_title{
+  display: grid;
+  grid-template-columns: 40px 1fr 20px;
+}
+.number_of_inbox{
+  color: var(--transparent-white);
 }

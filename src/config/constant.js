@@ -189,27 +189,10 @@ function TaskAndCategoryHandler() {
     }
   };
 
-  const addSectionInInbox = (section) => {
-    taskAndCategoryHandler.getCategories().Inbox.push(section);
-  };
+  const addCategory = (category) => {
+    const lastReferenceCategory = getLastReferenceTask();
 
-  const addSectionToCategoryInMyProject = (section) => {
-    const category = isCategoryExist();
-    if (category === CATEGORY_VOID) return;
-
-    if (!category.sections) {
-      category.sections = [];
-    }
-    category.sections.push(section);
-
-    updateStorage();
-  };
-
-  const addTaskToMyProject = (category) => {
-    category.sections = [[]];
-    taskAndCategoryHandler.getCategories().My_Project.push(category);
-
-    updateStorage();
+    lastReferenceCategory.push(category);
   };
 
   const setCategory = (categoriesInStorage) => {
@@ -236,7 +219,8 @@ function TaskAndCategoryHandler() {
     getTask,
     markTask,
     getCategories,
-    setCategory
+    setCategory,
+    addCategory
   };
 }
 
@@ -276,6 +260,8 @@ function Path() {
     categoryReference.findLastIndex((reference) => Number.isInteger(reference));
 
   const constructCategoryReference = (task) => {
+    if (typeof task === "object") return task.category;
+
     const pathStringFormat = task.getAttribute(DATA_CAT_REF);
 
     return pathStringFormat
