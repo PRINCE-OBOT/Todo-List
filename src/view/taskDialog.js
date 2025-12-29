@@ -80,7 +80,6 @@ function TaskDialog() {
         <button
           name="saveTaskButton"
           data-task-dialog="saveTask"
-          data-save-btn-action=""
           class="btn-save_task"
         >
           Save
@@ -154,12 +153,12 @@ function TaskDialog() {
       taskData.id = crypto.randomUUID();
       taskAndCategoryHandler.addTask(taskData);
     }
-
+    
     const changeMainView = form.saveTaskButton.getAttribute(
       "data-change-main-view"
     );
     
-    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView]);
+    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], changeMainView);
   }
 
   const markStatus = (target) => {
@@ -286,7 +285,6 @@ function TaskDialog() {
   };
 
   const updateActivePageViewValue = (msg, value) => {
-    console.log(value)
     form.saveTaskButton.setAttribute("data-change-main-view", value);
   };
 
