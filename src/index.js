@@ -7,7 +7,7 @@ import Today from "./view/today";
 import Search from "./view/search";
 import taskDialog from "./view/taskDialog";
 import CategoryPage from "./view/category";
-import { taskAndCategoryHandler } from "./config/constant";
+import { categoryReference, taskAndCategoryHandler } from "./config/constant";
 
 const changeViewHolder = document.querySelector("[data-change-view-holder");
 const mainNavigation = document.querySelector("[data-main-navigation]");
@@ -29,4 +29,4 @@ PubSub.publish(EVENTS.PAGE.LOAD.CATEGORY, "CATEGORY");
 
 taskAndCategoryHandler;
 
-window.todo = taskAndCategoryHandler;
+window.todo = { taskAndCategoryHandler, categoryReference };

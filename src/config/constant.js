@@ -51,19 +51,6 @@ function TaskAndCategoryHandler() {
     My_Project: []
   };
 
-  const isCategoryExist = () => {
-    const categoryReferenceIndex = categoryReference.get().pop();
-
-    const category =
-      taskAndCategoryHandler.getCategories().My_Project[categoryReferenceIndex];
-
-    if (!category) {
-      console.log(CATEGORY_VOID);
-      return CATEGORY_VOID;
-    }
-    return category;
-  };
-
   const updateStorage = (msg, category) => {
     localStorage.setItem(
       CATEGORY,
@@ -193,6 +180,8 @@ function TaskAndCategoryHandler() {
     const lastReferenceCategory = getLastReferenceTask();
 
     lastReferenceCategory.push(category);
+
+    updateStorage()
   };
 
   const setCategory = (categoriesInStorage) => {
@@ -260,7 +249,7 @@ function Path() {
     categoryReference.findLastIndex((reference) => Number.isInteger(reference));
 
   const constructCategoryReference = (task) => {
-    if (typeof task === "object") return task.category;
+    if (Array.isArray(task)) return task
 
     const pathStringFormat = task.getAttribute(DATA_CAT_REF);
 

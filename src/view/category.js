@@ -4,7 +4,8 @@ import {
   taskAndCategoryHandler,
   filterTasks,
   sortTaskBaseOnPriority,
-  path
+  path,
+  categoryReference
 } from "../config/constant";
 import PubSub from "pubsub-js";
 
@@ -39,53 +40,26 @@ function CategoryPage(main) {
     ".myProjectCategorySection"
   );
 
-  const taskToBeAdjusted = [];
-
-  const MyProjectCategory = {};
-
-  const pushTaskToArrForAdjustment = (task) => {
-    taskToBeAdjusted.push(task);
-  };
-
-  const setNumberOfInbox = () => {
-    numberOfInbox.textContent = +numberOfInbox.textContent + 1;
-  };
-
-  const handleDisplayOfMyProjectCategory = (task) => {
-    if (MyProjectCategory[category] === undefined) return;
-
-    const categoryTitle = path.generateCategory(task)[1];
-
-    if (!MyProjectCategory[categoryTitle]) MyProjectCategory[categoryTitle] = 1;
-
-    MyProjectCategory[categoryTitle]++;
-  };
-
-  const isTaskInBoxCategory = (task) => {
-    const category = task.category[0];
-
-    if (category === "Inbox") {
-      setNumberOfInbox();
-    } else {
-      handleDisplayOfMyProjectCategory(task);
-    }
+  const setNumberOfInbox = (inboxArr) => {
+    numberOfInbox.textContent = inboxArr.length;
   };
 
   function CategoryElement() {
+    // Make individual categoryElement to be a component - when click should open the subsection if available and subtask
     const categoryElement = document.createElement("div");
 
     categoryElement.innerHTML = `
     <p><span>#</span> <span class="categoryTitle"></span> <span class="numberOfTaskInCategory"></span>
     `;
 
-    const template = () => categoryElement.clone(true);
+    const template = () => categoryElement.cloneNode(true);
 
     return { template };
   }
 
   const categoryElement = CategoryElement();
 
-  const displayCategory = (title, count) => {
+  const displayCategoryElement = (title, count) => {
     const element = categoryElement.template();
 
     const categoryTitle = element.querySelector(".categoryTitle");
@@ -99,39 +73,53 @@ function CategoryPage(main) {
     myProjectCategorySection.append(element);
   };
 
-  const organizeMyProjectCategory = () => {
-    for (let categoryTitle in MyProjectCategory) {
-      console.log(categoryTitle);
-      displayCategory(categoryTitle, MyProjectCategory[categoryTitle]);
+  const categoryTaskStore = {};
+
+  const resetCategory = () => {
+    for (let key in categoryTaskStore) {
+      delete categoryTaskStore[key];
     }
   };
 
-  const resetCategory = () => {
-    numberOfInbox.textContent = 0;
-    taskToBeAdjusted.splice(0);
+  const getCategoryTitleInProject = () => {
+    return taskAndCategoryHandler
+      .getCategories()
+      .My_Project.map((category) => category.categoryTitle);
   };
 
-  const handleTodayAndOverdueTask = () => {
+  const handleProjectCategory = () => {
+    getCategoryTitleInProject().forEach((title) => {
+      displayCategoryElement(title, 0);
+    });
+  };
+
+  const handleCategoryTask = () => {
     resetCategory();
 
-    for (let key in taskAndCategoryHandler.getCategories()) {
+    const categories = taskAndCategoryHandler.getCategories();
+
+    for (let key in categories) {
+      const pushTaskToCategoryTaskStore = (task) => {
+        if (!categoryTaskStore[key]) categoryTaskStore[key] = [];
+        categoryTaskStore[key].push(task);
+      };
+
       filterTasks(
-        taskAndCategoryHandler.getCategories()[key],
+        categories[key],
         undefined,
         undefined,
-        pushTaskToArrForAdjustment
+        pushTaskToCategoryTaskStore
       );
     }
 
-    taskToBeAdjusted.sort(sortTaskBaseOnPriority);
-    taskToBeAdjusted.forEach(isTaskInBoxCategory);
+    setNumberOfInbox(categoryTaskStore.Inbox);
 
-    organizeMyProjectCategory();
+    handleProjectCategory();
   };
 
   const render = () => {
     main.append(categoryContent);
-    handleTodayAndOverdueTask();
+    handleCategoryTask();
   };
 
   const removeCategoryView = () => {
@@ -142,3 +130,12 @@ function CategoryPage(main) {
 }
 
 export default CategoryPage;
+
+/* 
+How to reference a category 
+todo.categoryReference.update(['My_Project'])
+
+How to add a category
+todo.taskAndCategoryHandler.addCategory({ categoryTitle: 'holiday', sections: [[]]})
+
+ */
