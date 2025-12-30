@@ -41,7 +41,7 @@ function CategoryPage(main) {
   );
 
   const setNumberOfInbox = (inboxArr) => {
-    numberOfInbox.textContent = inboxArr.length;
+    // numberOfInbox.textContent = inboxArr.length;
   };
 
   function CategoryElement() {
@@ -81,16 +81,36 @@ function CategoryPage(main) {
     }
   };
 
-  const getCategoryTitleInProject = () => {
-    return taskAndCategoryHandler
-      .getCategories()
-      .My_Project.map((category) => category.categoryTitle);
+  const myProjectCategoryArr = [];
+
+  const pushTaskToMyProjectCategoryArr = (task) => {
+    myProjectCategoryArr.push(task);
+  };
+
+  const getCategoryInformation = (category) => {
+    if (Array.isArray(category.sections)) {
+      filterTasks(
+        category.sections,
+        undefined,
+        undefined,
+        pushTaskToMyProjectCategoryArr
+      );
+    }
+
+    displayCategoryElement(category.categoryTitle, myProjectCategoryArr.length);
+    myProjectCategoryArr.splice(0);
   };
 
   const handleProjectCategory = () => {
-    getCategoryTitleInProject().forEach((title) => {
-      displayCategoryElement(title, 0);
-    });
+    const categoryInMyProject =
+      taskAndCategoryHandler.getCategories().My_Project;
+
+    categoryInMyProject.forEach(getCategoryInformation);
+  };
+
+  const pushTaskInboxTaskStore = (task) => {
+    if (!categoryTaskStore.Inbox) categoryTaskStore.Inbox = [];
+    categoryTaskStore.Inbox.push(task);
   };
 
   const handleCategoryTask = () => {
@@ -98,19 +118,7 @@ function CategoryPage(main) {
 
     const categories = taskAndCategoryHandler.getCategories();
 
-    for (let key in categories) {
-      const pushTaskToCategoryTaskStore = (task) => {
-        if (!categoryTaskStore[key]) categoryTaskStore[key] = [];
-        categoryTaskStore[key].push(task);
-      };
-
-      filterTasks(
-        categories[key],
-        undefined,
-        undefined,
-        pushTaskToCategoryTaskStore
-      );
-    }
+    filterTasks(categories.Inbox, undefined, undefined, pushTaskInboxTaskStore);
 
     setNumberOfInbox(categoryTaskStore.Inbox);
 
