@@ -41,26 +41,33 @@ function CategoryPage(main) {
   );
 
   const setNumberOfInbox = (inboxArr) => {
-    // numberOfInbox.textContent = inboxArr.length;
+    numberOfInbox.textContent = inboxArr.length;
   };
 
   function CategoryElement() {
-    // Make individual categoryElement to be a component - when click should open the subsection if available and subtask
     const categoryElement = document.createElement("div");
 
     categoryElement.innerHTML = `
-    <p><span>#</span> <span class="categoryTitle"></span> <span class="numberOfTaskInCategory"></span>
+    <p class="categoryTitleSection"><span>#</span> <span class="categoryTitle"></span> <span class="numberOfTaskInCategory"></span>
     `;
 
-    const template = () => categoryElement.cloneNode(true);
+    const template = () => {
+      const cloneCategory = categoryElement.cloneNode(true);
+
+      cloneCategory.addEventListener("click", handleCategoryAction);
+
+      return cloneCategory;
+    };
 
     return { template };
   }
 
   const categoryElement = CategoryElement();
 
-  const displayCategoryElement = (title, count) => {
+  const displayCategoryElement = (title, index, count) => {
     const element = categoryElement.template();
+
+    element.setAttribute('data-category-index', index)
 
     const categoryTitle = element.querySelector(".categoryTitle");
     const numberOfTaskInCategory = element.querySelector(
@@ -73,12 +80,11 @@ function CategoryPage(main) {
     myProjectCategorySection.append(element);
   };
 
-  const categoryTaskStore = {};
+  const inboxCategoryArr = [];
 
   const resetCategory = () => {
-    for (let key in categoryTaskStore) {
-      delete categoryTaskStore[key];
-    }
+    inboxCategoryArr.splice(0);
+    myProjectCategorySection.innerHTML = "";
   };
 
   const myProjectCategoryArr = [];
@@ -87,7 +93,7 @@ function CategoryPage(main) {
     myProjectCategoryArr.push(task);
   };
 
-  const getCategoryInformation = (category) => {
+  const getCategoryInformation = (category, index) => {
     if (Array.isArray(category.sections)) {
       filterTasks(
         category.sections,
@@ -97,7 +103,7 @@ function CategoryPage(main) {
       );
     }
 
-    displayCategoryElement(category.categoryTitle, myProjectCategoryArr.length);
+    displayCategoryElement(category.categoryTitle, index, myProjectCategoryArr.length);
     myProjectCategoryArr.splice(0);
   };
 
@@ -108,9 +114,8 @@ function CategoryPage(main) {
     categoryInMyProject.forEach(getCategoryInformation);
   };
 
-  const pushTaskInboxTaskStore = (task) => {
-    if (!categoryTaskStore.Inbox) categoryTaskStore.Inbox = [];
-    categoryTaskStore.Inbox.push(task);
+  const pushTaskToInboxArr = (task) => {
+    inboxCategoryArr.push(task);
   };
 
   const handleCategoryTask = () => {
@@ -118,9 +123,9 @@ function CategoryPage(main) {
 
     const categories = taskAndCategoryHandler.getCategories();
 
-    filterTasks(categories.Inbox, undefined, undefined, pushTaskInboxTaskStore);
+    filterTasks(categories.Inbox, undefined, undefined, pushTaskToInboxArr);
 
-    setNumberOfInbox(categoryTaskStore.Inbox);
+    setNumberOfInbox(inboxCategoryArr);
 
     handleProjectCategory();
   };
@@ -133,6 +138,10 @@ function CategoryPage(main) {
   const removeCategoryView = () => {
     categoryContent.remove();
   };
+  
+  function handleCategoryAction() {
+    
+  }
 
   return { init };
 }

@@ -27,17 +27,13 @@ function CategoryReference() {
 
   const getDefault = () => DEFAULT_CATEGORY_REFERENCE;
 
-  const categoryReferences = DEFAULT_CATEGORY_REFERENCE;
+  const categoryReferences = [...DEFAULT_CATEGORY_REFERENCE];
 
   const get = () => categoryReferences;
 
   const update = (categoryReference) => {
-    categoryReferences.splice(
-      0,
-      categoryReferences.length,
-      ...categoryReference
-    );
-    console.log(categoryReferences);
+    get().splice(0, get().length, ...categoryReference);
+    console.log(get());
   };
 
   return { getDefault, update, get };
@@ -181,7 +177,7 @@ function TaskAndCategoryHandler() {
 
     lastReferenceCategory.push(category);
 
-    updateStorage()
+    updateStorage();
   };
 
   const setCategory = (categoriesInStorage) => {
@@ -249,7 +245,7 @@ function Path() {
     categoryReference.findLastIndex((reference) => Number.isInteger(reference));
 
   const constructCategoryReference = (task) => {
-    if (Array.isArray(task)) return task
+    if (Array.isArray(task)) return task;
 
     const pathStringFormat = task.getAttribute(DATA_CAT_REF);
 

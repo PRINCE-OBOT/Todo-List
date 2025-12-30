@@ -22,8 +22,6 @@ function Search(main) {
       
         </div>
       
-        <br>
-
       <h2 class="heading_tasks">Tasks</h2>
       
       <div class="searchContentHolder"></div>

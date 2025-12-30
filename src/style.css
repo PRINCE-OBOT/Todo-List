@@ -124,7 +124,7 @@ html,
 main {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .hero_page_text {
@@ -147,11 +147,13 @@ main {
 
 .today_page {
   flex: 1;
-  padding: var(--pd-sm);
   color: var(--white);
-  overflow-y: auto;
-  max-height: 90vh;
   position: relative;
+}
+
+[data-tasks-section="today"], [data-tasks-section="overdue"]{
+  max-height: 215px;
+  overflow-y: auto;
 }
 
 p {
@@ -174,6 +176,7 @@ p {
   border-radius: var(--br-sm);
   border: 2px solid var(--transparent-white);
   color: var(--white);
+  min-height: max-content;
 }
 
 .task.task_mark {
@@ -274,7 +277,7 @@ p {
   gap: var(--gp-xlg);
   background-color: var(--black);
   opacity: 0.9;
-  padding: var(--pd-lg);
+  padding: 0 var(--pd-lg) var(--pd-lg) var(--pd-lg);
 }
 
 .nav-icon {
@@ -289,10 +292,9 @@ p {
 }
 
 .btn_add_task {
-  position: sticky;
-  bottom: 5px;
-  margin-left: auto;
-  margin-right: 10px;
+  position: absolute;
+  bottom: 55px;
+  right: 5px;
   max-width: fit-content;
   padding: var(--pd-sm);
   background: var(--white);
@@ -387,7 +389,6 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-sm);
-  justify-content: center;
   height: 100%;
 }
 .heading {
@@ -419,11 +420,11 @@ dialog::backdrop {
 }
 
 .searchContentHolder {
-  padding-top: var(--pd-lg);
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-sm);
-  height: 100%;
+  max-height: 450px;
+  overflow-y: auto;
 }
 .searchContentEmpty {
   font-size: 100px;
@@ -439,32 +440,40 @@ dialog::backdrop {
 }
 
 /* Category page */
-.category_page{
+.category_page {
   flex: 1;
 }
 
-.category_page *{
+.category_page * {
   color: var(--white);
 }
 
-.category_section_holder{
-  display: flex;  
+.category_section_holder {
+  display: flex;
   flex-direction: column;
   gap: var(--gp-lg);
 
   padding-top: var(--pd-lg);
 }
 
-.inbox_filter_completed_section{
+.inbox_filter_completed_section {
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-lg);
 }
+.myProjectCategorySection {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-sm);
 
-.icon_and_title{
+  padding-top: var(--pd-sm);
+}
+
+.icon_and_title,
+.categoryTitleSection {
   display: grid;
   grid-template-columns: 40px 1fr 20px;
 }
-.number_of_inbox{
+.number_of_inbox, .numberOfTaskInCategory {
   color: var(--transparent-white);
 }

@@ -62,6 +62,8 @@ function Today(main) {
 
   function addTask() {
     categoryReference.update(categoryReference.getDefault());
+    console.log(categoryReference.getDefault());
+    debugger
 
     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG);
   }
