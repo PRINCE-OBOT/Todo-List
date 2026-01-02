@@ -151,7 +151,8 @@ main {
   position: relative;
 }
 
-[data-tasks-section="today"], [data-tasks-section="overdue"]{
+[data-tasks-section="today"],
+[data-tasks-section="overdue"] {
   max-height: 215px;
   overflow-y: auto;
 }
@@ -474,6 +475,33 @@ dialog::backdrop {
   display: grid;
   grid-template-columns: 40px 1fr 20px;
 }
-.number_of_inbox, .numberOfTaskInCategory {
+.number_of_inbox,
+.numberOfTaskInCategory {
   color: var(--transparent-white);
+}
+
+/* Category subsection */
+
+.categorySubsectionContent {
+  flex: 1;
+}
+
+.taskHolder{
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-sm);
+}
+
+.taskSectionHolder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-lg);
+}
+
+.subsection_title {
+  color: var(--white);
+}
+
+.categoryTitle{
+  color: var(--white);
 }
