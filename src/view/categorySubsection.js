@@ -10,7 +10,6 @@ function CategorySubSection(main) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.MY_PROJECT, renderMyProject);
     PubSub.subscribe(EVENTS.PAGE.LOAD.INBOX, renderInbox);
-    PubSub.subscribe(EVENTS.PAGE.LOAD.SUBSECTION, renderSubsection);
   };
 
   const CategorySubSectionContent = document.createElement("div");
@@ -18,7 +17,7 @@ function CategorySubSection(main) {
 
   CategorySubSectionContent.innerHTML = `
   <div class="taskSectionHolder">
-    <div>
+    <div class="subsection_header">
         <span class="return_back">⬅️</span> <span class="categoryTitle">Inbox</span>
     </div>
 
@@ -115,6 +114,8 @@ function CategorySubSection(main) {
   };
 
   const renderInbox = (msg, { categoryTitle }) => {
+    main.append(CategorySubSectionContent);
+
     resetSubsection();
 
     main.append(CategorySubSectionContent);
@@ -129,18 +130,15 @@ function CategorySubSection(main) {
   const renderMyProject = (msg, { categoryIndex }) => {
     main.append(CategorySubSectionContent);
 
+    main.append(CategorySubSectionContent);
+
     const category = taskAndCategoryHandler.getCategories().My_Project[index];
 
     updateCategoryTitle(category.title);
     handleCategoryTask(category, "sections");
   };
 
-  const renderSubsection = () => {
-    main.append(CategorySubSectionContent);
-  };
-
   function returnToPreviousPage() {
-    
     PubSub.publish(EVENTS.PAGE.LOAD.PREVIOUS_PAGE);
   }
 
@@ -148,5 +146,5 @@ function CategorySubSection(main) {
 
   return { init };
 }
-
+// figure out a wau to keep track of the category that got click, whether inbox or project subcategory
 export default CategorySubSection;

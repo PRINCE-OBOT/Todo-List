@@ -168,7 +168,7 @@ function CategoryPage(mainNavigation, changeViewHolder) {
     }
 
     mainNavController.mainView({
-      target: { dataset: { changeMainView: "SUBSECTION" } }
+      target: { dataset: { changeMainView: categoryTitle } }
     });
   }
 

@@ -505,3 +505,8 @@ dialog::backdrop {
 .categoryTitle{
   color: var(--white);
 }
+
+.subsection_header{
+  display: flex;
+  gap: var(--gp-lg);
+}
