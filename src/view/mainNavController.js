@@ -4,6 +4,7 @@ import EVENTS from "../config/EVENTS";
 function MainNavController(mainNavigation, changeViewHolder) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.MAIN_NAV_CONTROLLER, navPage);
+    PubSub.subscribe(EVENTS.PAGE.LOAD.PREVIOUS_PAGE, returnToPreviousPage);
   };
 
   const div = document.createElement("div");
@@ -32,6 +33,15 @@ function MainNavController(mainNavigation, changeViewHolder) {
     </div>
   `;
 
+  const pagesEventReference = [];
+
+  const returnToPreviousPage = () => {
+    pagesEventReference.pop();
+    const previousPage = pagesEventReference[pagesEventReference.length - 1];
+
+    mainView({ target: { dataset: { changeMainView: previousPage } } });
+  };
+
   function mainView(e) {
     const changeMainView = e.target.dataset.changeMainView;
 
@@ -39,16 +49,18 @@ function MainNavController(mainNavigation, changeViewHolder) {
 
     changeViewHolder.innerHTML = "";
 
+    pagesEventReference.push(changeMainView);
+
     PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], changeMainView);
   }
-
-  div.addEventListener("click", mainView);
 
   const navPage = () => {
     mainNavigation.append(div);
   };
 
-  return { init };
-}
+  div.addEventListener("click", mainView);
+
+  return { init, mainView };
+}// make this mainNavController to listen when the paid for subsection want to open
 
 export default MainNavController;

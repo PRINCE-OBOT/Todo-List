@@ -8,8 +8,9 @@ import {
   categoryReference
 } from "../config/constant";
 import PubSub from "pubsub-js";
+import MainNavController from "./mainNavController";
 
-function CategoryPage(main) {
+function CategoryPage(mainNavigation, changeViewHolder) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.CATEGORY, render);
     PubSub.subscribe(EVENTS.PAGE.REMOVE.CATEGORY, removeCategoryView);
@@ -25,12 +26,12 @@ function CategoryPage(main) {
 
     <div class="category_section_holder">
         <div class="inbox_filter_completed_section">
-            <p class="icon_and_title"><span>📥</span> <span>Inbox</span> <span class="number_of_inbox"></span></p>
+            <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span>Inbox</span> <span class="number_of_inbox"></span></p>
         </div>
         
         <div>
             <p>My Projects</p>
-            <div class="myProjectCategorySection"></div>
+            <div class="myProjectCategorySection" data-category="MY_PROJECT"></div>
         </div>
     </div>
   `;
@@ -67,7 +68,7 @@ function CategoryPage(main) {
   const displayCategoryElement = (title, index, count) => {
     const element = categoryElement.template();
 
-    element.setAttribute('data-category-index', index)
+    element.setAttribute("data-category-index", index);
 
     const categoryTitle = element.querySelector(".categoryTitle");
     const numberOfTaskInCategory = element.querySelector(
@@ -103,7 +104,11 @@ function CategoryPage(main) {
       );
     }
 
-    displayCategoryElement(category.categoryTitle, index, myProjectCategoryArr.length);
+    displayCategoryElement(
+      category.categoryTitle,
+      index,
+      myProjectCategoryArr.length
+    );
     myProjectCategoryArr.splice(0);
   };
 
@@ -131,17 +136,45 @@ function CategoryPage(main) {
   };
 
   const render = () => {
-    main.append(categoryContent);
+    changeViewHolder.append(categoryContent);
     handleCategoryTask();
   };
 
   const removeCategoryView = () => {
     categoryContent.remove();
   };
-  
-  function handleCategoryAction() {
-    
+
+  function handleCategoryAction() {}
+
+  const categorySectionHolder = categoryContent.querySelector(
+    ".category_section_holder"
+  );
+
+  const mainNavController = MainNavController(mainNavigation, changeViewHolder);
+
+  function handleNavigation(e) {
+    const category = e.target.closest("[data-category]");
+
+    if (!category) return;
+
+    const categoryTitle = category.getAttribute("data-category");
+
+    const categoryIndex = e.target.dataset.categoryIndex;
+
+    if (categoryIndex === undefined) {
+      PubSub.publishSync(EVENTS.PAGE.LOAD[categoryTitle], {
+        categoryTitle
+      });
+    } else {
+      PubSub.publishSync(EVENTS.PAGE.LOAD[categoryTitle], { categoryIndex });
+    }
+
+    mainNavController.mainView({
+      target: { dataset: { changeMainView: "SUBSECTION" } }
+    });
   }
+
+  categorySectionHolder.addEventListener("click", handleNavigation);
 
   return { init };
 }
