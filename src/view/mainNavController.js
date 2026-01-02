@@ -1,8 +1,13 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../config/EVENTS";
 
-function MainNavController(mainNavigation, changeViewHolder) {
-  const init = () => {
+function MainNavController() {
+  let mainNavigation, changeViewHolder;
+
+  const init = (mainNav, main) => {
+    mainNavigation = mainNav;
+    changeViewHolder = main;
+
     PubSub.subscribe(EVENTS.PAGE.LOAD.MAIN_NAV_CONTROLLER, navPage);
     PubSub.subscribe(EVENTS.PAGE.LOAD.PREVIOUS_PAGE, returnToPreviousPage);
   };
@@ -37,6 +42,7 @@ function MainNavController(mainNavigation, changeViewHolder) {
 
   const returnToPreviousPage = () => {
     pagesEventReference.pop();
+
     const previousPage = pagesEventReference[pagesEventReference.length - 1];
 
     mainView({ target: { dataset: { changeMainView: previousPage } } });
@@ -56,11 +62,14 @@ function MainNavController(mainNavigation, changeViewHolder) {
 
   const navPage = () => {
     mainNavigation.append(div);
+    mainView({ target: { dataset: { changeMainView: "CATEGORY" } } });
   };
 
   div.addEventListener("click", mainView);
 
   return { init, mainView };
-}// make this mainNavController to listen when the paid for subsection want to open
+}
 
-export default MainNavController;
+const mainNavController = MainNavController();
+
+export default mainNavController;

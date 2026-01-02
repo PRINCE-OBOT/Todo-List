@@ -8,7 +8,7 @@ import {
   categoryReference
 } from "../config/constant";
 import PubSub from "pubsub-js";
-import MainNavController from "./mainNavController";
+import mainNavController from "./mainNavController";
 
 function CategoryPage(mainNavigation, changeViewHolder) {
   const init = () => {
@@ -149,8 +149,6 @@ function CategoryPage(mainNavigation, changeViewHolder) {
   const categorySectionHolder = categoryContent.querySelector(
     ".category_section_holder"
   );
-
-  const mainNavController = MainNavController(mainNavigation, changeViewHolder);
 
   function handleNavigation(e) {
     const category = e.target.closest("[data-category]");

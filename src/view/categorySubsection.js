@@ -19,7 +19,7 @@ function CategorySubSection(main) {
   CategorySubSectionContent.innerHTML = `
   <div class="taskSectionHolder">
     <div>
-        <span>⬅️</span> <span class="categoryTitle">Inbox</span>
+        <span class="return_back">⬅️</span> <span class="categoryTitle">Inbox</span>
     </div>
 
     <div class="taskHolder">
@@ -33,7 +33,7 @@ function CategorySubSection(main) {
     CategorySubSectionContent.querySelector(".taskSectionHolder");
   const taskHolder = CategorySubSectionContent.querySelector(".taskHolder");
 
-  const searchTaskToBeAdjusted = [];
+  const returnBack = CategorySubSectionContent.querySelector(".return_back");
 
   const handleCategoryTask = (category, key) => {
     if (Array.isArray(category[key])) {
@@ -101,7 +101,7 @@ function CategorySubSection(main) {
       const title = document.createElement("div");
       const subsectionHolder = document.createElement("div");
 
-      title.classList.add('subsection_title')
+      title.classList.add("subsection_title");
 
       const section = inbox[i];
 
@@ -138,6 +138,13 @@ function CategorySubSection(main) {
   const renderSubsection = () => {
     main.append(CategorySubSectionContent);
   };
+
+  function returnToPreviousPage() {
+    
+    PubSub.publish(EVENTS.PAGE.LOAD.PREVIOUS_PAGE);
+  }
+
+  returnBack.addEventListener("click", returnToPreviousPage);
 
   return { init };
 }
