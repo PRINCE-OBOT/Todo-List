@@ -486,13 +486,7 @@ dialog::backdrop {
   flex: 1;
 }
 
-.taskHolder{
-  display: flex;
-  flex-direction: column;
-  gap: var(--gp-sm);
-}
-
-.taskSectionHolder {
+.taskHolder {
   display: flex;
   flex-direction: column;
   gap: var(--gp-lg);

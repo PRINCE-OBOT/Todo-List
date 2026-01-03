@@ -86,6 +86,7 @@ function CategorySubSection(main) {
 
   const CreateTaskNotInSectionHolder = () => {
     const taskHolder = document.createElement("div");
+    taskHolder.classList.add("taskHolder");
 
     const getTaskHolder = () => taskHolder.cloneNode(true);
 
@@ -94,14 +95,18 @@ function CategorySubSection(main) {
 
   const createTaskNotInSectionHolder = CreateTaskNotInSectionHolder();
 
-  const appendTask = (task) => {
+  const handleDisplayTaskNotInSubsection = (tasks) => {
     const taskHolder = createTaskNotInSectionHolder.getTaskHolder();
-    taskHolder.append(task);
-    taskAndSubsectionHolder.append(taskHolder);
-  };
 
-  const handleDisplayTaskNotInSubsection = (task) => {
-    setTaskValue(task, appendTask);
+    const appendTask = (task) => {
+      taskHolder.append(task);
+    };
+
+    tasks.forEach((task) => {
+      setTaskValue(task, appendTask);
+    });
+    
+    taskAndSubsectionHolder.append(taskHolder);
   };
 
   const resetSubsection = () => {
@@ -113,6 +118,7 @@ function CategorySubSection(main) {
     const sectionHolder = document.createElement("div");
 
     sectionTitle.classList.add("subsection_title");
+    sectionHolder.classList.add("sectionHolder");
 
     const getSectionHolder = () => {
       return {
@@ -152,9 +158,9 @@ function CategorySubSection(main) {
     resetSubsection();
 
     const inbox = taskAndCategoryHandler.getCategories().Inbox;
-    
+
     updateCategoryTitle(value);
-    inbox[0].forEach(handleDisplayTaskNotInSubsection);
+    handleDisplayTaskNotInSubsection(inbox[0]);
     handleDisplayTaskInSubsection(inbox);
   };
 
