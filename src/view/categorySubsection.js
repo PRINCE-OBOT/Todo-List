@@ -21,8 +21,9 @@ function CategorySubSection(main) {
         <span class="return_back">⬅️</span> <span class="categoryTitle">Inbox</span>
     </div>
 
-    <div class="taskHolder">
+    <div class="task_and_subsection_holder">
     </div>
+    
   </div>
   `;
 
@@ -30,7 +31,9 @@ function CategorySubSection(main) {
     CategorySubSectionContent.querySelector(".categoryTitle");
   const taskSectionHolder =
     CategorySubSectionContent.querySelector(".taskSectionHolder");
-  const taskHolder = CategorySubSectionContent.querySelector(".taskHolder");
+  const taskAndSubsectionHolder = CategorySubSectionContent.querySelector(
+    ".task_and_subsection_holder"
+  );
 
   const returnBack = CategorySubSectionContent.querySelector(".return_back");
 
@@ -81,8 +84,20 @@ function CategorySubSection(main) {
     categoryTitle.textContent = title;
   };
 
+  const CreateTaskNotInSectionHolder = () => {
+    const taskHolder = document.createElement("div");
+
+    const getTaskHolder = () => taskHolder.cloneNode(true);
+
+    return { getTaskHolder };
+  };
+
+  const createTaskNotInSectionHolder = CreateTaskNotInSectionHolder();
+
   const appendTask = (task) => {
+    const taskHolder = createTaskNotInSectionHolder.getTaskHolder();
     taskHolder.append(task);
+    taskAndSubsectionHolder.append(taskHolder);
   };
 
   const handleDisplayTaskNotInSubsection = (task) => {
@@ -90,46 +105,60 @@ function CategorySubSection(main) {
   };
 
   const resetSubsection = () => {
-    taskHolder.innerHTML = "";
+    taskAndSubsectionHolder.innerHTML = "";
   };
+
+  const CreateTaskInSectionHolder = () => {
+    const sectionTitle = document.createElement("div");
+    const sectionHolder = document.createElement("div");
+
+    sectionTitle.classList.add("subsection_title");
+
+    const getSectionHolder = () => {
+      return {
+        sectionTitle: sectionTitle.cloneNode(true),
+        sectionHolder: sectionHolder.cloneNode(true)
+      };
+    };
+
+    return { getSectionHolder };
+  };
+
+  const createTaskInSectionHolder = CreateTaskInSectionHolder();
 
   const appendTaskToItSubsection = () => {};
 
   const handleDisplayTaskInSubsection = (inbox) => {
     for (let i = 1; i < inbox.length; i++) {
-      const title = document.createElement("div");
-      const subsectionHolder = document.createElement("div");
+      const sectionElem = createTaskInSectionHolder.getSectionHolder();
 
-      title.classList.add("subsection_title");
+      const sectionObj = inbox[i];
 
-      const section = inbox[i];
+      sectionElem.sectionTitle.textContent = sectionObj.sectionTitle;
+      sectionElem.sectionHolder.setAttribute("data-section-index", i);
 
-      title.textContent = section.sectionTitle;
-      subsectionHolder.setAttribute("data-section-index", i);
+      taskAndSubsectionHolder.append(
+        sectionElem.sectionTitle,
+        sectionElem.sectionHolder
+      );
 
-      taskSectionHolder.append(title, subsectionHolder);
-
-      taskInSubsection(section, "tasks", i);
+      taskInSubsection(sectionObj, "tasks", i);
     }
   };
 
-  const renderInbox = (msg, { categoryTitle }) => {
+  const renderInbox = (msg, { value }) => {
     main.append(CategorySubSectionContent);
 
     resetSubsection();
 
-    main.append(CategorySubSectionContent);
-
     const inbox = taskAndCategoryHandler.getCategories().Inbox;
-
-    updateCategoryTitle(categoryTitle);
+    
+    updateCategoryTitle(value);
     inbox[0].forEach(handleDisplayTaskNotInSubsection);
     handleDisplayTaskInSubsection(inbox);
   };
 
   const renderMyProject = (msg, { categoryIndex }) => {
-    main.append(CategorySubSectionContent);
-
     main.append(CategorySubSectionContent);
 
     const category = taskAndCategoryHandler.getCategories().My_Project[index];
@@ -146,5 +175,7 @@ function CategorySubSection(main) {
 
   return { init };
 }
-// figure out a wau to keep track of the category that got click, whether inbox or project subcategory
+
+// inbox title keep appending again and again, fix it
+
 export default CategorySubSection;

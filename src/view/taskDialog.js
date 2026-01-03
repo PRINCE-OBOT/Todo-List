@@ -153,11 +153,11 @@ function TaskDialog() {
       taskData.id = crypto.randomUUID();
       taskAndCategoryHandler.addTask(taskData);
     }
-    
+
     const changeMainView = form.saveTaskButton.getAttribute(
       "data-change-main-view"
     );
-    
+
     PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], changeMainView);
   }
 
@@ -284,7 +284,7 @@ function TaskDialog() {
     changeLabel
   };
 
-  const updateActivePageViewValue = (msg, value) => {
+  const updateActivePageViewValue = (msg,  {value} ) => {
     form.saveTaskButton.setAttribute("data-change-main-view", value);
   };
 

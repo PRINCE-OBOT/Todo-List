@@ -159,16 +159,8 @@ function CategoryPage(mainNavigation, changeViewHolder) {
 
     const categoryIndex = e.target.dataset.categoryIndex;
 
-    if (categoryIndex === undefined) {
-      PubSub.publishSync(EVENTS.PAGE.LOAD[categoryTitle], {
-        categoryTitle
-      });
-    } else {
-      PubSub.publishSync(EVENTS.PAGE.LOAD[categoryTitle], { categoryIndex });
-    }
-
     mainNavController.mainView({
-      target: { dataset: { changeMainView: categoryTitle } }
+      target: { dataset: { changeMainView: categoryTitle, categoryIndex } }
     });
   }
 

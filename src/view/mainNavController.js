@@ -57,7 +57,9 @@ function MainNavController() {
 
     pagesEventReference.push(changeMainView);
 
-    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], changeMainView);
+    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], {
+      value: changeMainView
+    });
   }
 
   const navPage = () => {

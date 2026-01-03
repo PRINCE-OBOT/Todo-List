@@ -31,6 +31,4 @@ mainNavController.init(mainNavigation, changeViewHolder);
 
 PubSub.publish(EVENTS.PAGE.LOAD.MAIN_NAV_CONTROLLER);
 
-taskAndCategoryHandler;
-
 window.todo = { taskAndCategoryHandler, categoryReference };
