@@ -2,7 +2,8 @@ import { setTaskValue } from "../components/task";
 import {
   taskAndCategoryHandler,
   filterTasks,
-  sortTaskBaseOnPriority
+  sortTaskBaseOnPriority,
+  getCategoryKey
 } from "../config/constant";
 import EVENTS from "../config/EVENTS";
 
@@ -18,7 +19,7 @@ function CategorySubSection(main) {
   CategorySubSectionContent.innerHTML = `
   <div class="taskSectionHolder">
     <div class="subsection_header">
-        <span class="return_back">⬅️</span> <span class="categoryTitle">Inbox</span>
+        <span class="return_back cursor_pointer">⬅️</span> <span class="categoryTitle">Inbox</span>
     </div>
 
     <div class="task_and_subsection_holder">
@@ -57,13 +58,9 @@ function CategorySubSection(main) {
     inboxArr.push(task);
   };
 
-  const displayTaskInSubsection = (index) => {
-    const subsection = taskSectionHolder.querySelector(
-      `[data-section-index="${index}"]`
-    );
-
+  const displayTaskInSubsection = (sectionHolder) => {
     const appendTaskToSubsection = (task) => {
-      subsection.append(task);
+      sectionHolder.append(task);
     };
 
     inboxArr.forEach((task) => {
@@ -71,13 +68,12 @@ function CategorySubSection(main) {
     });
   };
 
-  const taskInSubsection = (category, key, index) => {
+  const taskInSubsection = (category) => {
+    const key = getCategoryKey(category, ["sections", "tasks"]);
+
     if (Array.isArray(category[key])) {
       filterTasks(category[key], undefined, undefined, pushTaskToInboxArr);
     }
-
-    displayTaskInSubsection(index);
-    inboxArr.splice(0);
   };
 
   const updateCategoryTitle = (title) => {
@@ -105,7 +101,7 @@ function CategorySubSection(main) {
     tasks.forEach((task) => {
       setTaskValue(task, appendTask);
     });
-    
+
     taskAndSubsectionHolder.append(taskHolder);
   };
 
@@ -132,23 +128,23 @@ function CategorySubSection(main) {
 
   const createTaskInSectionHolder = CreateTaskInSectionHolder();
 
-  const appendTaskToItSubsection = () => {};
-
-  const handleDisplayTaskInSubsection = (inbox) => {
-    for (let i = 1; i < inbox.length; i++) {
+  const handleDisplayTaskInSubsection = (categoryArr) => {
+    for (let i = 1; i < categoryArr.length; i++) {
       const sectionElem = createTaskInSectionHolder.getSectionHolder();
 
-      const sectionObj = inbox[i];
+      const sectionObj = categoryArr[i];
 
       sectionElem.sectionTitle.textContent = sectionObj.sectionTitle;
-      sectionElem.sectionHolder.setAttribute("data-section-index", i);
 
-      taskAndSubsectionHolder.append(
-        sectionElem.sectionTitle,
-        sectionElem.sectionHolder
-      );
+      taskAndSubsectionHolder.append(sectionElem.sectionTitle);
 
-      taskInSubsection(sectionObj, "tasks", i);
+      taskInSubsection(sectionObj, i);
+
+      displayTaskInSubsection(sectionElem.sectionHolder);
+
+      taskAndSubsectionHolder.append(sectionElem.sectionHolder);
+
+      inboxArr.splice(0);
     }
   };
 
@@ -164,13 +160,17 @@ function CategorySubSection(main) {
     handleDisplayTaskInSubsection(inbox);
   };
 
-  const renderMyProject = (msg, { categoryIndex }) => {
+  const renderMyProject = (msg, { value, categoryIndex }) => {
     main.append(CategorySubSectionContent);
 
-    const category = taskAndCategoryHandler.getCategories().My_Project[index];
+    resetSubsection();
 
-    updateCategoryTitle(category.title);
-    handleCategoryTask(category, "sections");
+    const category =
+      taskAndCategoryHandler.getCategories().My_Project[+categoryIndex];
+
+    updateCategoryTitle(category.categoryTitle);
+    handleDisplayTaskNotInSubsection(category.sections[0]);
+    handleDisplayTaskInSubsection(category.sections);
   };
 
   function returnToPreviousPage() {
@@ -181,7 +181,5 @@ function CategorySubSection(main) {
 
   return { init };
 }
-
-// inbox title keep appending again and again, fix it
 
 export default CategorySubSection;

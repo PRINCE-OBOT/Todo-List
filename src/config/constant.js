@@ -333,6 +333,7 @@ export {
   filterTasks,
   taskAndCategoryHandler,
   sortTaskBaseOnPriority,
+  getCategoryKey,
   categoryReference,
   label,
   path

@@ -10,7 +10,7 @@ import {
 import PubSub from "pubsub-js";
 import mainNavController from "./mainNavController";
 
-function CategoryPage(mainNavigation, changeViewHolder) {
+function CategoryPage(_, changeViewHolder) {
   const init = () => {
     PubSub.subscribe(EVENTS.PAGE.LOAD.CATEGORY, render);
     PubSub.subscribe(EVENTS.PAGE.REMOVE.CATEGORY, removeCategoryView);
@@ -135,12 +135,12 @@ function CategoryPage(mainNavigation, changeViewHolder) {
     handleProjectCategory();
   };
 
-  const render = () => {
+  const render = (msg, {}) => {
     changeViewHolder.append(categoryContent);
     handleCategoryTask();
   };
 
-  const removeCategoryView = () => {
+  const removeCategoryView = (_, {}) => {
     categoryContent.remove();
   };
 
@@ -157,10 +157,18 @@ function CategoryPage(mainNavigation, changeViewHolder) {
 
     const categoryTitle = category.getAttribute("data-category");
 
-    const categoryIndex = e.target.dataset.categoryIndex;
+    const categoryIndexElem = e.target.closest("[data-category-index]");
+
+    let categoryIndex;
+
+    if (categoryIndexElem) {
+      categoryIndex = +categoryIndexElem.getAttribute("data-category-index");
+    }
 
     mainNavController.mainView({
-      target: { dataset: { changeMainView: categoryTitle, categoryIndex } }
+      target: {
+        dataset: { changeMainView: categoryTitle, categoryIndex }
+      }
     });
   }
 

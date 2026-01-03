@@ -486,21 +486,29 @@ dialog::backdrop {
   flex: 1;
 }
 
+.task_and_subsection_holder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gp-sm);
+
+  padding-top: var(--pd-sm);
+}
+
 .taskHolder {
   display: flex;
   flex-direction: column;
-  gap: var(--gp-lg);
+  gap: var(--gp-sm);
 }
 
 .subsection_title {
   color: var(--white);
 }
 
-.categoryTitle{
+.categoryTitle {
   color: var(--white);
 }
 
-.subsection_header{
+.subsection_header {
   display: flex;
   gap: var(--gp-lg);
 }

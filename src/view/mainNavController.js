@@ -50,6 +50,7 @@ function MainNavController() {
 
   function mainView(e) {
     const changeMainView = e.target.dataset.changeMainView;
+    const categoryIndex = e.target.dataset.categoryIndex;
 
     if (!changeMainView) return;
 
@@ -58,7 +59,8 @@ function MainNavController() {
     pagesEventReference.push(changeMainView);
 
     PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], {
-      value: changeMainView
+      value: changeMainView,
+      categoryIndex
     });
   }
 
