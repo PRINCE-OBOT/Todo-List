@@ -158,6 +158,10 @@ function CategoryPage(_, changeViewHolder) {
       categoryIndex = +categoryIndexElem.getAttribute("data-category-index");
     }
 
+    if (categoryTitle) {
+      if (categoryIndex === undefined) return;
+    }
+
     mainNavController.mainView({
       target: {
         dataset: { changeMainView: categoryTitle, categoryIndex }
