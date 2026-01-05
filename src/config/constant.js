@@ -268,25 +268,29 @@ function Path() {
       getLastIndexOfNumber(referenceArrayFormat) + 1
     );
 
-    let categoryPath = "";
-    let category = taskAndCategoryHandler.getCategories();
+    let categoryPath = categoryPathReference[0];
 
-    for (let i = 0; i < categoryPathReference.length; i++) {
-      const reference = categoryReference.get()[i];
+    const root = categoryPath;
 
-      if (reference === 0) return categoryPath;
+    let category = taskAndCategoryHandler.getCategories()[root];
 
-      category = category[reference];
+    for (let i = 1; i < categoryPathReference.length; i++) {
+      const index = categoryPathReference[i];
 
-      if (i === 0) {
-        categoryPath += reference;
-      } else {
-        const key = category.categoryTitle ? "categoryTitle" : "sectionTitle";
+      const key = category[index].categoryTitle
+        ? "categoryTitle"
+        : "sectionTitle";
 
-        if (!category[key]) return categoryPath;
+      if (!category[index][key]) return categoryPath;
 
-        categoryPath += ` / ${category[key]}`;
-      }
+      categoryPath += ` / ${category[index][key]}`;
+
+      const subsectionKey = getCategoryKey(category[index], [
+        "sections",
+        "tasks"
+      ]);
+
+      category = category[index][subsectionKey];
     }
     return categoryPath;
   };
