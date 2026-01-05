@@ -1,12 +1,5 @@
-import { setTaskValue } from "../components/task";
 import EVENTS from "../config/EVENTS";
-import {
-  taskAndCategoryHandler,
-  filterTasks,
-  sortTaskBaseOnPriority,
-  path,
-  categoryReference
-} from "../config/constant";
+import { taskAndCategoryHandler, filterTasks } from "../config/constant";
 import PubSub from "pubsub-js";
 import mainNavController from "./mainNavController";
 

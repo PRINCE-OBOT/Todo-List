@@ -157,8 +157,14 @@ function TaskDialog() {
     const changeMainView = form.saveTaskButton.getAttribute(
       "data-change-main-view"
     );
+    const categoryIndex = form.saveTaskButton.getAttribute(
+      "data-category-index"
+    );
 
-    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], changeMainView);
+    PubSub.publishSync(EVENTS.PAGE.LOAD[changeMainView], {
+      value: changeMainView,
+      categoryIndex
+    });
   }
 
   const markStatus = (target) => {
@@ -284,8 +290,9 @@ function TaskDialog() {
     changeLabel
   };
 
-  const updateActivePageViewValue = (msg,  {value} ) => {
+  const updateActivePageViewValue = (msg, { value, categoryIndex }) => {
     form.saveTaskButton.setAttribute("data-change-main-view", value);
+    form.saveTaskButton.setAttribute("data-category-index", categoryIndex);
   };
 
   function handleTaskAction(e) {
