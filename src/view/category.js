@@ -1,5 +1,9 @@
 import EVENTS from "../config/EVENTS";
-import { taskAndCategoryHandler, filterTasks } from "../config/constant";
+import {
+  taskAndCategoryHandler,
+  filterTasks,
+  categoryReference
+} from "../config/constant";
 import PubSub from "pubsub-js";
 import mainNavController from "./mainNavController";
 
@@ -27,7 +31,12 @@ function CategoryPage(_, changeViewHolder) {
               <p>My Projects</p><p class="cursor_pointer" data-display="myProjectOption">&vellip;</p>
 
               <div class="projectOptions close">
-                <span># Add Project</span>
+                <div data-add="category"># Add Project</div>
+                
+                <div class="enterCategorySection hide">
+                  <input name="enterCategory" class="enterCategory" data-add="category" placeholder="Enter Category Name"/>
+                  <span class="iconSaveCategory cursor_pointer">✅</span>
+                </div>
               </div>
             </div>
             <div class="myProjectCategorySection" data-category="MY_PROJECT"></div>
@@ -41,6 +50,13 @@ function CategoryPage(_, changeViewHolder) {
   );
 
   const projectOptions = categoryContent.querySelector(".projectOptions");
+
+  const addCategory = categoryContent.querySelector('[data-add="category"]');
+  const enterCategorySection = categoryContent.querySelector(
+    ".enterCategorySection"
+  );
+  const iconSaveCategory = categoryContent.querySelector(".iconSaveCategory");
+  const enterCategory = categoryContent.querySelector(".enterCategory");
 
   const setNumberOfInbox = (inboxArr) => {
     numberOfInbox.textContent = inboxArr.length;
@@ -180,6 +196,12 @@ function CategoryPage(_, changeViewHolder) {
   function displayMyProjectOption(e) {
     const display = e.target.dataset.display;
 
+    const add = e.target.dataset.add;
+    if (add) {
+      iconSaveCategory.setAttribute("data-category-type", add);
+      return;
+    }
+
     if (display) {
       projectOptions.classList.toggle("close");
     } else {
@@ -187,11 +209,38 @@ function CategoryPage(_, changeViewHolder) {
     }
   }
 
+  function showEnterCategorySection(e) {
+    enterCategorySection.classList.toggle("hide");
+  }
+
+  const categoryTypeHandler = {
+    category: () => {
+      categoryReference.update(["My_Project"]);
+
+      taskAndCategoryHandler.addCategory({
+        categoryTitle: enterCategory.value,
+        sections: [[]]
+      });
+    }
+  };
+
+  function saveCategory(e) {
+    const categoryType = e.target.dataset.categoryType;
+
+    if (!categoryType) return;
+
+    categoryTypeHandler[categoryType]();
+
+    render(_, {});
+  }
+
+  addCategory.addEventListener("click", showEnterCategorySection);
+
   categorySectionHolder.addEventListener("click", handleNavigation);
 
-  document.body.addEventListener("click", displayMyProjectOption);
+  iconSaveCategory.addEventListener("click", saveCategory);
 
-  // fix why the drop down menu is not working properly
+  document.body.addEventListener("click", displayMyProjectOption);
 
   return { init };
 }

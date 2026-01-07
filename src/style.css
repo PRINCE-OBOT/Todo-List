@@ -496,7 +496,7 @@ dialog::backdrop {
   border: 2px solid var(--transparent);
   padding: var(--pd-sm);
   border-radius: 10px;
-  
+
   display: block;
 }
 
@@ -534,4 +534,19 @@ dialog::backdrop {
 .subsection_header {
   display: flex;
   gap: var(--gp-lg);
+}
+
+.projectOptions {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-lg);
+}
+
+.enterCategory {
+  background-color: var(--black);
+  box-shadow: var(--box-shadow);
+  border: none;
+  color: var(--white);
+  border-radius: 5px;
+  padding: var(--pd-xxsm) var(--pd-sm);
 }
