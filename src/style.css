@@ -88,6 +88,7 @@ h6 {
   --low-priority: rgb(13, 144, 113);
   --transparent: rgba(59, 55, 55, 0.5);
   --transparent-white: rgba(255 255 255/ 0.5);
+  --box-shadow: 0.5px 0.5px 5px var(--transparent-white);
 
   --fs-sz-xlg: 40px;
   --fs-sz-lg: 20px;
@@ -473,13 +474,35 @@ dialog::backdrop {
 .icon_and_title,
 .categoryTitleSection {
   display: grid;
-  grid-template-columns: 40px 1fr 20px;
+  grid-template-columns: 40px 1fr max-content;
 }
+
 .number_of_inbox,
 .numberOfTaskInCategory {
   color: var(--transparent-white);
 }
 
+.project_title_and_ellipse {
+  display: grid;
+  grid-template-columns: 1fr max-content;
+
+  position: relative;
+}
+.projectOptions {
+  position: absolute;
+  right: 0;
+  top: 30px;
+  background: var(--black);
+  border: 2px solid var(--transparent);
+  padding: var(--pd-sm);
+  border-radius: 10px;
+  
+  display: block;
+}
+
+.projectOptions.close {
+  display: none;
+}
 /* Category subsection */
 
 .categorySubsectionContent {

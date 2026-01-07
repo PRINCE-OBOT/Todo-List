@@ -22,8 +22,14 @@ function CategoryPage(_, changeViewHolder) {
             <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span>Inbox</span> <span class="number_of_inbox"></span></p>
         </div>
         
-        <div>
-            <p>My Projects</p>
+        <div class="project_title_and_myProjectCategorySection">
+            <div class="project_title_and_ellipse">
+              <p>My Projects</p><p class="cursor_pointer" data-display="myProjectOption">&vellip;</p>
+
+              <div class="projectOptions close">
+                <span># Add Project</span>
+              </div>
+            </div>
             <div class="myProjectCategorySection" data-category="MY_PROJECT"></div>
         </div>
     </div>
@@ -33,6 +39,8 @@ function CategoryPage(_, changeViewHolder) {
   const myProjectCategorySection = categoryContent.querySelector(
     ".myProjectCategorySection"
   );
+
+  const projectOptions = categoryContent.querySelector(".projectOptions");
 
   const setNumberOfInbox = (inboxArr) => {
     numberOfInbox.textContent = inboxArr.length;
@@ -158,7 +166,7 @@ function CategoryPage(_, changeViewHolder) {
       categoryIndex = +categoryIndexElem.getAttribute("data-category-index");
     }
 
-    if (categoryTitle) {
+    if (categoryTitle === "MY_PROJECT") {
       if (categoryIndex === undefined) return;
     }
 
@@ -169,7 +177,21 @@ function CategoryPage(_, changeViewHolder) {
     });
   }
 
+  function displayMyProjectOption(e) {
+    const display = e.target.dataset.display;
+
+    if (display) {
+      projectOptions.classList.toggle("close");
+    } else {
+      projectOptions.classList.add("close");
+    }
+  }
+
   categorySectionHolder.addEventListener("click", handleNavigation);
+
+  document.body.addEventListener("click", displayMyProjectOption);
+
+  // fix why the drop down menu is not working properly
 
   return { init };
 }
@@ -184,3 +206,5 @@ How to add a category
 todo.taskAndCategoryHandler.addCategory({ categoryTitle: 'holiday', sections: [[]]})
 
  */
+
+// Next to add is UI for adding category, section, make adding of task button in the category and in inside inbox
