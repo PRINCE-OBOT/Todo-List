@@ -332,10 +332,12 @@ const categoryTypeHandler = {
       sections: [[]]
     });
   },
-  section: (value, index) => {
-    const categoryRef = ["My_Project"];
+  section: (value, index, root) => {
+    const categoryRef = [root];
 
-    categoryRef.push(index);
+    if (index !== "undefined") {
+      categoryRef.push(index);
+    }
 
     categoryReference.update(categoryRef);
 

@@ -496,6 +496,7 @@ dialog::backdrop {
   row-gap: var(--gp-sm);
 
   position: absolute;
+  z-index: 100;
   right: 0;
   top: 30px;
   background: var(--black);

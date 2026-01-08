@@ -82,9 +82,10 @@ function CategorySubSection(main) {
     }
   };
 
-  const updateCategoryTitleAndIndex = (title, categoryIndex) => {
+  const updateCategoryTitleAndIndex = (title, categoryIndex, root) => {
     categoryTitle.textContent = title;
     categoryTitle.setAttribute("data-category-index", categoryIndex);
+    categoryTitle.setAttribute("data-root", root);
   };
 
   const CreateTaskNotInSectionHolder = () => {
@@ -162,7 +163,7 @@ function CategorySubSection(main) {
 
     const inbox = taskAndCategoryHandler.getCategories().Inbox;
 
-    updateCategoryTitleAndIndex(value);
+    updateCategoryTitleAndIndex(value, undefined, "Inbox");
     handleDisplayTaskNotInSubsection(inbox[0]);
     handleDisplayTaskInSubsection(inbox);
   };
@@ -175,7 +176,7 @@ function CategorySubSection(main) {
     const category =
       taskAndCategoryHandler.getCategories().My_Project[+categoryIndex];
 
-    updateCategoryTitleAndIndex(category.categoryTitle, categoryIndex);
+    updateCategoryTitleAndIndex(value, categoryIndex, "My_Project");
     handleDisplayTaskNotInSubsection(category.sections[0]);
     handleDisplayTaskInSubsection(category.sections);
   };
@@ -216,12 +217,17 @@ function CategorySubSection(main) {
     if (!categoryType) return;
 
     const categoryIndex = categoryTitle.getAttribute("data-category-index");
+    const root = categoryTitle.getAttribute("data-root");
 
-    categoryTypeHandler[categoryType](enterSection.value, categoryIndex);
+    categoryTypeHandler[categoryType](enterSection.value, categoryIndex, root);
 
     enterSection.value = "";
 
-    renderMyProject('', { value: categoryTitle.value, categoryIndex });
+    if (root === "Inbox") {
+      renderInbox("", { value: categoryTitle.value, categoryIndex });
+    } else {
+      renderMyProject("", { value: categoryTitle.value, categoryIndex });
+    }
   }
 
   iconSaveSection.addEventListener("click", saveSection);
