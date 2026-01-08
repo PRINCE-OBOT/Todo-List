@@ -323,6 +323,29 @@ function Label() {
 
 const label = Label();
 
+const categoryTypeHandler = {
+  category: (value) => {
+    categoryReference.update(["My_Project"]);
+
+    taskAndCategoryHandler.addCategory({
+      categoryTitle: value,
+      sections: [[]]
+    });
+  },
+  section: (value, index) => {
+    const categoryRef = ["My_Project"];
+
+    categoryRef.push(index);
+
+    categoryReference.update(categoryRef);
+
+    taskAndCategoryHandler.addCategory({
+      sectionTitle: value,
+      tasks: [[]]
+    });
+  }
+};
+
 (function initializeCategory() {
   const categories = localStorage.getItem(CATEGORY);
 
@@ -339,6 +362,7 @@ export {
   sortTaskBaseOnPriority,
   getCategoryKey,
   categoryReference,
+  categoryTypeHandler,
   label,
   path
 };

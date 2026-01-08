@@ -488,7 +488,13 @@ dialog::backdrop {
 
   position: relative;
 }
-.projectOptions {
+
+.projectOptions,
+.sectionOptions {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-sm);
+
   position: absolute;
   right: 0;
   top: 30px;
@@ -496,12 +502,20 @@ dialog::backdrop {
   border: 2px solid var(--transparent);
   padding: var(--pd-sm);
   border-radius: 10px;
-
-  display: block;
 }
 
-.projectOptions.close {
+:is(.projectOptions, .sectionOptions).close {
   display: none;
+}
+
+.enterCategory,
+.enterSection {
+  background-color: var(--black);
+  box-shadow: var(--box-shadow);
+  border: none;
+  color: var(--white);
+  border-radius: 5px;
+  padding: var(--pd-xxsm) var(--pd-sm);
 }
 /* Category subsection */
 
@@ -522,7 +536,6 @@ dialog::backdrop {
   flex-direction: column;
   gap: var(--gp-sm);
 }
-
 .subsection_title {
   color: var(--white);
 }
@@ -535,18 +548,13 @@ dialog::backdrop {
   display: flex;
   gap: var(--gp-lg);
 }
+.subsection_header {
+  display: grid;
+  grid-template-columns: 20px 1fr 20px;
 
-.projectOptions {
-  display: flex;
-  flex-direction: column;
-  row-gap: var(--gp-lg);
-}
-
-.enterCategory {
-  background-color: var(--black);
-  box-shadow: var(--box-shadow);
-  border: none;
+  position: relative;
   color: var(--white);
-  border-radius: 5px;
-  padding: var(--pd-xxsm) var(--pd-sm);
+}
+.category_ellipse {
+  justify-self: end;
 }

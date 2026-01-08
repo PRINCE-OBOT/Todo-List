@@ -3,7 +3,8 @@ import {
   taskAndCategoryHandler,
   filterTasks,
   sortTaskBaseOnPriority,
-  getCategoryKey
+  getCategoryKey,
+  categoryTypeHandler
 } from "../config/constant";
 import EVENTS from "../config/EVENTS";
 
@@ -17,40 +18,45 @@ function CategorySubSection(main) {
   CategorySubSectionContent.classList.add("categorySubsectionContent");
 
   CategorySubSectionContent.innerHTML = `
-  <div class="taskSectionHolder">
-    <div class="subsection_header">
-        <span class="return_back cursor_pointer">⬅️</span> <span class="categoryTitle">Inbox</span>
-    </div>
+    <div class="taskSectionHolder">
+      <div class="subsection_header">
+        <span class="return_back cursor_pointer">⬅️</span>
+        <span class="categoryTitle">Inbox</span>
+        <span class="category_ellipse cursor_pointer" data-display="sectionOption">&vellip;</span>
 
-    <div class="task_and_subsection_holder">
+        <div class="sectionOptions close">
+          <div data-add="section"># Add Section</div>
+
+          <div class="enterSectionCon hide">
+            <input
+              name="enterSection"
+              class="enterSection"
+              data-avoid="true"
+              placeholder="Enter Section Name"
+            />
+            <span class="iconSaveSection cursor_pointer">✅</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task_and_subsection_holder"></div>
     </div>
-    
-  </div>
   `;
 
   const categoryTitle =
     CategorySubSectionContent.querySelector(".categoryTitle");
-  const taskSectionHolder =
-    CategorySubSectionContent.querySelector(".taskSectionHolder");
   const taskAndSubsectionHolder = CategorySubSectionContent.querySelector(
     ".task_and_subsection_holder"
   );
+  const enterSectionCon =
+    CategorySubSectionContent.querySelector(".enterSectionCon");
+  const enterSection = CategorySubSectionContent.querySelector(".enterSection");
+  const sectionOptions =
+    CategorySubSectionContent.querySelector(".sectionOptions");
+  const iconSaveSection =
+    CategorySubSectionContent.querySelector(".iconSaveSection");
 
   const returnBack = CategorySubSectionContent.querySelector(".return_back");
-
-  const handleCategoryTask = (category, key) => {
-    if (Array.isArray(category[key])) {
-      filterTasks(
-        category[key],
-        undefined,
-        undefined,
-        pushTaskToMyProjectCategoryArr
-      );
-    }
-
-    displayCategoryElement(index, myProjectCategoryArr.length);
-    myProjectCategoryArr.splice(0);
-  };
 
   const inboxArr = [];
 
@@ -76,8 +82,9 @@ function CategorySubSection(main) {
     }
   };
 
-  const updateCategoryTitle = (title) => {
+  const updateCategoryTitleAndIndex = (title, categoryIndex) => {
     categoryTitle.textContent = title;
+    categoryTitle.setAttribute("data-category-index", categoryIndex);
   };
 
   const CreateTaskNotInSectionHolder = () => {
@@ -155,7 +162,7 @@ function CategorySubSection(main) {
 
     const inbox = taskAndCategoryHandler.getCategories().Inbox;
 
-    updateCategoryTitle(value);
+    updateCategoryTitleAndIndex(value);
     handleDisplayTaskNotInSubsection(inbox[0]);
     handleDisplayTaskInSubsection(inbox);
   };
@@ -168,7 +175,7 @@ function CategorySubSection(main) {
     const category =
       taskAndCategoryHandler.getCategories().My_Project[+categoryIndex];
 
-    updateCategoryTitle(category.categoryTitle);
+    updateCategoryTitleAndIndex(category.categoryTitle, categoryIndex);
     handleDisplayTaskNotInSubsection(category.sections[0]);
     handleDisplayTaskInSubsection(category.sections);
   };
@@ -176,6 +183,50 @@ function CategorySubSection(main) {
   function returnToPreviousPage() {
     PubSub.publish(EVENTS.PAGE.LOAD.PREVIOUS_PAGE);
   }
+
+  const showEnterSection = () => {
+    enterSectionCon.classList.toggle("hide");
+  };
+
+  function displaySectionOption(e) {
+    const avoid = e.target.dataset.avoid;
+
+    if (avoid) return;
+
+    const display = e.target.dataset.display;
+
+    const add = e.target.dataset.add;
+
+    if (add) {
+      iconSaveSection.setAttribute("data-category-type", add);
+      showEnterSection();
+      return;
+    }
+
+    if (display) {
+      sectionOptions.classList.toggle("close");
+    } else {
+      sectionOptions.classList.add("close");
+    }
+  }
+
+  function saveSection(e) {
+    const categoryType = e.target.dataset.categoryType;
+
+    if (!categoryType) return;
+
+    const categoryIndex = categoryTitle.getAttribute("data-category-index");
+
+    categoryTypeHandler[categoryType](enterSection.value, categoryIndex);
+
+    enterSection.value = "";
+
+    renderMyProject('', { value: categoryTitle.value, categoryIndex });
+  }
+
+  iconSaveSection.addEventListener("click", saveSection);
+
+  CategorySubSectionContent.addEventListener("click", displaySectionOption);
 
   returnBack.addEventListener("click", returnToPreviousPage);
 

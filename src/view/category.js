@@ -2,7 +2,8 @@ import EVENTS from "../config/EVENTS";
 import {
   taskAndCategoryHandler,
   filterTasks,
-  categoryReference
+  categoryReference,
+  categoryTypeHandler
 } from "../config/constant";
 import PubSub from "pubsub-js";
 import mainNavController from "./mainNavController";
@@ -34,7 +35,7 @@ function CategoryPage(_, changeViewHolder) {
                 <div data-add="category"># Add Project</div>
                 
                 <div class="enterCategorySection hide">
-                  <input name="enterCategory" class="enterCategory" data-add="category" placeholder="Enter Category Name"/>
+                  <input name="enterCategory" class="enterCategory" data-avoid="true" placeholder="Enter Category Name"/>
                   <span class="iconSaveCategory cursor_pointer">✅</span>
                 </div>
               </div>
@@ -51,7 +52,6 @@ function CategoryPage(_, changeViewHolder) {
 
   const projectOptions = categoryContent.querySelector(".projectOptions");
 
-  const addCategory = categoryContent.querySelector('[data-add="category"]');
   const enterCategorySection = categoryContent.querySelector(
     ".enterCategorySection"
   );
@@ -193,12 +193,21 @@ function CategoryPage(_, changeViewHolder) {
     });
   }
 
+  const showEnterCategorySection = () => {
+    enterCategorySection.classList.toggle("hide");
+  };
+
   function displayMyProjectOption(e) {
+    const avoid = e.target.dataset.avoid;
+
+    if (avoid) return;
+
     const display = e.target.dataset.display;
 
     const add = e.target.dataset.add;
     if (add) {
       iconSaveCategory.setAttribute("data-category-type", add);
+      showEnterCategorySection();
       return;
     }
 
@@ -209,38 +218,25 @@ function CategoryPage(_, changeViewHolder) {
     }
   }
 
-  function showEnterCategorySection(e) {
-    enterCategorySection.classList.toggle("hide");
-  }
 
-  const categoryTypeHandler = {
-    category: () => {
-      categoryReference.update(["My_Project"]);
-
-      taskAndCategoryHandler.addCategory({
-        categoryTitle: enterCategory.value,
-        sections: [[]]
-      });
-    }
-  };
 
   function saveCategory(e) {
     const categoryType = e.target.dataset.categoryType;
 
     if (!categoryType) return;
 
-    categoryTypeHandler[categoryType]();
+    categoryTypeHandler[categoryType](enterCategory.value);
+
+    enterCategory.value = "";
 
     render(_, {});
   }
-
-  addCategory.addEventListener("click", showEnterCategorySection);
 
   categorySectionHolder.addEventListener("click", handleNavigation);
 
   iconSaveCategory.addEventListener("click", saveCategory);
 
-  document.body.addEventListener("click", displayMyProjectOption);
+  categoryContent.addEventListener("click", displayMyProjectOption);
 
   return { init };
 }
@@ -256,4 +252,4 @@ todo.taskAndCategoryHandler.addCategory({ categoryTitle: 'holiday', sections: [[
 
  */
 
-// Next to add is UI for adding category, section, make adding of task button in the category and in inside inbox
+// Next to add is UI for DELETING CATEGORY, section, make adding of task button in the category and in inside inbox
