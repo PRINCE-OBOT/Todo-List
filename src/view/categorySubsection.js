@@ -4,7 +4,8 @@ import {
   filterTasks,
   sortTaskBaseOnPriority,
   getCategoryKey,
-  categoryTypeHandler
+  categoryTypeHandler,
+  categoryReference
 } from "../config/constant";
 import EVENTS from "../config/EVENTS";
 
@@ -25,8 +26,8 @@ function CategorySubSection(main) {
         <span class="category_ellipse cursor_pointer" data-display="sectionOption">&vellip;</span>
 
         <div class="sectionOptions close">
-          <div data-add="section"># Add Section</div>
-
+          <div data-add="section" class="cursor_pointer">Add Section</div>
+          
           <div class="enterSectionCon hide">
             <input
               name="enterSection"
@@ -35,7 +36,9 @@ function CategorySubSection(main) {
               placeholder="Enter Section Name"
             />
             <span class="iconSaveSection cursor_pointer">✅</span>
-          </div>
+            </div>
+            
+          <div data-delete="section" class="cursor_pointer">Delete Project</div>
         </div>
       </div>
 
@@ -55,6 +58,8 @@ function CategorySubSection(main) {
     CategorySubSectionContent.querySelector(".sectionOptions");
   const iconSaveSection =
     CategorySubSectionContent.querySelector(".iconSaveSection");
+  const btnDeleteCategory =
+    CategorySubSectionContent.querySelector("[data-delete]");
 
   const returnBack = CategorySubSectionContent.querySelector(".return_back");
 
@@ -176,7 +181,11 @@ function CategorySubSection(main) {
     const category =
       taskAndCategoryHandler.getCategories().My_Project[+categoryIndex];
 
-    updateCategoryTitleAndIndex(value, categoryIndex, "My_Project");
+    updateCategoryTitleAndIndex(
+      category.categoryTitle,
+      categoryIndex,
+      "My_Project"
+    );
     handleDisplayTaskNotInSubsection(category.sections[0]);
     handleDisplayTaskInSubsection(category.sections);
   };
@@ -211,13 +220,19 @@ function CategorySubSection(main) {
     }
   }
 
+  const getRooAndIndex = () => {
+    const categoryIndex = categoryTitle.getAttribute("data-category-index");
+    const root = categoryTitle.getAttribute("data-root");
+
+    return { root, categoryIndex };
+  };
+
   function saveSection(e) {
     const categoryType = e.target.dataset.categoryType;
 
     if (!categoryType) return;
 
-    const categoryIndex = categoryTitle.getAttribute("data-category-index");
-    const root = categoryTitle.getAttribute("data-root");
+    const { categoryIndex, root } = getRooAndIndex();
 
     categoryTypeHandler[categoryType](enterSection.value, categoryIndex, root);
 
@@ -230,7 +245,19 @@ function CategorySubSection(main) {
     }
   }
 
+  function deleteCategory() {
+    const { categoryIndex, root } = getRooAndIndex();
+
+    categoryReference.update([root, +categoryIndex]);
+
+    taskAndCategoryHandler.deleteTask();
+
+    returnToPreviousPage();
+  }
+
   iconSaveSection.addEventListener("click", saveSection);
+
+  btnDeleteCategory.addEventListener("click", deleteCategory);
 
   CategorySubSectionContent.addEventListener("click", displaySectionOption);
 

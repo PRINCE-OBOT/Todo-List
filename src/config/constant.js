@@ -117,14 +117,13 @@ function TaskAndCategoryHandler() {
   };
 
   const deleteTask = () => {
-    const id = categoryReference.get().pop();
+    let index = categoryReference.get().pop();
 
     const lastReferenceTaskSection = getLastReferenceTask();
 
-    lastReferenceTaskSection.splice(
-      getIndexOfTask(lastReferenceTaskSection, id),
-      1
-    );
+    index = isIndexID(index, lastReferenceTaskSection);
+
+    lastReferenceTaskSection.splice(index, 1);
 
     updateStorage();
   };
