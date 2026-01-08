@@ -23,11 +23,15 @@ function CategorySubSection(main) {
       <div class="subsection_header">
         <span class="return_back cursor_pointer">⬅️</span>
         <span class="categoryTitle">Inbox</span>
-        <span class="category_ellipse cursor_pointer" data-display="sectionOption">&vellip;</span>
+        <span
+          class="category_ellipse cursor_pointer"
+          data-display="sectionOption"
+          >&vellip;</span
+        >
 
         <div class="sectionOptions close">
           <div data-add="section" class="cursor_pointer">Add Section</div>
-          
+
           <div class="enterSectionCon hide">
             <input
               name="enterSection"
@@ -36,9 +40,7 @@ function CategorySubSection(main) {
               placeholder="Enter Section Name"
             />
             <span class="iconSaveSection cursor_pointer">✅</span>
-            </div>
-            
-          <div data-delete="section" class="cursor_pointer">Delete Project</div>
+          </div>
         </div>
       </div>
 
@@ -58,10 +60,14 @@ function CategorySubSection(main) {
     CategorySubSectionContent.querySelector(".sectionOptions");
   const iconSaveSection =
     CategorySubSectionContent.querySelector(".iconSaveSection");
-  const btnDeleteCategory =
-    CategorySubSectionContent.querySelector("[data-delete]");
 
   const returnBack = CategorySubSectionContent.querySelector(".return_back");
+
+  const btnDeleteCategory = document.createElement("div");
+
+  btnDeleteCategory.textContent = "Delete Project";
+  btnDeleteCategory.classList.add("cursor_pointer");
+  btnDeleteCategory.setAttribute("data-delete", "section");
 
   const inboxArr = [];
 
@@ -214,6 +220,13 @@ function CategorySubSection(main) {
     }
 
     if (display) {
+      const { root } = getRooAndIndex();
+
+      if (root === "Inbox") btnDeleteCategory.remove();
+      else {
+        sectionOptions.append(btnDeleteCategory);
+      }
+
       sectionOptions.classList.toggle("close");
     } else {
       sectionOptions.classList.add("close");
