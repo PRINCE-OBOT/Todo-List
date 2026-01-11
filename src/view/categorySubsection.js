@@ -128,16 +128,39 @@ function CategorySubSection(main) {
     taskAndSubsectionHolder.innerHTML = "";
   };
 
+  // Make the createSectionOptions to be inserted in sectionTitleAndEllipse
+  // For deleting of section and updating the reference to the designated section.
+  const sectionEllipseOptions = (function createSectionEllipseOptions() {
+    const div = document.createElement("div");
+    div.classList.add("sectionEllipseOptions", "close");
+
+    div.innerHTML = `
+      <div data-display="task" class="cursor_pointer">Add Task</div>
+      <div data-delete="section">Delete Section</div>
+    `;
+
+    return div;
+  })();
+
   const CreateTaskInSectionHolder = () => {
+    const sectionTitleAndEllipse = document.createElement("div");
+    const ellipse = document.createElement("div");
     const sectionTitle = document.createElement("div");
     const sectionHolder = document.createElement("div");
 
+    sectionTitleAndEllipse.classList.add("sectionTitleAndEllipse");
     sectionTitle.classList.add("subsection_title");
     sectionHolder.classList.add("sectionHolder");
+    ellipse.classList.add("cursor_pointer");
+    ellipse.setAttribute("data-display-option", "sectionEllipse");
+
+    ellipse.innerHTML = "&vellip;";
+
+    sectionTitleAndEllipse.append(sectionTitle, ellipse);
 
     const getSectionHolder = () => {
       return {
-        sectionTitle: sectionTitle.cloneNode(true),
+        sectionTitleAndEllipse: sectionTitleAndEllipse.cloneNode(true),
         sectionHolder: sectionHolder.cloneNode(true)
       };
     };
@@ -153,9 +176,12 @@ function CategorySubSection(main) {
 
       const sectionObj = categoryArr[i];
 
-      sectionElem.sectionTitle.textContent = sectionObj.sectionTitle;
+      const sectionTitle =
+        sectionElem.sectionTitleAndEllipse.querySelector(".subsection_title");
 
-      taskAndSubsectionHolder.append(sectionElem.sectionTitle);
+      sectionTitle.textContent = sectionObj.sectionTitle;
+
+      taskAndSubsectionHolder.append(sectionElem.sectionTitleAndEllipse);
 
       taskInSubsection(sectionObj, i);
 
@@ -165,6 +191,8 @@ function CategorySubSection(main) {
 
       inboxArr.splice(0);
     }
+
+    taskAndSubsectionHolder.append(sectionEllipseOptions);
   };
 
   const renderInbox = (msg, { value }) => {
@@ -220,7 +248,7 @@ function CategorySubSection(main) {
     }
 
     if (display) {
-      const { root } = getRooAndIndex();
+      const { root } = getRootAndIndex();
 
       if (root === "Inbox") btnDeleteCategory.remove();
       else {
@@ -233,7 +261,7 @@ function CategorySubSection(main) {
     }
   }
 
-  const getRooAndIndex = () => {
+  const getRootAndIndex = () => {
     const categoryIndex = categoryTitle.getAttribute("data-category-index");
     const root = categoryTitle.getAttribute("data-root");
 
@@ -245,7 +273,7 @@ function CategorySubSection(main) {
 
     if (!categoryType) return;
 
-    const { categoryIndex, root } = getRooAndIndex();
+    const { categoryIndex, root } = getRootAndIndex();
 
     categoryTypeHandler[categoryType](enterSection.value, categoryIndex, root);
 
@@ -259,7 +287,7 @@ function CategorySubSection(main) {
   }
 
   function deleteCategory() {
-    const { categoryIndex, root } = getRooAndIndex();
+    const { categoryIndex, root } = getRootAndIndex();
 
     categoryReference.update([root, +categoryIndex]);
 
@@ -268,11 +296,63 @@ function CategorySubSection(main) {
     returnToPreviousPage();
   }
 
+  const getTopOfParent = (parent) => {
+    const rect = parent.getBoundingClientRect();
+
+    return rect.top;
+  };
+
+  const getBottomOfParent = (parent) => {
+    const rect = parent.getBoundingClientRect();
+    return rect.bottom;
+  };
+
+  const getBottomOfTASHolder = () => {
+    const rect = taskAndSubsectionHolder.getBoundingClientRect();
+    return rect.bottom;
+  };
+
+  const displaySectionEllipse = (target) => {
+    const parent = target.closest(".sectionTitleAndEllipse");
+
+    const topOfParent = getTopOfParent(parent);
+    const bottomOfTaskAndSectionHolder = getBottomOfTASHolder();
+
+    const HEIGHT_OF_SECTION_OPTION = 81;
+
+    if (topOfParent + HEIGHT_OF_SECTION_OPTION > bottomOfTaskAndSectionHolder) {
+      const bottomOfParent = getBottomOfParent(parent);
+
+      const bottomValue = bottomOfTaskAndSectionHolder - bottomOfParent;
+
+      sectionEllipseOptions.style.top = "auto";
+      sectionEllipseOptions.style.bottom = `${bottomValue}px`;
+    } else {
+      sectionEllipseOptions.style.top = `${topOfParent}px`;
+      sectionEllipseOptions.style.bottom = "auto";
+    }
+
+    sectionEllipseOptions.classList.toggle("close");
+  };
+
+  function displayOption(e) {
+    const displayOption = e.target.dataset.displayOption;
+
+    if (displayOption) {
+      displaySectionEllipse(e.target);
+    } else {
+      sectionEllipseOptions.classList.add("close");
+    }
+  }
+
   iconSaveSection.addEventListener("click", saveSection);
 
   btnDeleteCategory.addEventListener("click", deleteCategory);
 
-  CategorySubSectionContent.addEventListener("click", displaySectionOption);
+  CategorySubSectionContent.addEventListener("click", (e) => {
+    displaySectionOption(e);
+    displayOption(e);
+  });
 
   returnBack.addEventListener("click", returnToPreviousPage);
 

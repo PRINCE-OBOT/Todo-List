@@ -505,7 +505,22 @@ dialog::backdrop {
   border-radius: 10px;
 }
 
-:is(.projectOptions, .sectionOptions).close {
+.sectionEllipseOptions{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--gp-sm);
+
+  position: absolute;
+  z-index: 100;
+  right: 0;
+  background: var(--black);
+  border: 2px solid var(--transparent);
+  padding: var(--pd-sm);
+  border-radius: 10px;
+}
+
+:is(.projectOptions, .sectionOptions, .sectionEllipseOptions).close {
   display: none;
 }
 
@@ -520,7 +535,17 @@ dialog::backdrop {
 }
 /* Category subsection */
 
+
 .categorySubsectionContent {
+  display: flex;
+  
+  flex: 1;
+}
+
+.taskSectionHolder{
+  display: flex;
+  flex-direction: column;
+
   flex: 1;
 }
 
@@ -528,7 +553,10 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   gap: var(--gp-sm);
+  color: var(--white);
+  flex: 1;
 
+  position: relative;
   padding-top: var(--pd-sm);
 }
 
@@ -558,4 +586,13 @@ dialog::backdrop {
 }
 .category_ellipse {
   justify-self: end;
+}
+
+.sectionTitleAndEllipse {
+  display: flex;
+  color: var(--white);
+}
+
+.subsection_title {
+  flex: 1;
 }

@@ -117,7 +117,7 @@ function TaskAndCategoryHandler() {
   };
 
   const deleteTask = () => {
-    let index = categoryReference.get().pop();
+    let index = castegoryReference.get().pop();
 
     const lastReferenceTaskSection = getLastReferenceTask();
 
