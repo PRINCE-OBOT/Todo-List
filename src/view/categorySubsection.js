@@ -32,6 +32,8 @@ function CategorySubSection(main) {
 
         <div class="sectionOptions close">
           <div data-add="section" class="cursor_pointer">Add Section</div>
+          
+          <div data-btn="addTask" class="cursor_pointer">Add Task</div>
 
           <div class="enterSectionCon hide">
             <input
@@ -54,6 +56,8 @@ function CategorySubSection(main) {
   const taskAndSubsectionHolder = CategorySubSectionContent.querySelector(
     ".task_and_subsection_holder"
   );
+  const sectionHeader =
+    CategorySubSectionContent.querySelector(".subsection_header");
   const enterSectionCon =
     CategorySubSectionContent.querySelector(".enterSectionCon");
   const enterSection = CategorySubSectionContent.querySelector(".enterSection");
@@ -98,7 +102,7 @@ function CategorySubSection(main) {
     categoryTitle.textContent = title;
     categoryTitle.setAttribute("data-category-index", categoryIndex);
     categoryTitle.setAttribute("data-root", root);
-    categoryTitle.setAttribute(
+    sectionHeader.setAttribute(
       "data-category-reference",
       `${[root, categoryIndex]}`
     );
@@ -358,7 +362,7 @@ function CategorySubSection(main) {
     }
   }
 
-  function setCatRefToSEO(e) {
+  function setCatRefToOptions(e) {
     const elemWithCategoryRef = e.target.closest("[data-category-reference]");
     const elem = e.target.closest(".task_and_subsection_holder");
 
@@ -378,6 +382,22 @@ function CategorySubSection(main) {
     }
   }
 
+  function handleSectionEllipseOptions(e) {
+    const btn = e.target.dataset.btn;
+
+    const elemWithCategoryRef = e.target.closest("[data-category-reference]");
+
+    if (!elemWithCategoryRef) return;
+
+    const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
+
+    if (btn === "addTask") {
+      categoryReference.update(categoryRef);
+
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);
+    }
+  }
+
   iconSaveSection.addEventListener("click", saveSection);
 
   btnDeleteCategory.addEventListener("click", deleteCategory);
@@ -385,25 +405,11 @@ function CategorySubSection(main) {
   CategorySubSectionContent.addEventListener("click", (e) => {
     displaySectionOption(e);
     displayOption(e);
-    setCatRefToSEO(e);
+    setCatRefToOptions(e);
+    handleSectionEllipseOptions(e);
   });
 
-  function handleSectionEllipseOptions(e) {
-    const btn = e.target.dataset.btn;
-
-    const elemWithCategoryRef = e.target.closest("[data-category-reference]");
-
-    const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
-
-    if (btn === "addTask") {
-      categoryReference.update(categoryRef);
-
-      debugger;
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);
-    }
-  }
-
-  sectionEllipseOptions.addEventListener("click", handleSectionEllipseOptions);
+  // sectionEllipseOptions.addEventListener("click", handleSectionEllipseOptions);
 
   returnBack.addEventListener("click", returnToPreviousPage);
 
