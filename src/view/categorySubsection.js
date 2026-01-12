@@ -5,7 +5,8 @@ import {
   sortTaskBaseOnPriority,
   getCategoryKey,
   categoryTypeHandler,
-  categoryReference
+  categoryReference,
+  path
 } from "../config/constant";
 import EVENTS from "../config/EVENTS";
 
@@ -97,6 +98,10 @@ function CategorySubSection(main) {
     categoryTitle.textContent = title;
     categoryTitle.setAttribute("data-category-index", categoryIndex);
     categoryTitle.setAttribute("data-root", root);
+    categoryTitle.setAttribute(
+      "data-category-reference",
+      `${[root, categoryIndex]}`
+    );
   };
 
   const CreateTaskNotInSectionHolder = () => {
@@ -128,8 +133,6 @@ function CategorySubSection(main) {
     taskAndSubsectionHolder.innerHTML = "";
   };
 
-  // Make the createSectionOptions to be inserted in sectionTitleAndEllipse
-  // For deleting of section and updating the reference to the designated section.
   const sectionEllipseOptions = (function createSectionEllipseOptions() {
     const div = document.createElement("div");
     div.classList.add("sectionEllipseOptions", "close");
@@ -170,6 +173,14 @@ function CategorySubSection(main) {
 
   const createTaskInSectionHolder = CreateTaskInSectionHolder();
 
+  const setSectionTAEAttr = (sectionTitleAndEllipse, index) => {
+    const categoryRef = categoryTitle.getAttribute("data-category-reference");
+    sectionTitleAndEllipse.setAttribute(
+      "data-category-reference",
+      `${categoryRef},${index}`
+    );
+  };
+
   const handleDisplayTaskInSubsection = (categoryArr) => {
     for (let i = 1; i < categoryArr.length; i++) {
       const sectionElem = createTaskInSectionHolder.getSectionHolder();
@@ -180,6 +191,8 @@ function CategorySubSection(main) {
         sectionElem.sectionTitleAndEllipse.querySelector(".subsection_title");
 
       sectionTitle.textContent = sectionObj.sectionTitle;
+
+      setSectionTAEAttr(sectionElem.sectionTitleAndEllipse, i);
 
       taskAndSubsectionHolder.append(sectionElem.sectionTitleAndEllipse);
 
@@ -345,6 +358,16 @@ function CategorySubSection(main) {
     }
   }
 
+  function updateCategoryReference(e) {
+    const elemWithCategoryRef = e.target.closest("[data-category-reference]");
+
+    if (!elemWithCategoryRef) return;
+
+    const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
+
+    categoryReference.update(categoryRef);
+  }
+
   iconSaveSection.addEventListener("click", saveSection);
 
   btnDeleteCategory.addEventListener("click", deleteCategory);
@@ -352,6 +375,7 @@ function CategorySubSection(main) {
   CategorySubSectionContent.addEventListener("click", (e) => {
     displaySectionOption(e);
     displayOption(e);
+    updateCategoryReference(e);
   });
 
   returnBack.addEventListener("click", returnToPreviousPage);

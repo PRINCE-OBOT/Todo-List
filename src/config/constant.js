@@ -117,7 +117,7 @@ function TaskAndCategoryHandler() {
   };
 
   const deleteTask = () => {
-    let index = castegoryReference.get().pop();
+    let index = categoryReference.get().pop();
 
     const lastReferenceTaskSection = getLastReferenceTask();
 
@@ -243,10 +243,10 @@ function Path() {
   const getLastIndexOfNumber = (categoryReference) =>
     categoryReference.findLastIndex((reference) => Number.isInteger(reference));
 
-  const constructCategoryReference = (task) => {
-    if (Array.isArray(task)) return task;
+  const constructCategoryReference = (elemWithCatRef) => {
+    if (Array.isArray(elemWithCatRef)) return elemWithCatRef;
 
-    const pathStringFormat = task.getAttribute(DATA_CAT_REF);
+    const pathStringFormat = elemWithCatRef.getAttribute(DATA_CAT_REF);
 
     return pathStringFormat
       .split(",")
