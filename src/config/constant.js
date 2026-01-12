@@ -260,9 +260,9 @@ function Path() {
   };
 
   const generateCategory = (elemWithCategoryRef) => {
-    const referenceArrayFormat = Array.isArray(elemWithCategoryRef)
-      ? elemWithCategoryRef
-      : constructCategoryReference(elemWithCategoryRef);
+    const referenceArrayFormat = elemWithCategoryRef
+      ? constructCategoryReference(elemWithCategoryRef)
+      : categoryReference.get();
 
     const categoryPathReference = referenceArrayFormat.slice(
       0,

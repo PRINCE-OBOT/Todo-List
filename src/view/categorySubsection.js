@@ -178,7 +178,8 @@ function CategorySubSection(main) {
   const createTaskInSectionHolder = CreateTaskInSectionHolder();
 
   const setSectionTAEAttr = (sectionTitleAndEllipse, index) => {
-    const categoryRef = categoryTitle.getAttribute("data-category-reference");
+    const categoryRef = sectionHeader.getAttribute("data-category-reference");
+    
     sectionTitleAndEllipse.setAttribute(
       "data-category-reference",
       `${categoryRef},${index}`
@@ -343,9 +344,9 @@ function CategorySubSection(main) {
       const bottomValue = bottomOfTaskAndSectionHolder - bottomOfParent;
 
       sectionEllipseOptions.style.top = "auto";
-      sectionEllipseOptions.style.bottom = `${bottomValue}px`;
+      sectionEllipseOptions.style.bottom = `${bottomValue + 10}px`;
     } else {
-      sectionEllipseOptions.style.top = `${topOfParent}px`;
+      sectionEllipseOptions.style.top = `${topOfParent + 30}px`;
       sectionEllipseOptions.style.bottom = "auto";
     }
 
@@ -372,6 +373,7 @@ function CategorySubSection(main) {
       "data-category-reference"
     );
 
+
     if (!elem) {
       sectionOptions.setAttribute("data-category-reference", categoryRef);
     } else {
@@ -392,6 +394,10 @@ function CategorySubSection(main) {
     const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
 
     if (btn === "addTask") {
+      if (categoryRef.length === 2) {
+        categoryRef.push(0);
+      }
+
       categoryReference.update(categoryRef);
 
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);

@@ -505,15 +505,14 @@ dialog::backdrop {
   border-radius: 10px;
 }
 
-.sectionEllipseOptions{
-  position: absolute;
+.sectionEllipseOptions {
+  position: fixed;
   display: flex;
   flex-direction: column;
   row-gap: var(--gp-sm);
 
-  position: absolute;
   z-index: 100;
-  right: 0;
+  right: calc(50% - var(--container_width) / 2);
   background: var(--black);
   border: 2px solid var(--transparent);
   padding: var(--pd-sm);
@@ -535,14 +534,13 @@ dialog::backdrop {
 }
 /* Category subsection */
 
-
 .categorySubsectionContent {
   display: flex;
-  
+
   flex: 1;
 }
 
-.taskSectionHolder{
+.taskSectionHolder {
   display: flex;
   flex-direction: column;
 
