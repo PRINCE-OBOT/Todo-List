@@ -259,8 +259,10 @@ function Path() {
       .slice(getLastIndexOfNumber(categoryReference.get()) + 1);
   };
 
-  const generateCategory = (task) => {
-    const referenceArrayFormat = constructCategoryReference(task);
+  const generateCategory = (elemWithCategoryRef) => {
+    const referenceArrayFormat = Array.isArray(elemWithCategoryRef)
+      ? elemWithCategoryRef
+      : constructCategoryReference(elemWithCategoryRef);
 
     const categoryPathReference = referenceArrayFormat.slice(
       0,

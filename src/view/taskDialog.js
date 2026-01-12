@@ -257,11 +257,12 @@ function TaskDialog() {
     taskDialogContent.showModal();
   };
 
-  const displayAddTaskDialog = (msg) => {
+  const displayAddTaskDialog = (msg, categoryRef) => {
+    
     form.title.value = "";
     form.date.value = "";
     form.description.value = "";
-    taskTitle.textContent = "Inbox";
+    taskTitle.textContent = path.generateCategory(categoryRef);
     form.input_label.value = "";
 
     hr.classList.add("hide");

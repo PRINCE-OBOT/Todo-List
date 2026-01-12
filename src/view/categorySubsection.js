@@ -138,7 +138,7 @@ function CategorySubSection(main) {
     div.classList.add("sectionEllipseOptions", "close");
 
     div.innerHTML = `
-      <div data-display="task" class="cursor_pointer">Add Task</div>
+      <div data-btn="addTask" class="cursor_pointer">Add Task</div>
       <div data-delete="section">Delete Section</div>
     `;
 
@@ -358,14 +358,24 @@ function CategorySubSection(main) {
     }
   }
 
-  function updateCategoryReference(e) {
+  function setCatRefToSEO(e) {
     const elemWithCategoryRef = e.target.closest("[data-category-reference]");
+    const elem = e.target.closest(".task_and_subsection_holder");
 
     if (!elemWithCategoryRef) return;
 
-    const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
+    const categoryRef = elemWithCategoryRef.getAttribute(
+      "data-category-reference"
+    );
 
-    categoryReference.update(categoryRef);
+    if (!elem) {
+      sectionOptions.setAttribute("data-category-reference", categoryRef);
+    } else {
+      sectionEllipseOptions.setAttribute(
+        "data-category-reference",
+        categoryRef
+      );
+    }
   }
 
   iconSaveSection.addEventListener("click", saveSection);
@@ -375,8 +385,25 @@ function CategorySubSection(main) {
   CategorySubSectionContent.addEventListener("click", (e) => {
     displaySectionOption(e);
     displayOption(e);
-    updateCategoryReference(e);
+    setCatRefToSEO(e);
   });
+
+  function handleSectionEllipseOptions(e) {
+    const btn = e.target.dataset.btn;
+
+    const elemWithCategoryRef = e.target.closest("[data-category-reference]");
+
+    const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
+
+    if (btn === "addTask") {
+      categoryReference.update(categoryRef);
+
+      debugger;
+      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);
+    }
+  }
+
+  sectionEllipseOptions.addEventListener("click", handleSectionEllipseOptions);
 
   returnBack.addEventListener("click", returnToPreviousPage);
 
