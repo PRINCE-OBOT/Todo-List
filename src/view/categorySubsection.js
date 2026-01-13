@@ -33,17 +33,17 @@ function CategorySubSection(main) {
         <div class="sectionOptions close">
           <div data-add="section" class="cursor_pointer">Add Section</div>
           
-          <div data-btn="addTask" class="cursor_pointer">Add Task</div>
-
           <div class="enterSectionCon hide">
-            <input
+          <input
               name="enterSection"
               class="enterSection"
               data-avoid="true"
               placeholder="Enter Section Name"
-            />
-            <span class="iconSaveSection cursor_pointer">✅</span>
-          </div>
+              />
+              <span class="iconSaveSection cursor_pointer">✅</span>
+              </div>
+              
+          <div data-btn="addTask" class="cursor_pointer">Add Task</div>
         </div>
       </div>
 
@@ -72,7 +72,7 @@ function CategorySubSection(main) {
 
   btnDeleteCategory.textContent = "Delete Project";
   btnDeleteCategory.classList.add("cursor_pointer");
-  btnDeleteCategory.setAttribute("data-delete", "section");
+  btnDeleteCategory.setAttribute("data-btn", "delete");
 
   const inboxArr = [];
 
@@ -143,7 +143,7 @@ function CategorySubSection(main) {
 
     div.innerHTML = `
       <div data-btn="addTask" class="cursor_pointer">Add Task</div>
-      <div data-delete="section">Delete Section</div>
+      <div data-btn="deleteSection">Delete Section</div>
     `;
 
     return div;
@@ -179,7 +179,7 @@ function CategorySubSection(main) {
 
   const setSectionTAEAttr = (sectionTitleAndEllipse, index) => {
     const categoryRef = sectionHeader.getAttribute("data-category-reference");
-    
+
     sectionTitleAndEllipse.setAttribute(
       "data-category-reference",
       `${categoryRef},${index}`
@@ -373,7 +373,6 @@ function CategorySubSection(main) {
       "data-category-reference"
     );
 
-
     if (!elem) {
       sectionOptions.setAttribute("data-category-reference", categoryRef);
     } else {
@@ -384,8 +383,8 @@ function CategorySubSection(main) {
     }
   }
 
-  function handleSectionEllipseOptions(e) {
-    const btn = e.target.dataset.btn;
+  function handleOptionsInEllipse(e) {
+    const option = e.target.dataset.btn;
 
     const elemWithCategoryRef = e.target.closest("[data-category-reference]");
 
@@ -393,7 +392,7 @@ function CategorySubSection(main) {
 
     const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
 
-    if (btn === "addTask") {
+    if (option === "addTask") {
       if (categoryRef.length === 2) {
         categoryRef.push(0);
       }
@@ -401,6 +400,17 @@ function CategorySubSection(main) {
       categoryReference.update(categoryRef);
 
       PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);
+    }
+
+    categoryReference.update(categoryRef);
+
+    const categoryIndex = +categoryTitle.getAttribute("data-category-index");
+
+    if (option === "deleteSection") {
+      taskAndCategoryHandler.deleteTask();
+      renderMyProject("", { value: "", categoryIndex });
+    } else if (option === "deleteCategory") {
+      taskAndCategoryHandler.deleteTask();
     }
   }
 
@@ -412,10 +422,8 @@ function CategorySubSection(main) {
     displaySectionOption(e);
     displayOption(e);
     setCatRefToOptions(e);
-    handleSectionEllipseOptions(e);
+    handleOptionsInEllipse(e);
   });
-
-  // sectionEllipseOptions.addEventListener("click", handleSectionEllipseOptions);
 
   returnBack.addEventListener("click", returnToPreviousPage);
 

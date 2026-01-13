@@ -120,7 +120,7 @@ function TaskAndCategoryHandler() {
     let index = categoryReference.get().pop();
 
     const lastReferenceTaskSection = getLastReferenceTask();
-
+    
     index = isIndexID(index, lastReferenceTaskSection);
 
     lastReferenceTaskSection.splice(index, 1);
