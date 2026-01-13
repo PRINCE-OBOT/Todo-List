@@ -72,7 +72,7 @@ function CategorySubSection(main) {
 
   btnDeleteCategory.textContent = "Delete Project";
   btnDeleteCategory.classList.add("cursor_pointer");
-  btnDeleteCategory.setAttribute("data-btn", "delete");
+  btnDeleteCategory.setAttribute("data-btn", "deleteCategory");
 
   const inboxArr = [];
 
@@ -304,16 +304,6 @@ function CategorySubSection(main) {
     }
   }
 
-  function deleteCategory() {
-    const { categoryIndex, root } = getRootAndIndex();
-
-    categoryReference.update([root, +categoryIndex]);
-
-    taskAndCategoryHandler.deleteTask();
-
-    returnToPreviousPage();
-  }
-
   const getTopOfParent = (parent) => {
     const rect = parent.getBoundingClientRect();
 
@@ -411,12 +401,11 @@ function CategorySubSection(main) {
       renderMyProject("", { value: "", categoryIndex });
     } else if (option === "deleteCategory") {
       taskAndCategoryHandler.deleteTask();
+      returnToPreviousPage();
     }
   }
 
   iconSaveSection.addEventListener("click", saveSection);
-
-  btnDeleteCategory.addEventListener("click", deleteCategory);
 
   CategorySubSectionContent.addEventListener("click", (e) => {
     displaySectionOption(e);
