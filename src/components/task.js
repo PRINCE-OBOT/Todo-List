@@ -1,4 +1,5 @@
 import keys from "../constant";
+import DOMHistory from "../DOMHistory";
 import EVENTS from "../events";
 import storage from "../storage";
 import todoList from "../todo_list";
@@ -37,11 +38,11 @@ function DOMTask() {
   const TaskAction = {
     delete: () => {
       todoList.delete();
+      DOMHistory.removeLast();
     },
     view: () => {
       const todoListObj = storage.get(keys.todo_list);
       const taskObj = todoList.get(todoListObj);
-      
       PubSub.publish(EVENTS.SHOW_TASK_DIALOG, taskObj);
     },
     mark: (target) => {
@@ -54,9 +55,11 @@ function DOMTask() {
 
     if (!taskAction) return;
 
-    const categoryPath = e.target
-      .closest("[data-category-path]")
-      ?.getAttribute("data-category-path");
+    const taskSection = e.target.closest("[data-category-path]");
+
+    DOMHistory.add(taskSection);
+
+    const categoryPath = taskSection.getAttribute("data-category-path");
 
     todoList.pathUpdate(categoryPath);
 

@@ -26,8 +26,6 @@ function Nav() {
   const rerender = () => {
     const recentContent = navHistory[navHistory.length - 1];
 
-    debugger;
-
     navContent({ target: { dataset: { nav: recentContent } } });
   };
 

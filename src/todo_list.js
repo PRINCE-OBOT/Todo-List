@@ -329,6 +329,17 @@ class TodoList {
     storage.set(keys.todo_list, todoListObj);
   }
 
+  delete() {
+    const todoListObj = storage.get(keys.todo_list);
+
+    const { index, subsequentArrOfCategory } =
+      this.#getSubsequentArrOfCategory(todoListObj);
+
+    subsequentArrOfCategory.splice(index, 1);
+
+    storage.set(keys.todo_list, todoListObj);
+  }
+
   get(todoListObj) {
     const { index, subsequentArrOfCategory } =
       this.#getSubsequentArrOfCategory(todoListObj);
