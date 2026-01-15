@@ -24,13 +24,13 @@ class Section {
 
 class TaskTemplate {
   constructor({ description, dueDate, priority }) {
-    this.id = crypto.randomUUID();
+    this._id = crypto.randomUUID();
     this.description = description;
-    this.createdAt = new Date();
     this.dueDate = dueDate;
     this.priority = priority;
-    this.categoryPath = [...todoList.pathGet(), this.id];
-    this.subtasks = [];
+    this._createdAt = new Date();
+    this._categoryPath = [...todoList.pathGet(), this._id];
+    this._subtasks = [];
   }
 }
 

@@ -237,7 +237,7 @@ class TodoList {
   }
 
   #findIndex(categories, id) {
-    return categories.findIndex((category) => category.id === id);
+    return categories.findIndex((category) => category._id === id);
   }
 
   #getArrOfCategory(todoListObj) {
@@ -340,6 +340,20 @@ class TodoList {
     storage.set(keys.todo_list, todoListObj);
   }
 
+  edit(taskValue) {
+    const todoListObj = storage.get(keys.todo_list);
+
+    const taskObj = this.get(todoListObj);
+
+    for (const key in taskValue) {
+      if (!key.startsWith("_")) {
+        taskObj[key] = taskValue[key];
+      }
+    }
+
+    storage.set(keys.todo_list, todoListObj);
+  }
+
   get(todoListObj) {
     const { index, subsequentArrOfCategory } =
       this.#getSubsequentArrOfCategory(todoListObj);
@@ -376,6 +390,14 @@ class TodoList {
 
   pathLast() {
     return this.path[this.path.length - 1];
+  }
+
+  pathTaskIDLength() {
+    return console.log(
+      this.path.slice(
+        this.path.findLastIndex((path) => Number.isInteger(path) + 1)
+      ).length
+    );
   }
 
   pathUpdate(categoryPath) {

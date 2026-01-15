@@ -110,7 +110,7 @@ function TaskDialog() {
   const inputCreatedAt = document.createElement("input");
   const title_createAt = document.createElement("p");
 
-  inputCreatedAt.name = 'createdAt'
+  inputCreatedAt.name = "createdAt";
   inputCreatedAt.readOnly = true;
   title_createAt.textContent = "Created";
 
@@ -126,7 +126,7 @@ function TaskDialog() {
   const showFillTaskDialog = (taskObj) => {
     taskPath.textContent = todoList.pathFormat();
     form.title.value = taskObj.taskTitle || taskObj.subtaskTitle;
-    inputCreatedAt.value = formatDate(taskObj?.createdAt);
+    inputCreatedAt.value = formatDate(taskObj?._createdAt);
     form.dueDate.value = formatDate(taskObj?.dueDate);
     form.description.value = taskObj.description;
 
@@ -144,7 +144,7 @@ function TaskDialog() {
     setValueOfSelect(taskObj, "label");
     form.input_label.value = form.label.value;
 
-    isSubtask(taskObj.subtasks);
+    isSubtask(taskObj[keys.subtasks]);
 
     taskDialogContent.showModal();
   };
@@ -159,7 +159,7 @@ function TaskDialog() {
     hr.classList.add("hide");
 
     inputCreatedAt.remove();
-    title_createAt.remove()
+    title_createAt.remove();
     subtaskSection.remove();
     addSubtaskBtn.remove();
 
@@ -182,13 +182,6 @@ function TaskDialog() {
     }
   };
 
-  const markStatus = (target) => {
-    PubSub.publishSync(EVENTS.UI.MARK, {
-      target,
-      taskSection: currentTaskSection
-    });
-    taskDialogContent.close();
-  };
 
   const changeLabel = () => {
     form.input_label.value = form.label.value;
@@ -257,28 +250,32 @@ function TaskDialog() {
     };
   };
 
-  const isAddingSubtask = () => {
-    return Number.isNaN(+todoList.pathLast());
-  };
-
   function saveTask() {
     const taskValue = getTaskValue();
-
-    const categoryObj = isAddingSubtask()
-      ? new Subtask({ ...taskValue })
-      : new Task({
-          ...taskValue
-        });
-
-        debugger
 
     const saveBtnAction = form.saveTaskButton.getAttribute(
       "data-save-btn-action"
     );
 
+    let categoryObj;
+
     if (saveBtnAction === keys.edit) {
+      categoryObj =
+        todoList.pathTaskIDLength() > 1
+          ? new Subtask({ ...taskValue })
+          : new Task({
+              ...taskValue
+            });
       todoList.edit(categoryObj);
+
     } else {
+      categoryObj =
+        todoList.pathTaskIDLength() >= 1
+          ? new Subtask({ ...taskValue })
+          : new Task({
+              ...taskValue
+            });
+
       todoList.add(categoryObj);
     }
 
@@ -288,8 +285,8 @@ function TaskDialog() {
   const taskDialogAction = {
     saveTask,
     markStatus: (target) => {
-      DOMtask.mark(target)
-      taskDialogContent.close()
+      DOMtask.mark(target);
+      taskDialogContent.close();
     },
     changeLabel
   };

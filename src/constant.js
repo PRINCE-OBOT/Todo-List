@@ -3,9 +3,9 @@ const keys = {
   todo_list: "todo_list",
 
   // Category subsection Key
-  sections: "sections",
-  tasks: "tasks",
-  subtasks: "subtasks",
+  sections: "_sections",
+  tasks: "_tasks",
+  subtasks: "_subtasks",
 
   // Category title
   projectTitle: "projectTitle",

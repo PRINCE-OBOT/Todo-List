@@ -89,7 +89,7 @@ function DOMTask() {
   const set = (taskObj, callback) => {
     const task = template();
 
-    task.setAttribute("data-category-path", taskObj.categoryPath);
+    task.setAttribute("data-category-path", taskObj._categoryPath);
 
     const priority = task.querySelector("[data-priority]");
     const title = task.querySelector(".title");
