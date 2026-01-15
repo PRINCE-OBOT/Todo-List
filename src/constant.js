@@ -5,6 +5,7 @@ const keys = {
   // Category subsection Key
   sections: "sections",
   tasks: "tasks",
+  subtasks: "subtasks",
 
   // Category title
   projectTitle: "projectTitle",

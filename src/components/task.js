@@ -39,8 +39,9 @@ function DOMTask() {
       todoList.delete();
     },
     view: () => {
-      const todoListObj = storage.get(keys.todo_list)
+      const todoListObj = storage.get(keys.todo_list);
       const taskObj = todoList.get(todoListObj);
+      
       PubSub.publish(EVENTS.SHOW_TASK_DIALOG, taskObj);
     },
     mark: (target) => {
@@ -53,7 +54,9 @@ function DOMTask() {
 
     if (!taskAction) return;
 
-    const categoryPath = e.target.closest("[data-category-path]")?.getAttribute("data-category-path");
+    const categoryPath = e.target
+      .closest("[data-category-path]")
+      ?.getAttribute("data-category-path");
 
     todoList.pathUpdate(categoryPath);
 

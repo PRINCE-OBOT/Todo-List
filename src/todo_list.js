@@ -278,6 +278,8 @@ class TodoList {
       ? this.#findIndex(subsequentArrOfCategory, lastPath)
       : lastPath;
 
+    this.path.push(lastPath);
+
     return { index, subsequentArrOfCategory };
   }
 
@@ -358,7 +360,7 @@ class TodoList {
   }
 
   pathDefault() {
-    this.path.splice(0, this.path.length, keys.inbox, 0);
+    this.path = [keys.inbox, 0];
   }
 
   pathLast() {
@@ -373,7 +375,7 @@ class TodoList {
           .map((path) => (Number.isNaN(+path) ? path : +path));
 
     this.path = [...path];
-    console.log(this.path)
+    console.log(this.path);
   }
 
   pathAdd(path) {

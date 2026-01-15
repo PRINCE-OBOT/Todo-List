@@ -289,7 +289,7 @@ p {
   bottom: 55px;
   right: 5px;
   max-width: fit-content;
-  padding: var(--pd-sm);
+  padding: var(--sz-sm);
   background: var(--white);
   border-radius: 10px;
   color: var(--black);
@@ -359,9 +359,7 @@ dialog::backdrop {
 
 .dialog_form .description {
   height: 50px;
-  border: 1px solid var(--transparent-white);
-  padding: var(--sz-sm);
-  border-radius: var(--sz-sm);
+  padding-top: var(--sz-sm);
   flex: 1;
 }
 
@@ -380,11 +378,16 @@ dialog::backdrop {
 .task_dialog_date_section {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: var(--sz-sm);
+  gap: var(--sz-lg);
 }
 
 .task_dialog_date_section p {
   padding-top: var(--pd-sm);
+}
+
+.dueDate{
+  border-right: 2px solid var(--transparent-white);
+  border-radius: 0  var(--sz-sm) var(--sz-sm) 0;
 }
 
 /* Search page styles */

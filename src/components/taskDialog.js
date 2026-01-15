@@ -47,7 +47,7 @@ function TaskDialog() {
         <span>📅</span>
         <div class="task_dialog_date_section">
           <p>Due Date</p>
-          <input name="dueDate" type="date" />
+          <input name="dueDate" type="date" class="dueDate" />
         </div>
       </div>
 
@@ -125,7 +125,7 @@ function TaskDialog() {
 
   const showFillTaskDialog = (taskObj) => {
     taskPath.textContent = todoList.pathFormat();
-    form.title.value = taskObj.taskTitle || taskObj.subTitle;
+    form.title.value = taskObj.taskTitle || taskObj.subtaskTitle;
     inputCreatedAt.value = formatDate(taskObj?.createdAt);
     form.dueDate.value = formatDate(taskObj?.dueDate);
     form.description.value = taskObj.description;
@@ -269,6 +269,8 @@ function TaskDialog() {
       : new Task({
           ...taskValue
         });
+
+        debugger
 
     const saveBtnAction = form.saveTaskButton.getAttribute(
       "data-save-btn-action"

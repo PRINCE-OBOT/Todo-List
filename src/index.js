@@ -8,6 +8,7 @@ import TaskDialog from "./components/taskDialog";
 import storage from "./storage";
 import keys from "./constant";
 import { CategoryRoot } from "./category";
+import todoList from "./todo_list";
 
 const navContentHolder = document.querySelector("[data-nav-content-holder]");
 const navHolder = document.querySelector("[data-nav-holder]");
@@ -54,3 +55,5 @@ const navComponent = [Today, TaskDialog, Nav];
 navComponent.forEach((component) => {
   component(navContentHolder).init();
 });
+
+window.todoList = todoList
