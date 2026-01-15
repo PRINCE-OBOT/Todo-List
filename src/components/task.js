@@ -1,13 +1,9 @@
-import {
-  categoryReference,
-  path,
-  taskAndCategoryHandler
-} from "../config/constant";
-import EVENTS from "../config/EVENTS";
+import keys from "../constant";
+import EVENTS from "../events";
+import storage from "../storage";
+import todoList from "../todo_list";
 
-const DATA_CAT_REF = "data-category-reference";
-
-const CreateTaskTemplate = () => {
+function DOMTask() {
   const task = document.createElement("div");
   task.classList.add("task");
   task.setAttribute("data-task-action", "view");
@@ -38,96 +34,75 @@ const CreateTaskTemplate = () => {
     </div>
   `;
 
-  const getTaskTemplate = () => {
+  const TaskAction = {
+    delete: () => {
+      todoList.delete();
+    },
+    view: () => {
+      const todoListObj = storage.get(keys.todo_list)
+      const taskObj = todoList.get(todoListObj);
+      PubSub.publish(EVENTS.SHOW_TASK_DIALOG, taskObj);
+    },
+    mark: (target) => {
+      markTask(target.checked);
+    }
+  };
+
+  function handleTaskAction(e) {
+    const taskAction = e.target.dataset.taskAction;
+
+    if (!taskAction) return;
+
+    const categoryPath = e.target.closest("[data-category-path]")?.getAttribute("data-category-path");
+
+    todoList.pathUpdate(categoryPath);
+
+    TaskAction[taskAction](e.target);
+  }
+
+  const template = () => {
     const cloneTask = task.cloneNode(true);
-
     cloneTask.addEventListener("click", handleTaskAction);
-
     return cloneTask;
   };
 
-  return { getTaskTemplate };
-};
+  const markTask = (target) => {
+    todoList.mark(target.checked);
 
-const getClosestElement = (target, value) => {
-  return target.closest(`[${value}]`);
-};
+    const lastTaskSection = taskSection.getLast();
 
-const TaskAction = {
-  delete: (target) => {
-    taskAndCategoryHandler.deleteTask();
-    const taskSection = target.closest(".task");
-    taskSection.remove();
-  },
-  view: (target) => {
-    const task = taskAndCategoryHandler.getTask();
-    const taskSection = target.closest(`[${DATA_CAT_REF}]`);
+    lastTaskSection.textContent = "Task ";
 
-    categoryReference.update(path.constructCategoryReference(taskSection));
+    lastTaskSection.textContent += target.checked
+      ? "Completed"
+      : "Not completed";
 
-    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.VIEW_TASK_DIALOG, {
-      task,
-      taskSection
-    });
-  },
-  mark: (target) => {
-    markTask(null, { target });
-  }
-};
+    setTimeout(() => lastTaskSection.classList.add("task_mark"), 1000);
 
-const markTask = (msg, { target, taskSection }) => {
-  PubSub.publish(EVENTS.TODO_LIST.CATEGORY.MARK, target.checked);
+    setTimeout(() => lastTaskSection.remove(), 1290);
+  };
 
-  if (!msg) {
-    taskSection = getClosestElement(target, DATA_CAT_REF);
-  }
+  const set = (taskObj, callback) => {
+    const task = template();
 
-  taskSection.textContent = "Task ";
+    task.setAttribute("data-category-path", taskObj.categoryPath);
 
-  taskSection.textContent += target.checked ? "Completed" : "Not completed";
+    const priority = task.querySelector("[data-priority]");
+    const title = task.querySelector(".title");
+    const description = task.querySelector(".description");
 
-  setTimeout(() => taskSection.classList.add("task_mark"), 1000);
+    priority.setAttribute("data-priority", taskObj.priority);
 
-  setTimeout(() => taskSection.remove(), 1290);
-};
+    title.textContent = taskObj[keys.taskTitle] || taskObj[keys.subtaskTitle];
 
-function handleTaskAction(e) {
-  const taskDataset = e.target.dataset;
+    description.textContent = taskObj.description;
 
-  if (!taskDataset.taskAction) return;
+    callback(task, taskObj);
+  };
 
-  const taskSection = e.target.closest(`[${DATA_CAT_REF}]`);
-
-  const referenceArrayFormat = path.constructCategoryReference(taskSection);
-
-  categoryReference.update(referenceArrayFormat);
-
-  TaskAction[taskDataset.taskAction](e.target);
+  return { set };
 }
 
-PubSub.subscribe(EVENTS.UI.MARK, markTask);
+const DOMtask = DOMTask();
 
-const taskTemplate = CreateTaskTemplate();
-
-const setTaskValue = (category, callback) => {
-  const task = taskTemplate.getTaskTemplate();
-
-  task.setAttribute(DATA_CAT_REF, category.category);
-
-  const priority = task.querySelector("[data-priority]");
-  const title = task.querySelector(".title");
-  const description = task.querySelector(".description");
-  const categoryTitle = task.querySelector(".categoryTitle");
-
-  priority.setAttribute("data-priority", category.priority);
-
-  title.textContent = category.title || category.subtitle;
-
-  categoryTitle.textContent = path.generateCategory(task);
-
-  description.textContent = category.description;
-
-  callback(task, category);
-};
-
-export { setTaskValue };
+export { DOMtask };

@@ -1,34 +1,56 @@
 import "./style.css";
 import PubSub from "pubsub-js";
-import EVENTS from "./config/EVENTS";
-import homePage from "./view/heroPage";
-import mainNavController from "./view/mainNavController";
-import Today from "./view/today";
-import Search from "./view/search";
-import taskDialog from "./view/taskDialog";
-import CategoryPage from "./view/category";
-import { categoryReference, taskAndCategoryHandler } from "./config/constant";
-import CategorySubSection from "./view/categorySubsection";
+import EVENTS from "./events";
+// import homePage from "./view/heroPage";
+import Today from "./today";
+// import Search from "./view/search";
+import TaskDialog from "./components/taskDialog";
+import storage from "./storage";
+import keys from "./constant";
+import { CategoryRoot } from "./category";
 
-const changeViewHolder = document.querySelector("[data-change-view-holder");
-const mainNavigation = document.querySelector("[data-main-navigation]");
+const navContentHolder = document.querySelector("[data-nav-content-holder]");
+const navHolder = document.querySelector("[data-nav-holder]");
 
-const categoryPage = CategoryPage(mainNavigation, changeViewHolder);
+if (!storage.get(keys.todo_list))
+  storage.set(keys.todo_list, new CategoryRoot());
 
-const components = [homePage, categoryPage];
+function Nav() {
+  const init = () => {
+    PubSub.subscribe(EVENTS.NAV_RERENDER, rerender);
+  };
 
-[Search, Today, taskDialog, CategorySubSection].forEach((component) => {
-  components.push(component(changeViewHolder));
+  const navHistory = [];
+
+  const rerender = () => {
+    const recentContent = navHistory[navHistory.length - 1];
+
+    debugger;
+
+    navContent({ target: { dataset: { nav: recentContent } } });
+  };
+
+  function navContent(e) {
+    const nav = e.target.dataset.nav;
+
+    if (!nav) return;
+
+    navContentHolder.innerHTML = "";
+
+    navHistory.push(nav);
+
+    PubSub.publish(EVENTS[nav]);
+  }
+
+  navContent({ target: { dataset: { nav: "TODAY" } } });
+
+  navHolder.addEventListener("click", navContent);
+
+  return { init };
+}
+
+const navComponent = [Today, TaskDialog, Nav];
+
+navComponent.forEach((component) => {
+  component(navContentHolder).init();
 });
-
-// Initializing all the module
-(function initComponent() {
-  components.forEach((component) => component.init());
-})();
-
-// Initialize the module separately as it requires some argument
-mainNavController.init(mainNavigation, changeViewHolder);
-
-PubSub.publish(EVENTS.PAGE.LOAD.MAIN_NAV_CONTROLLER);
-
-window.todo = { taskAndCategoryHandler, categoryReference };

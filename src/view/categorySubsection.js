@@ -418,5 +418,8 @@ function CategorySubSection(main) {
 
   return { init };
 }
+// Make adding task in subsection to categorize under the subsection path in the taskDialog
+// fix problem when the inbox refreshes due to situation like when the changes happen in the inbox thereby remove the inbox title
+
 
 export default CategorySubSection;

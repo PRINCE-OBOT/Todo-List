@@ -1,0 +1,13 @@
+const EVENTS = {
+  NAV_RERENDER: "NAV_RERENDER",
+  
+  SHOW_TASK_DIALOG: "SHOW_TASK_DIALOG",
+
+  // Nav (Pages)
+  TODAY: "TODAY",
+  SEARCH: "SEARCH",
+  CATEGORY: "CATEGORY",
+  SUBCATEGORY: "SUBCATEGORY"
+};
+
+export default EVENTS;

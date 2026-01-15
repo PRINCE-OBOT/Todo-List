@@ -5,9 +5,8 @@ import { setTaskValue } from "../components/task";
 
 function TaskDialog() {
   const init = () => {
-    PubSub.subscribe(EVENTS.PAGE.REMOVE.TASK_DIALOG, removeTaskDialog);
     PubSub.subscribe(
-      EVENTS.TODO_LIST.CATEGORY.VIEW_TASK_DIALOG,
+      EVENTS.SHOW_TASK_DIALOG,
       displayViewTaskDialog
     );
     PubSub.subscribe(
