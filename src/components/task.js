@@ -31,7 +31,7 @@ function DOMTask() {
         </div>
       </div>
 
-      <p class="categoryTitle"></p>
+      <p class="categoryPath"></p>
     </div>
   `;
 
@@ -94,12 +94,12 @@ function DOMTask() {
     const priority = task.querySelector("[data-priority]");
     const title = task.querySelector(".title");
     const description = task.querySelector(".description");
+    const categoryPath = task.querySelector(".categoryPath");
 
     priority.setAttribute("data-priority", taskObj.priority);
-
     title.textContent = taskObj[keys.taskTitle] || taskObj[keys.subtaskTitle];
-
     description.textContent = taskObj.description;
+    categoryPath.textContent = todoList.pathFormat(taskObj._categoryPath);
 
     callback(task, taskObj);
   };

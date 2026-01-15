@@ -253,7 +253,7 @@ class TodoList {
       if (Array.isArray(category)) {
         categories = category;
       } else {
-        const key = this.#getCategoryKey(category, [
+        const key = this.#getKey(category, [
           keys.sections,
           keys.tasks,
           keys.subtasks
@@ -283,15 +283,16 @@ class TodoList {
     return { index, subsequentArrOfCategory };
   }
 
-  #getCategoryKey(category, categoryKeys) {
-    for (let i = 0; i < categoryKeys.length - 1; i++) {
+  #getKey(category, categoryKeys) {
+    for (let i = 0; i < categoryKeys.length; i++) {
       const key = categoryKeys[i];
 
       if (category[key]) {
         return key;
       }
     }
-    return categoryKeys[categoryKeys.length - 1];
+
+    return undefined;
   }
 
   #isTask(category, key, value, callback) {
@@ -372,10 +373,7 @@ class TodoList {
       } else {
         this.#isTask(category, key, value, callback);
 
-        const categoryKey = this.#getCategoryKey(category, [
-          keys.sections,
-          keys.tasks
-        ]);
+        const categoryKey = this.#getKey(category, [keys.sections, keys.tasks]);
 
         if (category[categoryKey]) {
           this.filter(category[categoryKey], key, value, callback);
@@ -419,26 +417,26 @@ class TodoList {
     return this.path;
   }
 
-  pathFormat() {
-    const root = this.path[0];
+  pathFormat(categoryPath) {
+    const path = categoryPath ? categoryPath : this.path;
 
     const todoListObj = storage.get(keys.todo_list);
 
-    let categories = todoListObj[root];
+    let categories = todoListObj[path[0]];
 
-    let path = root;
+    let pathStr = path[0];
 
-    for (let i = 1; i < categories.length; i++) {
-      const index = this.path[i];
+    for (let i = 1; i < path.length; i++) {
+      const index = path[i];
 
-      const key = this.#getCategoryKey(categories[index], [
+      const key = this.#getKey(categories[index], [
         keys.projectTitle,
         keys.sectionTitle
       ]);
 
-      if (!categories[index][key]) return path;
+      if (!categories[index][key]) return pathStr;
 
-      path += ` / ${categories[index][key]}`;
+      pathStr += ` / ${categories[index][key]}`;
 
       const subsectionKey = getCategoryKey(categories[index], [
         keys.sections,
