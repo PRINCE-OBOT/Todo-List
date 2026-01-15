@@ -287,7 +287,10 @@ function TaskDialog() {
 
   const taskDialogAction = {
     saveTask,
-    markStatus,
+    markStatus: (target) => {
+      DOMtask.mark(target)
+      taskDialogContent.close()
+    },
     changeLabel
   };
 

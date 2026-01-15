@@ -35,19 +35,33 @@ function DOMTask() {
     </div>
   `;
 
+  const mark = (target) => {
+    todoList.mark(target.checked);
+
+    const taskSection = DOMHistory.getLast();
+
+    taskSection.textContent = "Task ";
+
+    taskSection.textContent += target.checked ? "Completed" : "Not completed";
+
+    setTimeout(() => taskSection.classList.add("task_mark"), 1000);
+
+    setTimeout(() => taskSection.remove(), 1290);
+  };
+
+  const view = () => {
+    const todoListObj = storage.get(keys.todo_list);
+    const taskObj = todoList.get(todoListObj);
+    PubSub.publish(EVENTS.SHOW_TASK_DIALOG, taskObj);
+  };
+
   const TaskAction = {
     delete: () => {
       todoList.delete();
       DOMHistory.removeLast();
     },
-    view: () => {
-      const todoListObj = storage.get(keys.todo_list);
-      const taskObj = todoList.get(todoListObj);
-      PubSub.publish(EVENTS.SHOW_TASK_DIALOG, taskObj);
-    },
-    mark: (target) => {
-      markTask(target.checked);
-    }
+    view,
+    mark
   };
 
   function handleTaskAction(e) {
@@ -72,22 +86,6 @@ function DOMTask() {
     return cloneTask;
   };
 
-  const markTask = (target) => {
-    todoList.mark(target.checked);
-
-    const lastTaskSection = taskSection.getLast();
-
-    lastTaskSection.textContent = "Task ";
-
-    lastTaskSection.textContent += target.checked
-      ? "Completed"
-      : "Not completed";
-
-    setTimeout(() => lastTaskSection.classList.add("task_mark"), 1000);
-
-    setTimeout(() => lastTaskSection.remove(), 1290);
-  };
-
   const set = (taskObj, callback) => {
     const task = template();
 
@@ -106,7 +104,7 @@ function DOMTask() {
     callback(task, taskObj);
   };
 
-  return { set };
+  return { set, mark };
 }
 
 const DOMtask = DOMTask();

@@ -169,14 +169,14 @@ p {
   border-radius: var(--sz-sm);
   border: 2px solid var(--transparent-white);
   color: var(--white);
-  min-height: max-content;
+  height: 100px;
+  transition: 300ms;
 }
 
 .task.task_mark {
-  transition: 300ms;
-  padding: 0;
   overflow: hidden;
-  max-height: 0;
+  height: 0;
+  padding: 0;
 }
 
 .task :where(title, .description) {

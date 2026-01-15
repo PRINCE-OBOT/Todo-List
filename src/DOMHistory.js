@@ -11,8 +11,12 @@ class DOMHis {
     this.history[this.history.length - 1].remove();
   }
 
-  clear(){
-    this.history = []
+  getLast() {
+    return this.history, this.history[this.history.length - 1];
+  }
+
+  clear() {
+    this.history = [];
   }
 }
 
