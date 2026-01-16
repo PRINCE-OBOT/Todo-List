@@ -20,7 +20,7 @@ function Category(navContentHolder) {
 
     <div class="category_section_holder">
         <div class="inbox_filter_completed_section">
-            <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span>Inbox</span> <span class="number_of_inbox"></span></p>
+            <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span class="title" data-category-path="${keys.inbox}">${keys.inbox}</span> <span class="number_of_inbox"></span></p>
         </div>
         
         <div class="project_title_and_myProjectCategorySection">
@@ -54,56 +54,11 @@ function Category(navContentHolder) {
   const iconSaveCategory = categoryContent.querySelector(".iconSaveCategory");
   const enterCategory = categoryContent.querySelector(".enterCategory");
 
-  const setNumberOfInbox = (inboxArr) => {
-    numberOfInbox.textContent = inboxArr.length;
-  };
+  const numOfTask = [];
 
-  const inboxCategoryArr = [];
-
-  const resetCategory = () => {
-    inboxCategoryArr.splice(0);
-    myProjectCategorySection.innerHTML = "";
-  };
-
-  const myProjectCategoryArr = [];
-
-  const pushTaskToMyProjectCategoryArr = (task) => {
-    myProjectCategoryArr.push(true);
-  };
-
-  const pushTaskToInboxArr = (task) => {
-    inboxCategoryArr.push(task);
-  };
-
-  const categorySectionHolder = categoryContent.querySelector(
+  const categoryHolder = categoryContent.querySelector(
     ".category_section_holder"
   );
-
-  function handleNavigation(e) {
-    const category = e.target.closest("[data-category]");
-
-    if (!category) return;
-
-    const categoryTitle = category.getAttribute("data-category");
-
-    const categoryIndexElem = e.target.closest("[data-category-index]");
-
-    let categoryIndex;
-
-    if (categoryIndexElem) {
-      categoryIndex = +categoryIndexElem.getAttribute("data-category-index");
-    }
-
-    if (categoryTitle === "MY_PROJECT") {
-      if (categoryIndex === undefined) return;
-    }
-
-    mainNavController.mainView({
-      target: {
-        dataset: { changeMainView: categoryTitle, categoryIndex }
-      }
-    });
-  }
 
   const showEnterCategorySection = () => {
     enterCategorySection.classList.toggle("hide");
@@ -130,104 +85,105 @@ function Category(navContentHolder) {
     }
   }
 
-  const categoryTypeHandler = {
-    section: (value, index, root) => {
-      const categoryRef = [root];
-
-      if (index !== "undefined") {
-        categoryRef.push(index);
-      }
-
-      categoryReference.update(categoryRef);
-
-      taskAndCategoryHandler.addCategory({
-        sectionTitle: value,
-        tasks: [[]]
-      });
-    }
-  };
-
-  function saveCategory(e) {
+  function addMyProject() {
     todoList.pathUpdate([keys.myProject]);
-
     todoList.add(new MyProject({ title: enterCategory.value }));
-
     render();
+  }
+
+  function handleNavigation(e) {
+    const elemWithCategoryPath = e.target.closest("[data-category-path]");
+
+    if (!elemWithCategoryPath) return;
+
+    const categoryPath =
+      elemWithCategoryPath.getAttribute("data-category-path");
+
+    todoList.pathUpdate(categoryPath);
+
+    PubSub.publish(EVENTS.NAV_RENDER, EVENTS.SUBCATEGORY);
   }
 
   // Initial Rendering
 
-  function CategoryElement() {
-    const categoryElement = document.createElement("div");
-
-    categoryElement.innerHTML = `
+  function MyProjectSection() {
+    const myProject = document.createElement("div");
+    myProject.innerHTML = `
     <p class="categoryTitleSection"><span>#</span> <span class="categoryTitle"></span> <span class="numberOfTaskInCategory"></span>
     `;
 
     const template = () => {
-      const cloneCategory = categoryElement.cloneNode(true);
-
-      cloneCategory.addEventListener("click", ()=>'');
-
-      return cloneCategory;
+      const myProjectClone = myProject.cloneNode(true);
+      myProjectClone.addEventListener("click", handleNavigation);
+      return myProjectClone;
     };
 
     return { template };
   }
 
-  const categoryElement = CategoryElement();
+  const myProject = MyProjectSection();
 
-  const displayCategoryElement = (title, index, count) => {
-    const element = categoryElement.template();
+  const displayCategoryElement = (myProjectObj) => {
+    const element = myProject.template();
 
-    element.setAttribute("data-category-index", index);
+    element.setAttribute(
+      "data-category-path",
+      `${myProjectObj[keys.categoryPath]}`
+    );
 
     const categoryTitle = element.querySelector(".categoryTitle");
     const numberOfTaskInCategory = element.querySelector(
       ".numberOfTaskInCategory"
     );
 
-    categoryTitle.textContent = title;
-    numberOfTaskInCategory.textContent = count;
+    categoryTitle.textContent = myProjectObj[keys.projectTitle];
+    numberOfTaskInCategory.textContent = numOfTask.length;
 
     myProjectCategorySection.append(element);
   };
 
-  const getCategoryInformation = (category, index) => {
+  const getCategoryInformation = (category) => {
     if (Array.isArray(category[keys.sections])) {
       todoList.filter(
         category[keys.sections],
         undefined,
         undefined,
-        pushTaskToMyProjectCategoryArr
+        pushTaskToArrToGetLength
       );
     }
 
-    displayCategoryElement(
-      category[keys.projectTitle],
-      index,
-      myProjectCategoryArr.length
-    );
-    myProjectCategoryArr.splice(0);
+    displayCategoryElement(category);
+    numOfTask.splice(0);
   };
 
   const handleProjectCategory = (todoListObj) => {
+    numOfTask.splice(0);
     todoListObj[keys.myProject].forEach(getCategoryInformation);
+  };
+
+  const setNumOfTaskInInbox = () => {
+    numberOfInbox.textContent = numOfTask.length;
+  };
+
+  const pushTaskToArrToGetLength = () => {
+    numOfTask.push(true);
+  };
+
+  const resetCategory = () => {
+    numOfTask.splice(0);
+    myProjectCategorySection.innerHTML = "";
   };
 
   const handleCategoryTask = () => {
     resetCategory();
-
     const todoListObj = storage.get(keys.todo_list);
-
     todoList.filter(
       todoListObj[keys.inbox],
       undefined,
       undefined,
-      pushTaskToInboxArr
+      pushTaskToArrToGetLength
     );
-
-    setNumberOfInbox(inboxCategoryArr);
+    setNumOfTaskInInbox();
 
     handleProjectCategory(todoListObj);
   };
@@ -237,9 +193,9 @@ function Category(navContentHolder) {
     handleCategoryTask();
   };
 
-  categorySectionHolder.addEventListener("click", handleNavigation);
+  categoryHolder.addEventListener("click", handleNavigation);
 
-  iconSaveCategory.addEventListener("click", saveCategory);
+  iconSaveCategory.addEventListener("click", addMyProject);
 
   categoryContent.addEventListener("click", displayMyProjectOption);
 
@@ -247,4 +203,3 @@ function Category(navContentHolder) {
 }
 
 export default Category;
-// continue from adding a category and reloading the page

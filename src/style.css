@@ -391,11 +391,11 @@ dialog::backdrop {
 .task_dialog_date_section {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: var(--sz-lg);
+  column-gap: var(--sz-lg);
 }
 
-.task_dialog_date_section p {
-  padding-top: var(--sz-sm);
+.task_dialog_date_section input {
+  padding: 0;
 }
 
 .dueDate {

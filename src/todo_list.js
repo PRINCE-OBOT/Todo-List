@@ -10,39 +10,9 @@ class TodoList {
     return categories.findIndex((category) => category._id === id);
   }
 
-  #getArrOfCategory(todoListObj) {
-    let categories = todoListObj[this.path[0]];
-
-    for (let i = 1; i < this.path.length; i++) {
-      const index = Number.isNaN(+this.path[i])
-        ? this.#findIndex(categories, this.path[i])
-        : this.path[i];
-
-      const category = categories[index];
-
-      if (Array.isArray(category)) {
-        categories = category;
-      } else {
-        const key = this.#getKey(category, [
-          keys.sections,
-          keys.tasks,
-          keys.subtasks
-        ]);
-
-        categories = category[key];
-      }
-
-      if (!category) {
-        return todoListObj[keys.inbox][0];
-      }
-    }
-
-    return categories;
-  }
-
-  #getSubsequentArrOfCategory(todoListObj) {
+  getSubsequentArrOfCategory(todoListObj) {
     const lastPath = this.path.pop();
-    const subsequentArrOfCategory = this.#getArrOfCategory(todoListObj);
+    const subsequentArrOfCategory = this.getArrOfCategory(todoListObj);
 
     const index = Number.isNaN(+lastPath)
       ? this.#findIndex(subsequentArrOfCategory, lastPath)
@@ -77,11 +47,40 @@ class TodoList {
       }
     }
   }
+  getArrOfCategory(todoListObj) {
+    let categories = todoListObj[this.path[0]];
+
+    for (let i = 1; i < this.path.length; i++) {
+      const index = Number.isNaN(+this.path[i])
+        ? this.#findIndex(categories, this.path[i])
+        : this.path[i];
+
+      const category = categories[index];
+
+      if (Array.isArray(category)) {
+        categories = category;
+      } else {
+        const key = this.#getKey(category, [
+          keys.sections,
+          keys.tasks,
+          keys.subtasks
+        ]);
+
+        categories = category[key];
+      }
+
+      if (!category) {
+        return todoListObj[keys.inbox][0];
+      }
+    }
+
+    return categories;
+  }
 
   add(categoryObj) {
     const todoListObj = storage.get(keys.todo_list);
 
-    const arrOfCategory = this.#getArrOfCategory(todoListObj);
+    const arrOfCategory = this.getArrOfCategory(todoListObj);
 
     arrOfCategory.push(categoryObj);
 
@@ -104,7 +103,7 @@ class TodoList {
     const todoListObj = storage.get(keys.todo_list);
 
     const { index, subsequentArrOfCategory } =
-      this.#getSubsequentArrOfCategory(todoListObj);
+      this.getSubsequentArrOfCategory(todoListObj);
 
     subsequentArrOfCategory.splice(index, 1);
 
@@ -127,13 +126,13 @@ class TodoList {
 
   get(todoListObj) {
     const { index, subsequentArrOfCategory } =
-      this.#getSubsequentArrOfCategory(todoListObj);
+      this.getSubsequentArrOfCategory(todoListObj);
 
     return subsequentArrOfCategory[index];
   }
 
   getCategoryLen() {
-    return this.#getArrOfCategory(storage.get(keys.todo_list)).length;
+    return this.getArrOfCategory(storage.get(keys.todo_list)).length;
   }
 
   sortPriority(current, next) {

@@ -10,6 +10,8 @@ import { CategoryRoot } from "./category";
 import todoList from "./todo_list";
 import Search from "./components/search";
 import Category from "./components/category";
+import NavPage from "./nav";
+import SubCategory from "./subCategory";
 
 const navContentHolder = document.querySelector("[data-nav-content-holder]");
 const navHolder = document.querySelector("[data-nav-holder]");
@@ -20,17 +22,12 @@ if (!storage.get(keys.todo_list))
 function Nav() {
   const init = () => {
     PubSub.subscribe(EVENTS.NAV_RERENDER, rerender);
+    PubSub.subscribe(EVENTS.NAV_RENDER, render);
   };
 
   const navHistory = [];
 
-  const rerender = () => {
-    const recentContent = navHistory[navHistory.length - 1];
-
-    navContent({ target: { dataset: { nav: recentContent } } });
-  };
-
-  function navContent(e) {
+  function navigatePage(e) {
     const nav = e.target.dataset.nav;
 
     if (!nav) return;
@@ -42,14 +39,23 @@ function Nav() {
     PubSub.publish(EVENTS[nav]);
   }
 
-  navContent({ target: { dataset: { nav: "TODAY" } } });
+  navigatePage({ target: { dataset: { nav: "CATEGORY" } } });
 
-  navHolder.addEventListener("click", navContent);
+  const render = (_, page) => {
+    navigatePage(new NavPage(page));
+  };
+
+  const rerender = () => {
+    const currentPage = navHistory[navHistory.length - 1];
+    navigatePage(new NavPage(currentPage));
+  };
+
+  navHolder.addEventListener("click", navigatePage);
 
   return { init };
 }
 
-const navComponent = [Today, TaskDialog, Search, Category, Nav];
+const navComponent = [Today, TaskDialog, Search, Category, SubCategory, Nav];
 
 navComponent.forEach((component) => {
   component(navContentHolder).init();
