@@ -211,7 +211,7 @@ class TodoList {
 
       pathStr += ` / ${categories[index][key]}`;
 
-      const subsectionKey = getCategoryKey(categories[index], [
+      const subsectionKey = this.#getKey(categories[index], [
         keys.sections,
         keys.tasks
       ]);

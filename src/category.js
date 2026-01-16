@@ -27,7 +27,7 @@ class Section extends FolderTemplate {
   constructor({ title }) {
     super();
     this[keys.sectionTitle] = title;
-    this[keys.tasks] = [[]];
+    this[keys.tasks] = [];
   }
 }
 

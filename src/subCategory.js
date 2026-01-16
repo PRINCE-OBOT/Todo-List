@@ -1,3 +1,4 @@
+import { Section } from "./category";
 import { DOMtask } from "./components/task";
 import keys from "./constant";
 import EVENTS from "./events";
@@ -33,7 +34,7 @@ function SubCategory(navContentHolder) {
               data-avoid="true"
               placeholder="Enter Section Name"
               />
-              <span class="iconSaveSection cursor_pointer">✅</span>
+              <span data-option-action="addSection" class="iconSaveSection cursor_pointer">✅</span>
               </div>
               
           <div data-btn="addTask" class="cursor_pointer">Add Task</div>
@@ -97,7 +98,7 @@ function SubCategory(navContentHolder) {
 
   const createTaskNotInSectionHolder = CreateTaskNotInSectionHolder();
 
-  const handleDisplayTaskNotInSubsection = (tasks) => {
+  const handleDisplayTaskNotInSection = (tasks) => {
     const taskHolder = createTaskNotInSectionHolder.getTaskHolder();
 
     const appendTask = (task) => {
@@ -164,33 +165,6 @@ function SubCategory(navContentHolder) {
     );
   };
 
-  const handleDisplayTaskInSubsection = (arrOfCategory) => {
-    for (let i = 1; i < arrOfCategory.length; i++) {
-      const sectionElem = createTaskInSectionHolder.getSectionHolder();
-
-      const sectionObj = arrOfCategory[i];
-
-      const sectionTitle =
-        sectionElem.sectionTitleAndEllipse.querySelector(".subsection_title");
-
-      sectionTitle.textContent = sectionObj.sectionTitle;
-
-      setSectionTAEAttr(sectionElem.sectionTitleAndEllipse, i);
-
-      taskAndSubsectionHolder.append(sectionElem.sectionTitleAndEllipse);
-
-      taskInSubsection(sectionObj, i);
-
-      displayTaskInSubsection(sectionElem.sectionHolder);
-
-      taskAndSubsectionHolder.append(sectionElem.sectionHolder);
-
-      inboxArr.splice(0);
-    }
-
-    taskAndSubsectionHolder.append(sectionEllipseOptions);
-  };
-
   function returnToPreviousPage() {
     PubSub.publish(EVENTS.NAV_RENDER_PREVIOUS);
   }
@@ -234,24 +208,6 @@ function SubCategory(navContentHolder) {
 
     return { root, categoryIndex };
   };
-
-  function saveSection(e) {
-    const categoryType = e.target.dataset.categoryType;
-
-    if (!categoryType) return;
-
-    const { categoryIndex, root } = getRootAndIndex();
-
-    categoryTypeHandler[categoryType](enterSection.value, categoryIndex, root);
-
-    enterSection.value = "";
-
-    if (root === "Inbox") {
-      renderInbox("", { value: categoryTitle.value, categoryIndex });
-    } else {
-      renderMyProject("", { value: categoryTitle.value, categoryIndex });
-    }
-  }
 
   const getTopOfParent = (parent) => {
     const rect = parent.getBoundingClientRect();
@@ -354,6 +310,55 @@ function SubCategory(navContentHolder) {
     }
   }
 
+  const OptionAction = {
+    addSection: () => {
+      todoList.add(new Section({ title: enterSection.value }));
+      render();
+    }
+  };
+
+  function handleOptionAction(e) {
+    const optionAction = e.target.dataset.optionAction;
+
+    if (!optionAction) return;
+
+    OptionAction[optionAction]();
+  }
+
+  // Initial rendering
+  const handleDisplayTaskInSection = (arrOfCategory) => {
+    resetSubsection();
+
+    for (let i = 1; i < arrOfCategory.length; i++) {
+      const sectionElem = createTaskInSectionHolder.getSectionHolder();
+
+      const sectionObj = arrOfCategory[i];
+
+      const sectionTitle =
+        sectionElem.sectionTitleAndEllipse.querySelector(".subsection_title");
+
+      sectionTitle.textContent = sectionObj[keys.sectionTitle];
+
+      setSectionTAEAttr(sectionElem.sectionTitleAndEllipse, i);
+
+      taskAndSubsectionHolder.append(sectionElem.sectionTitleAndEllipse);
+
+      const appendTaskToSection = (taskElem) => {
+        sectionElem.sectionHolder.append(taskElem);
+      };
+
+      sectionObj[keys.tasks].forEach((taskObj) => {
+        DOMtask.set(taskObj, appendTaskToSection);
+      });
+
+      taskAndSubsectionHolder.append(sectionElem.sectionHolder);
+
+      inboxArr.splice(0);
+    }
+
+    taskAndSubsectionHolder.append(sectionEllipseOptions);
+  };
+
   const setCategoryTitleData = (title) => {
     categoryTitle.textContent = title;
     categoryTitle.setAttribute("data-category-path", `${todoList.pathGet}`);
@@ -361,7 +366,7 @@ function SubCategory(navContentHolder) {
 
   const render = () => {
     navContentHolder.append(subCategoryContent);
-    
+
     const todoLstObj = storage.get(keys.todo_list);
 
     if (todoList.pathGet().length > 1) {
@@ -371,17 +376,15 @@ function SubCategory(navContentHolder) {
       const myProject = subsequentArrOfCategory[index];
 
       setCategoryTitleData(myProject[keys.projectTitle]);
-      handleDisplayTaskNotInSubsection(myProject[keys.sections][0]);
-      handleDisplayTaskInSubsection(myProject[keys.sections]);
+      handleDisplayTaskNotInSection(myProject[keys.sections][0]);
+      handleDisplayTaskInSection(myProject[keys.sections]);
     } else {
       setCategoryTitleData(todoList.pathLast());
       const arrOfCategory = todoList.getArrOfCategory(todoLstObj);
-      handleDisplayTaskNotInSubsection(arrOfCategory[0]);
-      handleDisplayTaskInSubsection(arrOfCategory);
+      handleDisplayTaskNotInSection(arrOfCategory[0]);
+      handleDisplayTaskInSection(arrOfCategory);
     }
   };
-
-  iconSaveSection.addEventListener("click", saveSection);
 
   subCategoryContent.addEventListener("click", (e) => {
     displaySectionOption(e);
@@ -389,6 +392,8 @@ function SubCategory(navContentHolder) {
     setCatRefToOptions(e);
     handleOptionsInEllipse(e);
   });
+
+  sectionOptions.addEventListener("click", handleOptionAction);
 
   returnBack.addEventListener("click", returnToPreviousPage);
 

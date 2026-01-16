@@ -52,7 +52,6 @@ function Nav() {
   };
   
   const render = (_, page) => {
-    // debugger
     navigatePage(new NavPage(page));
   };
 
