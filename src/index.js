@@ -9,6 +9,7 @@ import storage from "./storage";
 import keys from "./constant";
 import { CategoryRoot } from "./category";
 import todoList from "./todo_list";
+import Search from "./view/search";
 
 const navContentHolder = document.querySelector("[data-nav-content-holder]");
 const navHolder = document.querySelector("[data-nav-holder]");
@@ -48,10 +49,10 @@ function Nav() {
   return { init };
 }
 
-const navComponent = [Today, TaskDialog, Nav];
+const navComponent = [Today, TaskDialog, Search, Nav];
 
 navComponent.forEach((component) => {
   component(navContentHolder).init();
 });
 
-window.todoList = todoList
+window.todoList = todoList;

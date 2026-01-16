@@ -1,14 +1,12 @@
-import { setTaskValue } from "../components/task";
-import {
-  taskAndCategoryHandler,
-  filterTasks,
-  sortTaskBaseOnPriority
-} from "../config/constant";
-import EVENTS from "../config/EVENTS";
+import { DOMtask } from "../components/task";
+import keys from "../constant";
+import EVENTS from "../events";
+import storage from "../storage";
+import todoList from "../todo_list";
 
-function Search(main) {
+function Search(navContentHolder) {
   const init = () => {
-    PubSub.subscribe(EVENTS.PAGE.LOAD.SEARCH, render);
+    PubSub.subscribe(EVENTS.SEARCH, render);
   };
 
   const searchContent = document.createElement("div");
@@ -18,7 +16,7 @@ function Search(main) {
     <div class="heading_section">
       <h2 class="heading">Search</h2>
       <div class="searchBar_section">
-        <input type="search" class="searchBar" placeholder="Search tasks" />
+        <input type="search" name="searchBar" class="searchBar" placeholder="Search tasks" />
       
         </div>
       
@@ -47,8 +45,8 @@ function Search(main) {
     searchContentHolder.append(task);
   };
 
-  const handleDisplayTaskInSearchSection = (task, _, arr) => {
-    setTaskValue(task, appendTaskInSearchSection);
+  const handleDisplayTaskInSearchSection = (task) => {
+    DOMtask.set(task, appendTaskInSearchSection);
   };
 
   const resetSearchHolder = () => {
@@ -72,23 +70,25 @@ function Search(main) {
       return;
     }
 
-    for (let key in taskAndCategoryHandler.getCategories()) {
-      filterTasks(
-        taskAndCategoryHandler.getCategories()[key],
-        "title",
+    const todoListObj = storage.get(keys.todo_list);
+
+    for (const root in todoListObj) {
+      todoList.filter(
+        todoListObj[root],
+        keys.taskTitle,
         searchTaskValue,
         pushSearchTaskToArrForAdjustment
       );
     }
 
-    searchTaskToBeAdjusted.sort(sortTaskBaseOnPriority);
+    searchTaskToBeAdjusted.sort(todoList.sortPriority);
     searchTaskToBeAdjusted.forEach(handleDisplayTaskInSearchSection);
 
     isSearchTaskToBeAdjusted();
   }
 
   const render = () => {
-    main.append(searchContent);
+    navContentHolder.append(searchContent);
     handleSearchTask();
   };
 

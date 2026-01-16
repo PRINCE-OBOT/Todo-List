@@ -67,7 +67,7 @@ function TaskDialog() {
           class="input_"
           type="text"
           name="input_label"
-          placeholder="Enter new label"
+          placeholder="Future feature..."
         />
 
         <select name="label" data-task-dialog-action="changeLabel"></select>
