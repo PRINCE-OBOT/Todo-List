@@ -162,6 +162,10 @@ class TodoList {
   pathLast() {
     return this.path[this.path.length - 1];
   }
+  
+  pathFirst() {
+    return this.path[0];
+  }
 
   pathTaskIDLength() {
     return console.log(

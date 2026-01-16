@@ -511,7 +511,8 @@ dialog::backdrop {
 }
 
 .projectOptions,
-.sectionOptions {
+.sectionOptions,
+.myProjectOption {
   display: flex;
   flex-direction: column;
   row-gap: var(--sz-sm);
@@ -540,7 +541,12 @@ dialog::backdrop {
   border-radius: 10px;
 }
 
-:is(.projectOptions, .sectionOptions, .sectionEllipseOptions).close {
+:is(
+    .projectOptions,
+    .myProjectOption,
+    .sectionOptions,
+    .sectionEllipseOptions
+  ).close {
   display: none;
 }
 
@@ -591,11 +597,11 @@ dialog::backdrop {
   color: var(--white);
 }
 
-.subsection_header {
+.myProjectHeader {
   display: flex;
   gap: var(--sz-lg);
 }
-.subsection_header {
+.myProjectHeader {
   display: grid;
   grid-template-columns: 20px 1fr 20px;
 

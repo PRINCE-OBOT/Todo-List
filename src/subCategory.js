@@ -15,29 +15,29 @@ function SubCategory(navContentHolder) {
 
   subCategoryContent.innerHTML = `
     <div class="taskSectionHolder">
-      <div class="subsection_header">
-        <span class="return_back cursor_pointer">⬅️</span>
-        <span class="categoryTitle">Inbox</span>
+      <div class="myProjectHeader">
+        <span class="return_back cursor_pointer" data-my-project-header-action="previousPage">⬅️</span>
+        <span class="myProjectTitle"></span>
         <span
           class="category_ellipse cursor_pointer"
-          data-display="sectionOption"
+          data-my-project-header-action="displayMyProjectOption"
           >&vellip;</span
         >
 
-        <div class="sectionOptions close">
-          <div data-add="section" class="cursor_pointer">Add Section</div>
+        <div class="myProjectOption close">
+          <div data-add="section" data-show class="cursor_pointer">Add Section</div>
           
           <div class="enterSectionCon hide">
           <input
               name="enterSection"
               class="enterSection"
-              data-avoid="true"
+              data-show
               placeholder="Enter Section Name"
               />
-              <span data-option-action="addSection" class="iconSaveSection cursor_pointer">✅</span>
+              <span data-my-project-option-action="addSection" class="iconSaveSection cursor_pointer">✅</span>
               </div>
               
-          <div data-btn="addTask" class="cursor_pointer">Add Task</div>
+          <div data-my-project-option-action="addTask" class="cursor_pointer">Add Task</div>
         </div>
       </div>
 
@@ -45,14 +45,14 @@ function SubCategory(navContentHolder) {
     </div>
   `;
 
-  const categoryTitle = subCategoryContent.querySelector(".categoryTitle");
+  const myProjectTitle = subCategoryContent.querySelector(".myProjectTitle");
   const taskAndSubsectionHolder = subCategoryContent.querySelector(
     ".task_and_subsection_holder"
   );
-  const sectionHeader = subCategoryContent.querySelector(".subsection_header");
+  const myProjectHeader = subCategoryContent.querySelector(".myProjectHeader");
   const enterSectionCon = subCategoryContent.querySelector(".enterSectionCon");
   const enterSection = subCategoryContent.querySelector(".enterSection");
-  const sectionOptions = subCategoryContent.querySelector(".sectionOptions");
+  const myProjectOption = subCategoryContent.querySelector(".myProjectOption");
   const iconSaveSection = subCategoryContent.querySelector(".iconSaveSection");
 
   const returnBack = subCategoryContent.querySelector(".return_back");
@@ -156,15 +156,6 @@ function SubCategory(navContentHolder) {
 
   const createTaskInSectionHolder = CreateTaskInSectionHolder();
 
-  const setSectionTAEAttr = (sectionTitleAndEllipse, index) => {
-    const categoryRef = sectionHeader.getAttribute("data-category-reference");
-
-    sectionTitleAndEllipse.setAttribute(
-      "data-category-reference",
-      `${categoryRef},${index}`
-    );
-  };
-
   function returnToPreviousPage() {
     PubSub.publish(EVENTS.NAV_RENDER_PREVIOUS);
   }
@@ -187,24 +178,11 @@ function SubCategory(navContentHolder) {
       showEnterSection();
       return;
     }
-
-    if (display) {
-      const { root } = getRootAndIndex();
-
-      if (root === "Inbox") btnDeleteCategory.remove();
-      else {
-        sectionOptions.append(btnDeleteCategory);
-      }
-
-      sectionOptions.classList.toggle("close");
-    } else {
-      sectionOptions.classList.add("close");
-    }
   }
 
   const getRootAndIndex = () => {
-    const categoryIndex = categoryTitle.getAttribute("data-category-index");
-    const root = categoryTitle.getAttribute("data-root");
+    const categoryIndex = myProjectTitle.getAttribute("data-category-index");
+    const root = myProjectTitle.getAttribute("data-root");
 
     return { root, categoryIndex };
   };
@@ -269,7 +247,7 @@ function SubCategory(navContentHolder) {
     );
 
     if (!elem) {
-      sectionOptions.setAttribute("data-category-reference", categoryRef);
+      myProjectOption.setAttribute("data-category-reference", categoryRef);
     } else {
       sectionEllipseOptions.setAttribute(
         "data-category-reference",
@@ -299,7 +277,7 @@ function SubCategory(navContentHolder) {
 
     categoryReference.update(categoryRef);
 
-    const categoryIndex = +categoryTitle.getAttribute("data-category-index");
+    const categoryIndex = +myProjectTitle.getAttribute("data-category-index");
 
     if (option === "deleteSection") {
       todoList.delete();
@@ -313,19 +291,69 @@ function SubCategory(navContentHolder) {
   const OptionAction = {
     addSection: () => {
       todoList.add(new Section({ title: enterSection.value }));
+      enterSection.value = "";
       render();
-    }
+    },
+    addTask: () => {}
   };
 
-  function handleOptionAction(e) {
-    const optionAction = e.target.dataset.optionAction;
+  function handleMyProjectOptionAction(e) {
+    const myProjectOptionAction = e.target.dataset.myProjectOptionAction;
 
-    if (!optionAction) return;
+    if (!myProjectOptionAction) return;
 
-    OptionAction[optionAction]();
+    OptionAction[myProjectOptionAction]();
+  }
+
+  class Dataset {
+    constructor(key, value, elem) {
+      this.key = key;
+      this.value = value;
+      this.elem = elem;
+    }
+  }
+
+  const datasets = [
+    new Dataset(
+      "myProjectHeaderAction",
+      "displayMyProjectOption",
+      myProjectOption
+    )
+  ];
+
+  function handleCategoryOptionClose(e) {
+    datasets.forEach((obj) => {
+      if (e.target.dataset[obj.key] !== obj.value && !e.target.hasAttribute('data-show'))
+        obj.elem.classList.add("close");
+    });
+  }
+
+  const displayMyProjectOption = () => {
+    todoList.pathFirst() === keys.inbox
+      ? btnDeleteCategory.remove()
+      : myProjectOption.append(btnDeleteCategory);
+
+    myProjectOption.classList.toggle("close");
+  };
+
+  const MyProjectHeaderAction = {
+    displayMyProjectOption
+  };
+
+  function handleMyProjectHeaderAction(e) {
+    const myProjectHeaderAction = e.target.dataset.myProjectHeaderAction;
+    if (!myProjectHeaderAction) return;
+    const categoryPath = myProjectHeader.getAttribute("data-category-path");
+    todoList.pathUpdate(categoryPath);
+    MyProjectHeaderAction[myProjectHeaderAction]();
+    render()
   }
 
   // Initial rendering
+  const setCategoryPathValueInSection = (sectionElem, categoryPath) => {
+    sectionElem.setAttribute("data-category-path", `${categoryPath}`);
+  };
+
   const handleDisplayTaskInSection = (arrOfCategory) => {
     resetSubsection();
 
@@ -339,7 +367,10 @@ function SubCategory(navContentHolder) {
 
       sectionTitle.textContent = sectionObj[keys.sectionTitle];
 
-      setSectionTAEAttr(sectionElem.sectionTitleAndEllipse, i);
+      setCategoryPathValueInSection(
+        sectionElem.sectionTitleAndEllipse,
+        sectionObj[keys.categoryPath]
+      );
 
       taskAndSubsectionHolder.append(sectionElem.sectionTitleAndEllipse);
 
@@ -360,8 +391,8 @@ function SubCategory(navContentHolder) {
   };
 
   const setCategoryTitleData = (title) => {
-    categoryTitle.textContent = title;
-    categoryTitle.setAttribute("data-category-path", `${todoList.pathGet}`);
+    myProjectHeader.setAttribute("data-category-path", `${todoList.pathGet()}`);
+    myProjectTitle.textContent = title;
   };
 
   const render = () => {
@@ -387,13 +418,16 @@ function SubCategory(navContentHolder) {
   };
 
   subCategoryContent.addEventListener("click", (e) => {
-    displaySectionOption(e);
-    displayOption(e);
-    setCatRefToOptions(e);
-    handleOptionsInEllipse(e);
+    handleCategoryOptionClose(e);
+    // displaySectionOption(e);
+    // displayOption(e);
+    // setCatRefToOptions(e);
+    // handleOptionsInEllipse(e);
   });
 
-  sectionOptions.addEventListener("click", handleOptionAction);
+  myProjectHeader.addEventListener("click", handleMyProjectHeaderAction);
+
+  myProjectOption.addEventListener("click", handleMyProjectOptionAction);
 
   returnBack.addEventListener("click", returnToPreviousPage);
 
