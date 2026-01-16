@@ -43,7 +43,7 @@ class TaskTemplate {
   }
 }
 
-class Task extends TaskTemplate {
+class Task extends TaskTemplate{
   constructor({ title, description, dueDate, priority }) {
     super({ description, dueDate, priority });
     this.taskTitle = title;

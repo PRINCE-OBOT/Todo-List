@@ -112,11 +112,7 @@ function Category(navContentHolder) {
     <p class="categoryTitleSection"><span>#</span> <span class="categoryTitle"></span> <span class="numberOfTaskInCategory"></span>
     `;
 
-    const template = () => {
-      const myProjectClone = myProject.cloneNode(true);
-      myProjectClone.addEventListener("click", handleNavigation);
-      return myProjectClone;
-    };
+    const template = () => myProject.cloneNode(true);
 
     return { template };
   }

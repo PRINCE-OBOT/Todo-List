@@ -192,7 +192,7 @@ function SubCategory(navContentHolder) {
   };
 
   function returnToPreviousPage() {
-    PubSub.publish(EVENTS.PAGE.LOAD.PREVIOUS_PAGE);
+    PubSub.publish(EVENTS.NAV_RENDER_PREVIOUS);
   }
 
   const showEnterSection = () => {
@@ -361,7 +361,7 @@ function SubCategory(navContentHolder) {
 
   const render = () => {
     navContentHolder.append(subCategoryContent);
-
+    
     const todoLstObj = storage.get(keys.todo_list);
 
     if (todoList.pathGet().length > 1) {

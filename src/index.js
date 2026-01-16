@@ -21,6 +21,7 @@ if (!storage.get(keys.todo_list))
 
 function Nav() {
   const init = () => {
+    PubSub.subscribe(EVENTS.NAV_RENDER_PREVIOUS, renderPrevious);
     PubSub.subscribe(EVENTS.NAV_RERENDER, rerender);
     PubSub.subscribe(EVENTS.NAV_RENDER, render);
   };
@@ -35,20 +36,27 @@ function Nav() {
     navContentHolder.innerHTML = "";
 
     navHistory.push(nav);
-
+    
     PubSub.publish(EVENTS[nav]);
   }
-
-  navigatePage({ target: { dataset: { nav: "CATEGORY" } } });
-
-  const render = (_, page) => {
-    navigatePage(new NavPage(page));
+  
+  
+  const renderPrevious = () => {
+    navHistory.pop();
+    rerender();
   };
-
+  
   const rerender = () => {
     const currentPage = navHistory[navHistory.length - 1];
     navigatePage(new NavPage(currentPage));
   };
+  
+  const render = (_, page) => {
+    // debugger
+    navigatePage(new NavPage(page));
+  };
+
+  render('','CATEGORY')
 
   navHolder.addEventListener("click", navigatePage);
 
