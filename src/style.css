@@ -355,7 +355,7 @@ dialog::backdrop {
 }
 
 .dialog_form :where(input:not([type="checkbox"]), textarea, select) {
-  padding: var(--pd-sm) 0;
+  padding: var(--sz-sm) 0;
   background-color: var(--fade-black);
   color: var(--white);
   flex: 1;
@@ -395,7 +395,7 @@ dialog::backdrop {
 }
 
 .task_dialog_date_section p {
-  padding-top: var(--pd-sm);
+  padding-top: var(--sz-sm);
 }
 
 .dueDate {
@@ -489,7 +489,7 @@ dialog::backdrop {
   flex-direction: column;
   row-gap: var(--sz-sm);
 
-  padding-top: var(--pd-sm);
+  padding-top: var(--sz-sm);
 }
 
 .icon_and_title,
@@ -522,7 +522,7 @@ dialog::backdrop {
   top: 30px;
   background: var(--black);
   border: 2px solid var(--transparent);
-  padding: var(--pd-sm);
+  padding: var(--sz-sm);
   border-radius: 10px;
 }
 
@@ -536,7 +536,7 @@ dialog::backdrop {
   right: calc(50% - var(--container_width) / 2);
   background: var(--black);
   border: 2px solid var(--transparent);
-  padding: var(--pd-sm);
+  padding: var(--sz-sm);
   border-radius: 10px;
 }
 
@@ -551,7 +551,7 @@ dialog::backdrop {
   border: none;
   color: var(--white);
   border-radius: 5px;
-  padding: var(--sz-xxsm) var(--pd-sm);
+  padding: var(--sz-xxsm) var(--sz-sm);
 }
 /* Category subsection */
 
@@ -575,7 +575,7 @@ dialog::backdrop {
   flex: 1;
 
   position: relative;
-  padding-top: var(--pd-sm);
+  padding-top: var(--sz-sm);
 }
 
 .taskHolder {

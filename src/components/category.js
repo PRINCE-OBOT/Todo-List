@@ -1,0 +1,250 @@
+import PubSub from "pubsub-js";
+import EVENTS from "../events";
+import keys from "../constant";
+import storage from "../storage";
+import todoList from "../todo_list";
+import { MyProject } from "../category";
+
+function Category(navContentHolder) {
+  const init = () => {
+    PubSub.subscribe(EVENTS.CATEGORY, render);
+  };
+
+  const categoryContent = document.createElement("div");
+  categoryContent.classList.add("category_page");
+
+  categoryContent.innerHTML = `
+    <div>
+      <h2>Category</h2>
+    </div>
+
+    <div class="category_section_holder">
+        <div class="inbox_filter_completed_section">
+            <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span>Inbox</span> <span class="number_of_inbox"></span></p>
+        </div>
+        
+        <div class="project_title_and_myProjectCategorySection">
+            <div class="project_title_and_ellipse">
+              <p>My Projects</p><p class="cursor_pointer" data-display="myProjectOption">&vellip;</p>
+
+              <div class="projectOptions close">
+                <div data-add="${keys.myProject}"># Add Project</div>
+                
+                <div class="enterCategorySection hide">
+                  <input name="enterCategory" class="enterCategory" data-avoid="true" placeholder="Enter Category Name"/>
+                  <span class="iconSaveCategory cursor_pointer">✅</span>
+                </div>
+              </div>
+            </div>
+            <div class="myProjectCategorySection" data-category="MY_PROJECT"></div>
+        </div>
+    </div>
+  `;
+
+  const numberOfInbox = categoryContent.querySelector(".number_of_inbox");
+  const myProjectCategorySection = categoryContent.querySelector(
+    ".myProjectCategorySection"
+  );
+
+  const projectOptions = categoryContent.querySelector(".projectOptions");
+
+  const enterCategorySection = categoryContent.querySelector(
+    ".enterCategorySection"
+  );
+  const iconSaveCategory = categoryContent.querySelector(".iconSaveCategory");
+  const enterCategory = categoryContent.querySelector(".enterCategory");
+
+  const setNumberOfInbox = (inboxArr) => {
+    numberOfInbox.textContent = inboxArr.length;
+  };
+
+  const inboxCategoryArr = [];
+
+  const resetCategory = () => {
+    inboxCategoryArr.splice(0);
+    myProjectCategorySection.innerHTML = "";
+  };
+
+  const myProjectCategoryArr = [];
+
+  const pushTaskToMyProjectCategoryArr = (task) => {
+    myProjectCategoryArr.push(true);
+  };
+
+  const pushTaskToInboxArr = (task) => {
+    inboxCategoryArr.push(task);
+  };
+
+  const categorySectionHolder = categoryContent.querySelector(
+    ".category_section_holder"
+  );
+
+  function handleNavigation(e) {
+    const category = e.target.closest("[data-category]");
+
+    if (!category) return;
+
+    const categoryTitle = category.getAttribute("data-category");
+
+    const categoryIndexElem = e.target.closest("[data-category-index]");
+
+    let categoryIndex;
+
+    if (categoryIndexElem) {
+      categoryIndex = +categoryIndexElem.getAttribute("data-category-index");
+    }
+
+    if (categoryTitle === "MY_PROJECT") {
+      if (categoryIndex === undefined) return;
+    }
+
+    mainNavController.mainView({
+      target: {
+        dataset: { changeMainView: categoryTitle, categoryIndex }
+      }
+    });
+  }
+
+  const showEnterCategorySection = () => {
+    enterCategorySection.classList.toggle("hide");
+  };
+
+  function displayMyProjectOption(e) {
+    const avoid = e.target.dataset.avoid;
+
+    if (avoid) return;
+
+    const display = e.target.dataset.display;
+
+    const add = e.target.dataset.add;
+    if (add) {
+      iconSaveCategory.setAttribute("data-category-type", add);
+      showEnterCategorySection();
+      return;
+    }
+
+    if (display) {
+      projectOptions.classList.toggle("close");
+    } else {
+      projectOptions.classList.add("close");
+    }
+  }
+
+  const categoryTypeHandler = {
+    section: (value, index, root) => {
+      const categoryRef = [root];
+
+      if (index !== "undefined") {
+        categoryRef.push(index);
+      }
+
+      categoryReference.update(categoryRef);
+
+      taskAndCategoryHandler.addCategory({
+        sectionTitle: value,
+        tasks: [[]]
+      });
+    }
+  };
+
+  function saveCategory(e) {
+    todoList.pathUpdate([keys.myProject]);
+
+    todoList.add(new MyProject({ title: enterCategory.value }));
+
+    render();
+  }
+
+  // Initial Rendering
+
+  function CategoryElement() {
+    const categoryElement = document.createElement("div");
+
+    categoryElement.innerHTML = `
+    <p class="categoryTitleSection"><span>#</span> <span class="categoryTitle"></span> <span class="numberOfTaskInCategory"></span>
+    `;
+
+    const template = () => {
+      const cloneCategory = categoryElement.cloneNode(true);
+
+      cloneCategory.addEventListener("click", ()=>'');
+
+      return cloneCategory;
+    };
+
+    return { template };
+  }
+
+  const categoryElement = CategoryElement();
+
+  const displayCategoryElement = (title, index, count) => {
+    const element = categoryElement.template();
+
+    element.setAttribute("data-category-index", index);
+
+    const categoryTitle = element.querySelector(".categoryTitle");
+    const numberOfTaskInCategory = element.querySelector(
+      ".numberOfTaskInCategory"
+    );
+
+    categoryTitle.textContent = title;
+    numberOfTaskInCategory.textContent = count;
+
+    myProjectCategorySection.append(element);
+  };
+
+  const getCategoryInformation = (category, index) => {
+    if (Array.isArray(category[keys.sections])) {
+      todoList.filter(
+        category[keys.sections],
+        undefined,
+        undefined,
+        pushTaskToMyProjectCategoryArr
+      );
+    }
+
+    displayCategoryElement(
+      category[keys.projectTitle],
+      index,
+      myProjectCategoryArr.length
+    );
+    myProjectCategoryArr.splice(0);
+  };
+
+  const handleProjectCategory = (todoListObj) => {
+    todoListObj[keys.myProject].forEach(getCategoryInformation);
+  };
+
+  const handleCategoryTask = () => {
+    resetCategory();
+
+    const todoListObj = storage.get(keys.todo_list);
+
+    todoList.filter(
+      todoListObj[keys.inbox],
+      undefined,
+      undefined,
+      pushTaskToInboxArr
+    );
+
+    setNumberOfInbox(inboxCategoryArr);
+
+    handleProjectCategory(todoListObj);
+  };
+
+  const render = () => {
+    navContentHolder.append(categoryContent);
+    handleCategoryTask();
+  };
+
+  categorySectionHolder.addEventListener("click", handleNavigation);
+
+  iconSaveCategory.addEventListener("click", saveCategory);
+
+  categoryContent.addEventListener("click", displayMyProjectOption);
+
+  return { init };
+}
+
+export default Category;
+// continue from adding a category and reloading the page

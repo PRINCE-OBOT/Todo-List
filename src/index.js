@@ -3,13 +3,13 @@ import PubSub from "pubsub-js";
 import EVENTS from "./events";
 // import homePage from "./view/heroPage";
 import Today from "./today";
-// import Search from "./view/search";
 import TaskDialog from "./components/taskDialog";
 import storage from "./storage";
 import keys from "./constant";
 import { CategoryRoot } from "./category";
 import todoList from "./todo_list";
-import Search from "./view/search";
+import Search from "./components/search";
+import Category from "./components/category";
 
 const navContentHolder = document.querySelector("[data-nav-content-holder]");
 const navHolder = document.querySelector("[data-nav-holder]");
@@ -49,7 +49,7 @@ function Nav() {
   return { init };
 }
 
-const navComponent = [Today, TaskDialog, Search, Nav];
+const navComponent = [Today, TaskDialog, Search, Category, Nav];
 
 navComponent.forEach((component) => {
   component(navContentHolder).init();

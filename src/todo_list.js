@@ -132,6 +132,10 @@ class TodoList {
     return subsequentArrOfCategory[index];
   }
 
+  getCategoryLen() {
+    return this.#getArrOfCategory(storage.get(keys.todo_list)).length;
+  }
+
   sortPriority(current, next) {
     return current.priority - next.priority;
   }

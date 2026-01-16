@@ -8,15 +8,24 @@ class CategoryRoot {
   }
 }
 
-class Project {
-  constructor(title) {
+class FolderTemplate {
+  constructor() {
+    this._id = todoList.getCategoryLen();
+    this._categoryPath = [...todoList.pathGet(), this._id];
+  }
+}
+
+class MyProject extends FolderTemplate {
+  constructor({ title }) {
+    super();
     this[keys.projectTitle] = title;
     this[keys.sections] = [[]];
   }
 }
 
-class Section {
-  constructor(title) {
+class Section extends FolderTemplate {
+  constructor({ title }) {
+    super();
     this[keys.sectionTitle] = title;
     this[keys.tasks] = [[]];
   }
@@ -48,4 +57,4 @@ class Subtask extends TaskTemplate {
   }
 }
 
-export { CategoryRoot, Project, Section, Task, Subtask };
+export { CategoryRoot, MyProject, Section, Task, Subtask };
