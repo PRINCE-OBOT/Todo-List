@@ -125,9 +125,9 @@ function SubCategory(navContentHolder) {
     taskAndSubsectionHolder.innerHTML = "";
   };
 
-  const sectionEllipseOptions = (function createSectionEllipseOptions() {
+  const sectionOptions = (function createSectionOptions() {
     const div = document.createElement("div");
-    div.classList.add("sectionEllipseOptions", "close");
+    div.classList.add("sectionOptions", "close");
 
     div.innerHTML = `
       <div data-btn="addTask" class="cursor_pointer">Add Task</div>
@@ -147,7 +147,7 @@ function SubCategory(navContentHolder) {
     sectionTitle.classList.add("subsection_title");
     sectionHolder.classList.add("sectionHolder");
     ellipse.classList.add("cursor_pointer");
-    ellipse.setAttribute("data-display-option", "sectionEllipse");
+    ellipse.setAttribute("data-section-action", "displaySectionOption");
 
     ellipse.innerHTML = "&vellip;";
 
@@ -185,36 +185,12 @@ function SubCategory(navContentHolder) {
     return rect.bottom;
   };
 
-  const displaySectionEllipse = (target) => {
-    const parent = target.closest(".sectionTitleAndEllipse");
-
-    const topOfParent = getTopOfParent(parent);
-    const bottomOfTaskAndSectionHolder = getBottomOfTASHolder();
-
-    const HEIGHT_OF_SECTION_OPTION = 81;
-
-    if (topOfParent + HEIGHT_OF_SECTION_OPTION > bottomOfTaskAndSectionHolder) {
-      const bottomOfParent = getBottomOfParent(parent);
-
-      const bottomValue = bottomOfTaskAndSectionHolder - bottomOfParent;
-
-      sectionEllipseOptions.style.top = "auto";
-      sectionEllipseOptions.style.bottom = `${bottomValue + 10}px`;
-    } else {
-      sectionEllipseOptions.style.top = `${topOfParent + 30}px`;
-      sectionEllipseOptions.style.bottom = "auto";
-    }
-
-    sectionEllipseOptions.classList.toggle("close");
-  };
-
   function displayOption(e) {
     const displayOption = e.target.dataset.displayOption;
 
     if (displayOption) {
-      displaySectionEllipse(e.target);
     } else {
-      sectionEllipseOptions.classList.add("close");
+      sectionOptions.classList.add("close");
     }
   }
 
@@ -231,10 +207,7 @@ function SubCategory(navContentHolder) {
     if (!elem) {
       myProjectOption.setAttribute("data-category-reference", categoryRef);
     } else {
-      sectionEllipseOptions.setAttribute(
-        "data-category-reference",
-        categoryRef
-      );
+      sectionOptions.setAttribute("data-category-reference", categoryRef);
     }
   }
 
@@ -319,6 +292,47 @@ function SubCategory(navContentHolder) {
         obj.elem.classList.add("close");
     });
   }
+  // Action in Section
+
+  const displaySectionOption = (target) => {
+    const parent = target.closest(".sectionTitleAndEllipse");
+
+    const topOfParent = getTopOfParent(parent);
+    const bottomOfTaskAndSectionHolder = getBottomOfTASHolder();
+
+    const HEIGHT_OF_SECTION_OPTION = 81;
+
+    if (topOfParent + HEIGHT_OF_SECTION_OPTION > bottomOfTaskAndSectionHolder) {
+      const bottomOfParent = getBottomOfParent(parent);
+
+      const bottomValue = bottomOfTaskAndSectionHolder - bottomOfParent;
+
+      sectionOptions.style.top = "auto";
+      sectionOptions.style.bottom = `${bottomValue + 10}px`;
+    } else {
+      sectionOptions.style.top = `${topOfParent + 30}px`;
+      sectionOptions.style.bottom = "auto";
+    }
+
+    
+    sectionOptions.classList.toggle("close");
+  };
+
+  const SectionAction = {
+    displaySectionOption
+  };
+
+  function handleSectionAction(e) {
+    const sectionAction = e.target.dataset.sectionAction;
+    if (!sectionAction) return;
+
+    const elemWithCategoryPath = e.target.closest("[data-category-path]");
+    const categoryPath =
+      elemWithCategoryPath.getAttribute("data-category-path");
+    todoList.pathUpdate(categoryPath);
+
+    SectionAction[sectionAction](e.target);
+  }
 
   // Action in MyProjectHeader
   const displayMyProjectOption = () => {
@@ -337,10 +351,10 @@ function SubCategory(navContentHolder) {
   function handleMyProjectHeaderAction(e) {
     const myProjectHeaderAction = e.target.dataset.myProjectHeaderAction;
     if (!myProjectHeaderAction) return;
+
     const categoryPath = myProjectHeader.getAttribute("data-category-path");
     todoList.pathUpdate(categoryPath);
     MyProjectHeaderAction[myProjectHeaderAction]();
-    render();
   }
 
   // Initial rendering
@@ -379,7 +393,7 @@ function SubCategory(navContentHolder) {
       inboxArr.splice(0);
     }
 
-    taskAndSubsectionHolder.append(sectionEllipseOptions);
+    taskAndSubsectionHolder.append(sectionOptions);
   };
 
   const setCategoryTitleData = (title) => {
@@ -424,6 +438,8 @@ function SubCategory(navContentHolder) {
   myProjectHeader.addEventListener("click", handleMyProjectHeaderAction);
 
   myProjectOption.addEventListener("click", handleMyProjectOptionAction);
+
+  taskAndSubsectionHolder.addEventListener("click", handleSectionAction);
 
   returnBack.addEventListener("click", returnToPreviousPage);
 

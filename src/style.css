@@ -535,14 +535,14 @@ dialog::backdrop {
   border-radius: 10px;
 }
 
-.sectionEllipseOptions {
+.sectionOptions {
   position: fixed;
   display: flex;
   flex-direction: column;
   row-gap: var(--sz-sm);
 
   z-index: 100;
-  right: calc(50% - var(--container_width) / 2);
+  right: calc(50% - var(--container_width) / 2 + 15px);
   background: var(--black);
   border: 2px solid var(--transparent);
   padding: var(--sz-sm);
@@ -553,7 +553,6 @@ dialog::backdrop {
     .projectOptions,
     .myProjectOption,
     .sectionOptions,
-    .sectionEllipseOptions
   ).close {
   display: none;
 }
