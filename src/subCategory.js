@@ -280,7 +280,8 @@ function SubCategory(navContentHolder) {
       "myProjectHeaderAction",
       "displayMyProjectOption",
       myProjectOption
-    )
+    ),
+    new Dataset("sectionAction", "displaySectionOption", sectionOptions)
   ];
 
   function handleCategoryOptionClose(e) {
@@ -314,7 +315,6 @@ function SubCategory(navContentHolder) {
       sectionOptions.style.bottom = "auto";
     }
 
-    
     sectionOptions.classList.toggle("close");
   };
 
