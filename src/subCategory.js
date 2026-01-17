@@ -19,7 +19,7 @@ function SubCategory(navContentHolder) {
       <div class="myProjectHeader">
         <span
           class="return_back cursor_pointer"
-          data-my-project-header-action="previousPage"
+          data-my-project-header-action="returnToPreviousPage"
           >⬅️</span
         >
         <span class="myProjectTitle"></span>
@@ -330,7 +330,8 @@ function SubCategory(navContentHolder) {
   };
 
   const MyProjectHeaderAction = {
-    displayMyProjectOption
+    displayMyProjectOption,
+    returnToPreviousPage
   };
 
   function handleMyProjectHeaderAction(e) {

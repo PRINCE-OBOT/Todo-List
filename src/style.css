@@ -213,6 +213,13 @@ p {
   row-gap: var(--sz-sm);
 }
 
+.categoryPath{
+  text-wrap: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
 [data-priority] {
   appearance: none;
   background-color: var(--white);
