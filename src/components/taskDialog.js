@@ -67,6 +67,7 @@ function TaskDialog() {
           class="input_"
           type="text"
           name="input_label"
+          readonly
           placeholder="Future feature..."
         />
 
@@ -182,7 +183,6 @@ function TaskDialog() {
     }
   };
 
-
   const changeLabel = () => {
     form.input_label.value = form.label.value;
   };
@@ -257,26 +257,30 @@ function TaskDialog() {
       "data-save-btn-action"
     );
 
-    let categoryObj;
-
     if (saveBtnAction === keys.edit) {
-      categoryObj =
-        todoList.pathTaskIDLength() > 1
-          ? new Subtask({ ...taskValue })
-          : new Task({
-              ...taskValue
-            });
-      todoList.edit(categoryObj);
-
+      if (todoList.pathTaskIDLength() > 1) {
+        todoList.edit(new Subtask({ ...taskValue }));
+      } else {
+        todoList.edit(
+          new Task({
+            ...taskValue
+          })
+        );
+      }
     } else {
-      categoryObj =
-        todoList.pathTaskIDLength() >= 1
-          ? new Subtask({ ...taskValue })
-          : new Task({
-              ...taskValue
-            });
+      if (todoList.pathTaskIDLength() >= 1) {
+        todoList.add(new Subtask({ ...taskValue }));
+      } else {
+        const path = todoList.pathGet();
+        todoList.pathUpdate([...path, 0]);
 
-      todoList.add(categoryObj);
+        todoList.add(
+          new Task({
+            ...taskValue
+          })
+        );
+        todoList.pathUpdate(path);
+      }
     }
 
     PubSub.publish(EVENTS.NAV_RERENDER);

@@ -62,7 +62,7 @@ function Today(navContentHolder) {
     const p = document.createElement("p");
 
     p.classList.add("task_overdue_date");
-    p.textContent = new Date(taskObj.createdAt).toDateString();
+    p.textContent = new Date(taskObj.dueDate).toDateString();
 
     const titleAndDateSection = taskElem.querySelector(
       ".title-and-date-section"

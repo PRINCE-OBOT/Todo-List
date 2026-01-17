@@ -64,6 +64,7 @@ function Category(navContentHolder) {
     enterCategorySection.classList.toggle("hide");
   };
 
+  // come back here later to make the handling of section closing and hiding more concisely
   function displayMyProjectOption(e) {
     const avoid = e.target.dataset.avoid;
 

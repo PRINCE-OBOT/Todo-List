@@ -1,6 +1,7 @@
 import { Section } from "./category";
 import { DOMtask } from "./components/task";
 import keys from "./constant";
+import Dataset from "./datasets";
 import EVENTS from "./events";
 import storage from "./storage";
 import todoList from "./todo_list";
@@ -16,7 +17,11 @@ function SubCategory(navContentHolder) {
   subCategoryContent.innerHTML = `
     <div class="taskSectionHolder">
       <div class="myProjectHeader">
-        <span class="return_back cursor_pointer" data-my-project-header-action="previousPage">⬅️</span>
+        <span
+          class="return_back cursor_pointer"
+          data-my-project-header-action="previousPage"
+          >⬅️</span
+        >
         <span class="myProjectTitle"></span>
         <span
           class="category_ellipse cursor_pointer"
@@ -25,21 +30,36 @@ function SubCategory(navContentHolder) {
         >
 
         <div class="myProjectOption close">
-          <div data-add="section" data-show class="cursor_pointer">Add Section</div>
-          
-          <div class="enterSectionCon hide">
-          <input
+          <div
+            data-add="section"
+            data-remain
+            class="cursor_pointer"
+            data-my-project-option-action="showFieldForSection"
+          >
+            Add Section
+          </div>
+
+          <div class="enterSectionFieldCon hide">
+            <input
               name="enterSection"
               class="enterSection"
-              data-show
+              data-remain
               placeholder="Enter Section Name"
-              />
-              <span data-my-project-option-action="addSection" class="iconSaveSection cursor_pointer">✅</span>
-              </div>
-              
-          <div data-my-project-option-action="addTask" class="cursor_pointer">Add Task</div>
+            />
+            <span
+              data-my-project-option-action="addSection"
+              class="iconSaveSection cursor_pointer"
+              >✅</span
+            >
+          </div>
+
+          <div data-my-project-option-action="addTask" class="cursor_pointer">
+            Add Task
+          </div>
         </div>
       </div>
+
+      <div class="taskNotInSectionHolder"></div>
 
       <div class="task_and_subsection_holder"></div>
     </div>
@@ -49,11 +69,19 @@ function SubCategory(navContentHolder) {
   const taskAndSubsectionHolder = subCategoryContent.querySelector(
     ".task_and_subsection_holder"
   );
+  const taskNotInSectionHolder = subCategoryContent.querySelector(
+    ".taskNotInSectionHolder"
+  );
   const myProjectHeader = subCategoryContent.querySelector(".myProjectHeader");
-  const enterSectionCon = subCategoryContent.querySelector(".enterSectionCon");
+  const enterSectionFieldCon = subCategoryContent.querySelector(
+    ".enterSectionFieldCon"
+  );
   const enterSection = subCategoryContent.querySelector(".enterSection");
   const myProjectOption = subCategoryContent.querySelector(".myProjectOption");
-  const iconSaveSection = subCategoryContent.querySelector(".iconSaveSection");
+
+  const btnAddSection = subCategoryContent.querySelector(
+    '[data-my-project-option-action="addSection"]'
+  );
 
   const returnBack = subCategoryContent.querySelector(".return_back");
 
@@ -61,7 +89,10 @@ function SubCategory(navContentHolder) {
 
   btnDeleteCategory.textContent = "Delete Project";
   btnDeleteCategory.classList.add("cursor_pointer");
-  btnDeleteCategory.setAttribute("data-btn", "deleteCategory");
+  btnDeleteCategory.setAttribute(
+    "data-my-project-option-action",
+    "deleteMyProject"
+  );
 
   const inboxArr = [];
 
@@ -79,40 +110,18 @@ function SubCategory(navContentHolder) {
     });
   };
 
-  const taskInSubsection = (category) => {
-    const key = getCategoryKey(category, ["sections", "tasks"]);
-
-    if (Array.isArray(category[key])) {
-      filterTasks(category[key], undefined, undefined, pushTaskToInboxArr);
-    }
-  };
-
-  const CreateTaskNotInSectionHolder = () => {
-    const taskHolder = document.createElement("div");
-    taskHolder.classList.add("taskHolder");
-
-    const getTaskHolder = () => taskHolder.cloneNode(true);
-
-    return { getTaskHolder };
-  };
-
-  const createTaskNotInSectionHolder = CreateTaskNotInSectionHolder();
-
   const handleDisplayTaskNotInSection = (tasks) => {
-    const taskHolder = createTaskNotInSectionHolder.getTaskHolder();
-
     const appendTask = (task) => {
-      taskHolder.append(task);
+      taskNotInSectionHolder.append(task);
     };
 
-    tasks.forEach((task) => {
-      DOMtask.set(task, appendTask);
+    tasks.forEach((taskObj) => {
+      DOMtask.set(taskObj, appendTask);
     });
-
-    taskAndSubsectionHolder.append(taskHolder);
   };
 
-  const resetSubsection = () => {
+  const resetLayout = () => {
+    taskNotInSectionHolder.innerHTML = "";
     taskAndSubsectionHolder.innerHTML = "";
   };
 
@@ -159,33 +168,6 @@ function SubCategory(navContentHolder) {
   function returnToPreviousPage() {
     PubSub.publish(EVENTS.NAV_RENDER_PREVIOUS);
   }
-
-  const showEnterSection = () => {
-    enterSectionCon.classList.toggle("hide");
-  };
-
-  function displaySectionOption(e) {
-    const avoid = e.target.dataset.avoid;
-
-    if (avoid) return;
-
-    const display = e.target.dataset.display;
-
-    const add = e.target.dataset.add;
-
-    if (add) {
-      iconSaveSection.setAttribute("data-category-type", add);
-      showEnterSection();
-      return;
-    }
-  }
-
-  const getRootAndIndex = () => {
-    const categoryIndex = myProjectTitle.getAttribute("data-category-index");
-    const root = myProjectTitle.getAttribute("data-root");
-
-    return { root, categoryIndex };
-  };
 
   const getTopOfParent = (parent) => {
     const rect = parent.getBoundingClientRect();
@@ -256,45 +238,59 @@ function SubCategory(navContentHolder) {
     }
   }
 
-  function handleOptionsInEllipse(e) {
-    const option = e.target.dataset.btn;
+  // function handleOptionsInEllipse(e) {
+  //   const option = e.target.dataset.btn;
 
-    const elemWithCategoryRef = e.target.closest("[data-category-reference]");
+  //   const elemWithCategoryRef = e.target.closest("[data-category-reference]");
 
-    if (!elemWithCategoryRef) return;
+  //   if (!elemWithCategoryRef) return;
 
-    const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
+  //   const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
 
-    if (option === "addTask") {
-      if (categoryRef.length === 2) {
-        categoryRef.push(0);
+  //   if (option === "addTask") {
+  //     if (categoryRef.length === 2) {
+  //       categoryRef.push(0);
+  //     }
+
+  //     categoryReference.update(categoryRef);
+
+  //     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);
+  //   }
+
+  //   categoryReference.update(categoryRef);
+
+  //   const categoryIndex = +myProjectTitle.getAttribute("data-category-index");
+
+  //   if (option === "deleteSection") {
+  //     todoList.delete();
+  //     render();
+  //   } else if (option === "deleteCategory") {
+  //     todoList.delete();
+  //     returnToPreviousPage();
+  //   }
+  // }
+
+  // Handle action in options
+  const OptionAction = {
+    addSection: () => {
+      if (enterSection.value.trim() === "") {
+        btnAddSection.setAttribute("data-remain", "");
+      } else {
+        btnAddSection.removeAttribute("data-remain");
+
+        todoList.add(new Section({ title: enterSection.value }));
+        enterSection.value = "";
+        render();
       }
-
-      categoryReference.update(categoryRef);
-
-      PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);
-    }
-
-    categoryReference.update(categoryRef);
-
-    const categoryIndex = +myProjectTitle.getAttribute("data-category-index");
-
-    if (option === "deleteSection") {
-      todoList.delete();
-      render();
-    } else if (option === "deleteCategory") {
+    },
+    showFieldForSection: () => enterSectionFieldCon.classList.toggle("hide"),
+    addTask: () => {
+      PubSub.publish(EVENTS.SHOW_TASK_DIALOG);
+    },
+    deleteMyProject: () => {
       todoList.delete();
       returnToPreviousPage();
     }
-  }
-
-  const OptionAction = {
-    addSection: () => {
-      todoList.add(new Section({ title: enterSection.value }));
-      enterSection.value = "";
-      render();
-    },
-    addTask: () => {}
   };
 
   function handleMyProjectOptionAction(e) {
@@ -305,14 +301,7 @@ function SubCategory(navContentHolder) {
     OptionAction[myProjectOptionAction]();
   }
 
-  class Dataset {
-    constructor(key, value, elem) {
-      this.key = key;
-      this.value = value;
-      this.elem = elem;
-    }
-  }
-
+  // Handle closing of option
   const datasets = [
     new Dataset(
       "myProjectHeaderAction",
@@ -323,11 +312,15 @@ function SubCategory(navContentHolder) {
 
   function handleCategoryOptionClose(e) {
     datasets.forEach((obj) => {
-      if (e.target.dataset[obj.key] !== obj.value && !e.target.hasAttribute('data-show'))
+      if (
+        e.target.dataset[obj.key] !== obj.value &&
+        !e.target.hasAttribute("data-remain")
+      )
         obj.elem.classList.add("close");
     });
   }
 
+  // Action in MyProjectHeader
   const displayMyProjectOption = () => {
     todoList.pathFirst() === keys.inbox
       ? btnDeleteCategory.remove()
@@ -346,7 +339,7 @@ function SubCategory(navContentHolder) {
     const categoryPath = myProjectHeader.getAttribute("data-category-path");
     todoList.pathUpdate(categoryPath);
     MyProjectHeaderAction[myProjectHeaderAction]();
-    render()
+    render();
   }
 
   // Initial rendering
@@ -355,8 +348,6 @@ function SubCategory(navContentHolder) {
   };
 
   const handleDisplayTaskInSection = (arrOfCategory) => {
-    resetSubsection();
-
     for (let i = 1; i < arrOfCategory.length; i++) {
       const sectionElem = createTaskInSectionHolder.getSectionHolder();
 
@@ -397,9 +388,13 @@ function SubCategory(navContentHolder) {
 
   const render = () => {
     navContentHolder.append(subCategoryContent);
+    resetLayout();
 
     const todoLstObj = storage.get(keys.todo_list);
 
+    todoList.pathUpdate(todoList.pathGet().slice(0, 2));
+
+    // if todoList.pathGet().length > 1 then it is loading MyProject in the subCategory, else it is loading inbox
     if (todoList.pathGet().length > 1) {
       const { index, subsequentArrOfCategory } =
         todoList.getSubsequentArrOfCategory(todoLstObj);

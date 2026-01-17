@@ -156,23 +156,25 @@ class TodoList {
   }
 
   pathDefault() {
-    this.path = [keys.inbox, 0];
+    this.path = [keys.inbox];
   }
 
   pathLast() {
     return this.path[this.path.length - 1];
   }
-  
+
   pathFirst() {
     return this.path[0];
   }
 
   pathTaskIDLength() {
-    return console.log(
-      this.path.slice(
-        this.path.findLastIndex((path) => Number.isInteger(path) + 1)
-      ).length
+    const lastNumIndex = this.path.findLastIndex((path) =>
+      Number.isInteger(path)
     );
+
+    return lastNumIndex === -1
+      ? lastNumIndex
+      : this.path.slice(lastNumIndex + 1).length;
   }
 
   pathUpdate(categoryPath) {
@@ -204,23 +206,29 @@ class TodoList {
     let pathStr = path[0];
 
     for (let i = 1; i < path.length; i++) {
-      const index = path[i];
+      const index = Number.isNaN(+path[i])
+        ? this.#findIndex(categories, path[i])
+        : path[i];
 
-      const key = this.#getKey(categories[index], [
-        keys.projectTitle,
-        keys.sectionTitle
-      ]);
+      if (Array.isArray(categories[index])) {
+        categories = categories[index];
+      } else {
+        const key = this.#getKey(categories[index], [
+          keys.projectTitle,
+          keys.sectionTitle
+        ]);
 
-      if (!categories[index][key]) return pathStr;
+        if (!categories[index][key]) return pathStr;
 
-      pathStr += ` / ${categories[index][key]}`;
+        pathStr += ` / ${categories[index][key]}`;
 
-      const subsectionKey = this.#getKey(categories[index], [
-        keys.sections,
-        keys.tasks
-      ]);
+        const subsectionKey = this.#getKey(categories[index], [
+          keys.sections,
+          keys.tasks
+        ]);
 
-      categories = categories[index][subsectionKey];
+        categories = categories[index][subsectionKey];
+      }
     }
 
     return pathStr;

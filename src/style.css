@@ -111,6 +111,7 @@ html,
 .container {
   margin: 0 auto 0;
   max-width: var(--container_width);
+  padding: 0 var(--sz-sm);
 }
 
 main {
@@ -171,7 +172,7 @@ p {
 
 .task {
   display: grid;
-  grid-template-columns: var(--sz-lg) 1fr 1fr;
+  grid-template-columns: var(--sz-lg) 120px 1fr;
   gap: var(--sz-lg);
 
   overflow-x: auto;
@@ -187,15 +188,15 @@ p {
 }
 
 .task.task_mark {
-  overflow: hidden;
+  overflow-y: hidden;
   height: 0;
   padding: 0;
 }
 
-.task :where(title, .description) {
-  max-width: 10ch;
+.task :where(.title, .description) {
   text-overflow: ellipsis;
   text-wrap: nowrap;
+  overflow-y: hidden;
 }
 
 .title-and-date-section {
@@ -572,11 +573,14 @@ dialog::backdrop {
   flex-direction: column;
   flex: 1;
 }
-
-.task_and_subsection_holder {
+.taskNotInSectionHolder{
   display: flex;
   flex-direction: column;
   gap: var(--sz-sm);
+  padding-top: var(--sz-lg);
+}
+
+.task_and_subsection_holder {
   color: var(--white);
   flex: 1;
 
