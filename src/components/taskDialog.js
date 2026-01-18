@@ -232,6 +232,7 @@ function TaskDialog() {
   };
 
   const resetTaskDialog = () => {
+    form.markStatus.checked = false
     resetLabel();
     resetSubtaskSection();
   };
@@ -250,7 +251,7 @@ function TaskDialog() {
       priority: form.priority.value
     };
   };
-
+ 
   function saveTask() {
     const taskValue = getTaskValue();
 
@@ -293,3 +294,6 @@ function TaskDialog() {
 }
 
 export default TaskDialog;
+
+// 1. A task to be added newly is not to be marked
+// 2. Create a space where completed task will be stored and retrieve
