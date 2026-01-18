@@ -157,6 +157,7 @@ function TaskDialog() {
     form.dueDate.value = "";
     form.description.value = "";
     form.input_label.value = "";
+    form.markStatus.style.visibility = 'hidden'
 
     hr.classList.add("hide");
 
@@ -295,5 +296,4 @@ function TaskDialog() {
 
 export default TaskDialog;
 
-// 1. A task to be added newly is not to be marked
 // 2. Create a space where completed task will be stored and retrieve
