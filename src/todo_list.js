@@ -1,3 +1,4 @@
+import { MyProject, Section, Subtask, Task } from "./category";
 import keys from "./constant";
 import storage from "./storage";
 
@@ -47,6 +48,7 @@ class TodoList {
       }
     }
   }
+
   getArrOfCategory(todoListObj) {
     let categories = todoListObj[this.path[0]];
 
@@ -77,14 +79,48 @@ class TodoList {
     return categories;
   }
 
-  add(categoryObj) {
+  addTask(taskValue) {
     const todoListObj = storage.get(keys.todo_list);
 
-    const arrOfCategory = this.getArrOfCategory(todoListObj);
+    let category = this.getArrOfCategory(todoListObj);
 
-    arrOfCategory.push(categoryObj);
+    if (category[keys.taskTitle] || category[keys.subtaskTitle]) {
+      category.push(new Subtask({ ...taskValue }));
+    } else {
+      if (Array.isArray(category[0])) {
+        category = category[0];
 
-    arrOfCategory.sort(this.sortPriority);
+        this.path.push(0);
+
+        category.push(new Task({ ...taskValue }));
+
+        this.path.pop();
+      } else {
+        category.push(new Task({ ...taskValue }));
+      }
+    }
+
+    category.sort(this.sortPriority);
+
+    storage.set(keys.todo_list, todoListObj);
+  }
+
+  addMyProject(myProjectValue) {
+    const todoListObj = storage.get(keys.todo_list);
+
+    const arrOfMyProject = this.getArrOfCategory(todoListObj);
+
+    arrOfMyProject.push(new MyProject({ ...myProjectValue }));
+
+    storage.set(keys.todo_list, todoListObj);
+  }
+
+  addSection(sectionValue) {
+    const todoListObj = storage.get(keys.todo_list);
+
+    const arrOfMyProject = this.getArrOfCategory(todoListObj);
+
+    arrOfMyProject.push(new Section({ ...sectionValue }));
 
     storage.set(keys.todo_list, todoListObj);
   }

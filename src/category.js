@@ -10,7 +10,7 @@ class CategoryRoot {
 
 class FolderTemplate {
   constructor() {
-    this._id = todoList.getCategoryLen();
+    this._id = crypto.randomUUID();
     this._categoryPath = [...todoList.pathGet(), this._id];
   }
 }
@@ -36,7 +36,7 @@ class TaskTemplate {
     this._id = crypto.randomUUID();
     this.description = description;
     this.dueDate = dueDate;
-    this.priority = priority;
+    this.priority = +priority;
     this._createdAt = new Date();
     this._categoryPath = [...todoList.pathGet(), this._id];
     this._subtasks = [];

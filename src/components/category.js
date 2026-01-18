@@ -88,7 +88,7 @@ function Category(navContentHolder) {
 
   function addMyProject() {
     todoList.pathUpdate([keys.myProject]);
-    todoList.add(new MyProject({ title: enterCategory.value }));
+    todoList.addMyProject({ title: enterCategory.value });
     render();
   }
 

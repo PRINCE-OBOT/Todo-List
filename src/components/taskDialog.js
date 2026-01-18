@@ -5,6 +5,7 @@ import { DOMtask } from "../components/task";
 import todoList from "../todo_list";
 import keys from "../constant";
 import { Subtask, Task } from "../category";
+import storage from "../storage";
 
 function TaskDialog() {
   const init = () => {
@@ -220,7 +221,7 @@ function TaskDialog() {
   const isSubtask = (subtasks) => {
     if (!subtasks) return;
 
-    subtasks.forEach((subtask) => {
+    subtasks.sort(todoList.sortPriority).forEach((subtask) => {
       DOMtask.set(subtask, appendSubtaskToSubtaskSection);
     });
   };
@@ -258,29 +259,9 @@ function TaskDialog() {
     );
 
     if (saveBtnAction === keys.edit) {
-      if (todoList.pathTaskIDLength() > 1) {
-        todoList.edit(new Subtask({ ...taskValue }));
-      } else {
-        todoList.edit(
-          new Task({
-            ...taskValue
-          })
-        );
-      }
+      todoList.edit(taskValue);
     } else {
-      if (todoList.pathTaskIDLength() >= 1) {
-        todoList.add(new Subtask({ ...taskValue }));
-      } else {
-        const path = todoList.pathGet();
-        todoList.pathUpdate([...path, 0]);
-
-        todoList.add(
-          new Task({
-            ...taskValue
-          })
-        );
-        todoList.pathUpdate(path);
-      }
+      todoList.addTask(taskValue);
     }
 
     PubSub.publish(EVENTS.NAV_RERENDER);

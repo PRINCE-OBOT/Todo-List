@@ -88,6 +88,7 @@ h6 {
   --low-priority: rgb(13, 144, 113);
   --transparent: rgba(59, 55, 55, 0.5);
   --transparent-white: rgba(255 255 255/ 0.5);
+  --transparent-white-x2: rgba(255 255 255/ 0.1);
   --box-shadow: 0.5px 0.5px 5px var(--transparent-white);
 
   --sz-xxsm: 2px;
@@ -183,17 +184,21 @@ p {
   border-radius: var(--sz-sm);
   border: 2px solid var(--transparent-white);
   color: var(--white);
-  height: 100px;
+  min-height: 100px;
+  max-height: 120px;
   transition: 300ms;
+
+  transform-origin: 0 0;
+  scale: 1;
 }
 
 .task.task_mark {
   overflow-y: hidden;
-  height: 0;
+  scale: 0;
   padding: 0;
 }
 
-.task :where(.title, .description) {
+.task :where(.title, .description, .task_overdue_date) {
   text-overflow: ellipsis;
   text-wrap: nowrap;
   overflow-y: hidden;
@@ -201,6 +206,8 @@ p {
 
 .title-and-date-section {
   pointer-events: none;
+  border-right: 1px solid var(--transparent-white-x2);
+  padding-right: var(--sz-sm);
 }
 
 .description {
@@ -252,6 +259,7 @@ p {
 
 .task_overdue_date {
   color: var(--warning);
+  
 }
 
 .description {
@@ -570,8 +578,13 @@ dialog::backdrop {
 
 .categorySubsectionContent {
   display: flex;
-
   flex: 1;
+}
+
+.sectionHolder{
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--sz-sm);
 }
 
 .taskSectionHolder {
@@ -625,6 +638,7 @@ dialog::backdrop {
 .sectionTitleAndEllipse {
   display: flex;
   color: var(--white);
+  margin-bottom: var(--sz-sm);
 }
 
 .subsection_title {
