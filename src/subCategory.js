@@ -1,4 +1,3 @@
-import { Section } from "./category";
 import { DOMtask } from "./components/task";
 import keys from "./constant";
 import Dataset from "./datasets";
@@ -83,8 +82,6 @@ function SubCategory(navContentHolder) {
     '[data-my-project-option-action="addSection"]'
   );
 
-  const returnBack = subCategoryContent.querySelector(".return_back");
-
   const btnDeleteCategory = document.createElement("div");
 
   btnDeleteCategory.textContent = "Delete Project";
@@ -95,20 +92,6 @@ function SubCategory(navContentHolder) {
   );
 
   const inboxArr = [];
-
-  const pushTaskToInboxArr = (task) => {
-    inboxArr.push(task);
-  };
-
-  const displayTaskInSubsection = (sectionHolder) => {
-    const appendTaskToSubsection = (task) => {
-      sectionHolder.append(task);
-    };
-
-    inboxArr.forEach((task) => {
-      DOMtask.set(task, appendTaskToSubsection);
-    });
-  };
 
   const handleDisplayTaskNotInSection = (tasks) => {
     const appendTask = (task) => {
@@ -173,64 +156,6 @@ function SubCategory(navContentHolder) {
     return rect.bottom;
   };
 
-  function displayOption(e) {
-    const displayOption = e.target.dataset.displayOption;
-
-    if (displayOption) {
-    } else {
-      sectionOptions.classList.add("close");
-    }
-  }
-
-  function setCatRefToOptions(e) {
-    const elemWithCategoryRef = e.target.closest("[data-category-reference]");
-    const elem = e.target.closest(".task_and_subsection_holder");
-
-    if (!elemWithCategoryRef) return;
-
-    const categoryRef = elemWithCategoryRef.getAttribute(
-      "data-category-reference"
-    );
-
-    if (!elem) {
-      myProjectOption.setAttribute("data-category-reference", categoryRef);
-    } else {
-      sectionOptions.setAttribute("data-category-reference", categoryRef);
-    }
-  }
-
-  // function handleOptionsInEllipse(e) {
-  //   const option = e.target.dataset.btn;
-
-  //   const elemWithCategoryRef = e.target.closest("[data-category-reference]");
-
-  //   if (!elemWithCategoryRef) return;
-
-  //   const categoryRef = path.constructCategoryReference(elemWithCategoryRef);
-
-  //   if (option === "addTask") {
-  //     if (categoryRef.length === 2) {
-  //       categoryRef.push(0);
-  //     }
-
-  //     categoryReference.update(categoryRef);
-
-  //     PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG, categoryRef);
-  //   }
-
-  //   categoryReference.update(categoryRef);
-
-  //   const categoryIndex = +myProjectTitle.getAttribute("data-category-index");
-
-  //   if (option === "deleteSection") {
-  //     todoList.delete();
-  //     render();
-  //   } else if (option === "deleteCategory") {
-  //     todoList.delete();
-  //     returnToPreviousPage();
-  //   }
-  // }
-
   // Handle action in section options
   const sectionOptions = (function createSectionOptions() {
     const div = document.createElement("div");
@@ -250,7 +175,7 @@ function SubCategory(navContentHolder) {
     },
     delete: () => {
       todoList.delete();
-      render()
+      render();
     }
   };
 
@@ -459,9 +384,10 @@ function SubCategory(navContentHolder) {
 
   taskAndSubsectionHolder.addEventListener("click", handleSectionAction);
 
-  returnBack.addEventListener("click", returnToPreviousPage);
 
   return { init };
 }
 
 export default SubCategory;
+
+// whenever a task is added in subCategory returning back is still rendering the same page

@@ -35,27 +35,28 @@ function Nav() {
 
     navContentHolder.innerHTML = "";
 
-    navHistory.push(nav);
-    
+    const lastNav = navHistory[navHistory.length - 1];
+
+    if (lastNav !== nav) navHistory.push(nav);
+
     PubSub.publish(EVENTS[nav]);
   }
-  
-  
+
   const renderPrevious = () => {
     navHistory.pop();
     rerender();
   };
-  
+
   const rerender = () => {
     const currentPage = navHistory[navHistory.length - 1];
     navigatePage(new NavPage(currentPage));
   };
-  
+
   const render = (_, page) => {
     navigatePage(new NavPage(page));
   };
 
-  render('','CATEGORY')
+  render("", "CATEGORY");
 
   navHolder.addEventListener("click", navigatePage);
 
