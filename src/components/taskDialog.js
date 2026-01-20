@@ -1,11 +1,8 @@
 import PubSub from "pubsub-js";
 import EVENTS from "../events";
-import { label } from "../config/constant";
 import { DOMtask } from "../components/task";
 import todoList from "../todo_list";
 import keys from "../constant";
-import { Subtask, Task } from "../category";
-import storage from "../storage";
 
 function TaskDialog() {
   const init = () => {
@@ -297,5 +294,3 @@ function TaskDialog() {
 }
 
 export default TaskDialog;
-
-// 2. Create a space where completed task will be stored and retrieve

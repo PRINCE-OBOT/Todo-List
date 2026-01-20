@@ -1,9 +1,9 @@
-import { DOMtask } from "./components/task";
-import keys from "./constant";
-import Modal from "./datasets";
-import EVENTS from "./events";
-import storage from "./storage";
-import todoList from "./todo_list";
+import { DOMtask } from "./task";
+import keys from "../constant";
+import Modal from "../datasets";
+import EVENTS from "../events";
+import storage from "../storage";
+import todoList from "../todo_list";
 
 function SubCategory(navContentHolder) {
   const init = () => {
@@ -381,4 +381,3 @@ function SubCategory(navContentHolder) {
 }
 
 export default SubCategory;
-

@@ -1,8 +1,7 @@
 import "./style.css";
 import PubSub from "pubsub-js";
 import EVENTS from "./events";
-// import homePage from "./view/heroPage";
-import Today from "./today";
+import Today from "./components/today";
 import TaskDialog from "./components/taskDialog";
 import storage from "./storage";
 import keys from "./constant";
@@ -11,7 +10,8 @@ import todoList from "./todo_list";
 import Search from "./components/search";
 import Category from "./components/category";
 import NavPage from "./nav";
-import SubCategory from "./subCategory";
+import SubCategory from "./components/subCategory";
+import HeroPage from "./components/heroPage";
 
 const navContentHolder = document.querySelector("[data-nav-content-holder]");
 const navHolder = document.querySelector("[data-nav-holder]");
@@ -56,17 +56,31 @@ function Nav() {
     navigatePage(new NavPage(page));
   };
 
-  render("", "CATEGORY");
+  render("", "TODAY");
 
   navHolder.addEventListener("click", navigatePage);
 
   return { init };
 }
 
-const navComponent = [Today, TaskDialog, Search, Category, SubCategory, Nav];
+const navComponent = [
+  HeroPage,
+  Today,
+  TaskDialog,
+  Search,
+  Category,
+  SubCategory,
+  Nav
+];
 
 navComponent.forEach((component) => {
   component(navContentHolder).init();
 });
+
+PubSub.publish(EVENTS.HERO_PAGE);
+
+setTimeout(() => {
+  PubSub.publish(EVENTS.REMOVE_HERO_PAGE);
+}, 2000);
 
 window.todoList = todoList;

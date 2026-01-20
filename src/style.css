@@ -113,12 +113,20 @@ html,
   margin: 0 auto 0;
   max-width: var(--container_width);
   padding: 0 var(--sz-sm);
+
+  position: relative;
 }
 
 main {
   display: flex;
   flex-direction: column;
   height: 100vh;
+}
+
+@keyframes fadeText {
+  50%{
+    color: var(--primary-accent);
+  }
 }
 
 .hero_page_text {
@@ -129,6 +137,10 @@ main {
   height: 100%;
   color: var(--white);
   font-size: var(--fs-sz-xlg);
+  animation: fadeText 800ms infinite;
+  font-size: var(--sz-xlg);
+  position: fixed;
+  inset: 0;
 }
 
 .change-view-holder {

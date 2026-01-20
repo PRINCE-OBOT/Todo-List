@@ -1,17 +1,14 @@
-import { setTaskValue } from "../components/task";
-import EVENTS from "../config/EVENTS";
-import {
-  taskAndCategoryHandler,
-  categoryReference,
-  filterTasks,
-  sortTaskBaseOnPriority
-} from "../config/constant";
 import { startOfDay, isToday, isBefore } from "date-fns";
+import { DOMtask } from "./task";
+import keys from "../constant";
+import EVENTS from "../events";
 import PubSub from "pubsub-js";
+import storage from "../storage";
+import todoList from "../todo_list";
 
-function Today(main) {
+function Today(navContentHolder) {
   const init = () => {
-    PubSub.subscribe(EVENTS.PAGE.LOAD.TODAY, render);
+    PubSub.subscribe(EVENTS.TODAY, render);
   };
 
   const todayDate = new Date().toDateString();
@@ -39,7 +36,7 @@ function Today(main) {
         <div data-tasks-section="overdue"></div>
       </div>
 
-      <div class="btn_add_task cursor_pointer">&#10011; Add Task</div>
+      <div class="btn_add_task cursor_pointer" >&#10011; Add Task</div>
     </div>
   `;
 
@@ -55,37 +52,32 @@ function Today(main) {
 
   const btnAddTask = todayContent.querySelector(".btn_add_task");
 
-  btnAddTask.addEventListener("click", addTask);
-
   const taskToBeAdjusted = [];
 
-  function addTask() {
-    categoryReference.update(categoryReference.getDefault());
-
-    PubSub.publish(EVENTS.TODO_LIST.CATEGORY.ADD_TASK_DIALOG);
-  }
-
-  const appendTodayTask = (task) => {
-    todayTaskSection.append(task);
+  const appendTodayTask = (taskElem) => {
+    todayTaskSection.append(taskElem);
   };
 
-  const appendOverdueTask = (task, category) => {
+  const appendOverdueTask = (taskElem, taskObj) => {
     const p = document.createElement("p");
 
     p.classList.add("task_overdue_date");
-    p.textContent = new Date(category.date).toDateString();
+    p.textContent = new Date(taskObj.dueDate).toDateString();
 
-    const titleAndDateSection = task.querySelector(".title-and-date-section");
+    const titleAndDateSection = taskElem.querySelector(
+      ".title-and-date-section"
+    );
 
     titleAndDateSection.append(p);
 
-    overdueTaskSection.append(task);
+    overdueTaskSection.append(taskElem);
   };
 
-  const handleDisplayTaskInTodayAndOverSection = (task) => {
-    if (isBefore(new Date(task.date), today))
-      setTaskValue(task, appendOverdueTask);
-    if (isToday(task.date)) setTaskValue(task, appendTodayTask);
+  const splitTodayAndOverdueTask = (taskObj) => {
+    if (taskObj.status) return;
+    else if (isToday(taskObj.dueDate)) DOMtask.set(taskObj, appendTodayTask);
+    else if (isBefore(new Date(taskObj.dueDate), today))
+      DOMtask.set(taskObj, appendOverdueTask);
   };
 
   const pushTaskToArrForAdjustment = (task) => {
@@ -102,27 +94,35 @@ function Today(main) {
   const handleTodayAndOverdueTask = () => {
     resetTodayAndOverdueTask();
 
-    console.log(taskAndCategoryHandler.getCategories());
+    const todoListObj = storage.get(keys.todo_list);
 
-    for (let key in taskAndCategoryHandler.getCategories()) {
-      filterTasks(
-        taskAndCategoryHandler.getCategories()[key],
+    for (const root in todoListObj) {
+      todoList.filter(
+        todoListObj[root],
         undefined,
         undefined,
         pushTaskToArrForAdjustment
       );
     }
 
-    taskToBeAdjusted.sort(sortTaskBaseOnPriority);
-    taskToBeAdjusted.forEach(handleDisplayTaskInTodayAndOverSection);
+    taskToBeAdjusted.sort(todoList.sortPriority);
+    taskToBeAdjusted.forEach(splitTodayAndOverdueTask);
 
     today_and_overdue_task.textContent = taskToBeAdjusted.length;
   };
 
+  function handleAddTask() {
+    todoList.pathDefault();
+
+    PubSub.publish(EVENTS.SHOW_TASK_DIALOG);
+  }
+
   const render = () => {
-    main.append(todayContent);
+    navContentHolder.append(todayContent);
     handleTodayAndOverdueTask();
   };
+
+  btnAddTask.addEventListener("click", handleAddTask);
 
   return { init };
 }
