@@ -134,8 +134,13 @@ main {
 .change-view-holder {
   flex: 1;
   display: flex;
+  overflow-y: auto;
 
   padding-top: var(--sz-lg);
+}
+
+.change-view-holder > div{
+  max-height: 80vh;
 }
 
 [data-nav-holder] {
@@ -144,6 +149,7 @@ main {
   column-gap: var(--sz-lg);
   color: var(--white);
   padding-bottom: var(--sz-lg);
+  padding-top: var(--sz-lg);
 }
 
 [data-nav] {
@@ -192,8 +198,7 @@ p {
   scale: 1;
 }
 
-.task :is(
-.description, .categoryPath) {
+.task :is(.description, .categoryPath) {
   color: var(--transparent-white);
 }
 
@@ -477,11 +482,6 @@ dialog::backdrop {
   opacity: 0.5;
 }
 
-::-webkit-scrollbar,
-.hide {
-  display: none;
-}
-
 /* Category page */
 .category_page {
   flex: 1;
@@ -650,4 +650,9 @@ dialog::backdrop {
 
 .subsection_title {
   flex: 1;
+}
+
+::-webkit-scrollbar,
+.hide {
+  display: none;
 }

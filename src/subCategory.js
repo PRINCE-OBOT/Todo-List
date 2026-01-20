@@ -1,6 +1,6 @@
 import { DOMtask } from "./components/task";
 import keys from "./constant";
-import Dataset from "./datasets";
+import Modal from "./datasets";
 import EVENTS from "./events";
 import storage from "./storage";
 import todoList from "./todo_list";
@@ -98,9 +98,12 @@ function SubCategory(navContentHolder) {
       taskNotInSectionHolder.append(task);
     };
 
-    tasks.sort(todoList.sortPriority).forEach((taskObj) => {
-      DOMtask.set(taskObj, appendTask);
-    });
+    tasks
+      .filter((taskObj) => !taskObj.status)
+      .sort(todoList.sortPriority)
+      .forEach((taskObj) => {
+        DOMtask.set(taskObj, appendTask);
+      });
   };
 
   const resetLayout = () => {
@@ -220,23 +223,13 @@ function SubCategory(navContentHolder) {
 
   // Handle closing of option
   const datasets = [
-    new Dataset(
+    new Modal(
       "myProjectHeaderAction",
       "displayMyProjectOption",
       myProjectOption
     ),
-    new Dataset("sectionAction", "displaySectionOption", sectionOptions)
+    new Modal("sectionAction", "displaySectionOption", sectionOptions)
   ];
-
-  function handleCategoryOptionClose(e) {
-    datasets.forEach((obj) => {
-      if (
-        e.target.dataset[obj.key] !== obj.value &&
-        !e.target.hasAttribute("data-remain")
-      )
-        obj.elem.classList.add("close");
-    });
-  }
 
   // Action in Section
 
@@ -374,7 +367,7 @@ function SubCategory(navContentHolder) {
     }
   };
 
-  subCategoryContent.addEventListener("click", handleCategoryOptionClose);
+  subCategoryContent.addEventListener("click", (e) => Modal.close(datasets, e));
 
   myProjectHeader.addEventListener("click", handleMyProjectHeaderAction);
 
@@ -384,10 +377,8 @@ function SubCategory(navContentHolder) {
 
   taskAndSubsectionHolder.addEventListener("click", handleSectionAction);
 
-
   return { init };
 }
 
 export default SubCategory;
 
-// whenever a task is added in subCategory returning back is still rendering the same page

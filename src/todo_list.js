@@ -151,9 +151,16 @@ class TodoList {
 
     const taskObj = this.get(todoListObj);
 
-    for (const key in taskValue) {
+    let category;
+    if (taskObj[keys.taskTitle]) {
+      category = new Task({ ...taskValue });
+    } else {
+      category = new Subtask({ ...taskValue });
+    }
+
+    for (const key in category) {
       if (!key.startsWith("_")) {
-        taskObj[key] = taskValue[key];
+        taskObj[key] = category[key];
       }
     }
 

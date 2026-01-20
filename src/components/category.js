@@ -5,6 +5,7 @@ import storage from "../storage";
 import todoList from "../todo_list";
 import { MyProject } from "../category";
 import { DOMtask } from "./task";
+import Modal from "../datasets";
 
 function Category(navContentHolder) {
   const init = () => {
@@ -21,25 +22,25 @@ function Category(navContentHolder) {
 
     <div class="category_section_holder">
         <div class="inbox_section">
-            <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span class="title" data-category-path="${keys.inbox}">${keys.inbox}</span> <span class="number_of_inbox"></span></p>
+            <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span class="title cursor_pointer" data-category-path="${keys.inbox}">${keys.inbox}</span> <span class="number_of_inbox"></span></p>
         </div>
        
         <div class="completed_section">
-            <p class="icon_and_title" data-category="COMPLETED"><span>©️</span> <span class="title">Completed</span> <span class="arrow_view_competed_task">⤵️</span></p>
+            <p class="icon_and_title" data-category="COMPLETED"><span>©️</span> <span class="title cursor_pointer">Completed</span> <span class="arrow_view_competed_task cursor_pointer">⤵️</span></p>
         </div>
 
-        <div class="list_of_completed_task_section">
+        <div class="list_of_completed_task_section hide">
         </div>
         
         <div class="project_title_and_myProjectCategorySection">
             <div class="project_title_and_ellipse">
-              <p>${keys.myProject}s</p><p class="cursor_pointer" data-display="myProjectOption">&vellip;</p>
+              <p>${keys.myProject}s</p><p class="cursor_pointer myProjectsEllipse" data-my-project-ellipse-action="showFieldToEnterMyProject">&vellip;</p>
 
               <div class="projectOptions close">
-                <div data-add="${keys.myProject}"># Add Project</div>
+                <div data-my-project-option-action="showFieldToAddMyProject" data-remain># Add Project</div>
                 
                 <div class="enterCategorySection hide">
-                  <input name="enterCategory" class="enterCategory" data-avoid="true" placeholder="Enter Category Name"/>
+                  <input name="enterCategory" class="enterCategory" data-remain placeholder="Enter Category Name"/>
                   <span class="iconSaveCategory cursor_pointer">✅</span>
                 </div>
               </div>
@@ -63,41 +64,53 @@ function Category(navContentHolder) {
   const iconSaveCategory = categoryContent.querySelector(".iconSaveCategory");
   const enterCategory = categoryContent.querySelector(".enterCategory");
 
-  const taskForAdjustment = [];
-
   const listOfCompletedTaskSection = categoryContent.querySelector(
     ".list_of_completed_task_section"
   );
+  const arrowViewCompetedTask = categoryContent.querySelector(
+    ".arrow_view_competed_task"
+  );
+  const myProjectsEllipse = categoryContent.querySelector(".myProjectsEllipse");
 
-  const showEnterCategorySection = () => {
+  const taskForAdjustment = [];
+
+  // Handle closing of option
+  const datasets = [
+    new Modal(
+      "myProjectEllipseAction",
+      "showFieldToEnterMyProject",
+      projectOptions
+    )
+  ];
+
+  const showFieldToAddMyProject = () => {
     enterCategorySection.classList.toggle("hide");
   };
 
-  // come back here later to make the handling of section closing and hiding more concisely
-  function displayMyProjectOption(e) {
-    const avoid = e.target.dataset.avoid;
+  const MyProjectOptionAction = {
+    showFieldToAddMyProject
+  };
 
-    if (avoid) return;
+  function handleMyProjectOptionAction(e) {
+    const myProjectOptionAction = e.target.dataset.myProjectOptionAction;
 
-    const display = e.target.dataset.display;
+    if (!myProjectOptionAction) return;
 
-    const add = e.target.dataset.add;
-    if (add) {
-      iconSaveCategory.setAttribute("data-category-type", add);
-      showEnterCategorySection();
-      return;
-    }
+    MyProjectOptionAction[myProjectOptionAction]();
+  }
 
-    if (display) {
-      projectOptions.classList.toggle("close");
-    } else {
-      projectOptions.classList.add("close");
-    }
+  function toggleDisplayMyProjectOption(e) {
+    projectOptions.classList.toggle("close");
   }
 
   function addMyProject() {
+    if (enterCategory.value.trim() === "") return;
+
     todoList.pathUpdate([keys.myProject]);
     todoList.addMyProject({ title: enterCategory.value });
+
+    enterCategory.value = "";
+
     render();
   }
 
@@ -109,10 +122,13 @@ function Category(navContentHolder) {
     const categoryPath =
       elemWithCategoryPath.getAttribute("data-category-path");
 
-    debugger;
     todoList.pathUpdate(categoryPath);
 
     PubSub.publish(EVENTS.NAV_RENDER, EVENTS.SUBCATEGORY);
+  }
+
+  function toggleDisplayOfCompletedTask() {
+    listOfCompletedTaskSection.classList.toggle("hide");
   }
 
   // Initial Rendering
@@ -135,6 +151,8 @@ function Category(navContentHolder) {
 
   const displayCategoryElement = (myProjectObj) => {
     const element = myProject.template();
+
+    element.classList.add("cursor_pointer");
 
     element.setAttribute(
       "data-category-path",
@@ -236,7 +254,13 @@ function Category(navContentHolder) {
 
   iconSaveCategory.addEventListener("click", addMyProject);
 
-  categoryContent.addEventListener("click", displayMyProjectOption);
+  arrowViewCompetedTask.addEventListener("click", toggleDisplayOfCompletedTask);
+
+  myProjectsEllipse.addEventListener("click", toggleDisplayMyProjectOption);
+
+  projectOptions.addEventListener("click", handleMyProjectOptionAction);
+
+  categoryContent.addEventListener("click", (e) => Modal.close(datasets, e));
 
   return { init };
 }

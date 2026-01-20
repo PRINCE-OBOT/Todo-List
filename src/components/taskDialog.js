@@ -132,6 +132,7 @@ function TaskDialog() {
     form.dueDate.value = formatDate(taskObj?.dueDate);
     form.description.value = taskObj.description;
     form.markStatus.style.visibility = "visible";
+    form.markStatus.checked = taskObj.status;
 
     task_dialog_date_section.append(title_createAt, inputCreatedAt);
     hr.classList.remove("hide");
@@ -158,6 +159,7 @@ function TaskDialog() {
     form.dueDate.value = "";
     form.description.value = "";
     form.input_label.value = "";
+    form.markStatus.checked = false;
     form.markStatus.style.visibility = "hidden";
 
     hr.classList.add("hide");
@@ -234,7 +236,6 @@ function TaskDialog() {
   };
 
   const resetTaskDialog = () => {
-    form.markStatus.checked = false;
     resetLabel();
     resetSubtaskSection();
   };
