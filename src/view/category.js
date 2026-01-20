@@ -23,7 +23,7 @@ function CategoryPage(_, changeViewHolder) {
     </div>
 
     <div class="category_section_holder">
-        <div class="inbox_filter_completed_section">
+        <div class="inbox_section">
             <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span>Inbox</span> <span class="number_of_inbox"></span></p>
         </div>
         
@@ -217,8 +217,6 @@ function CategoryPage(_, changeViewHolder) {
       projectOptions.classList.add("close");
     }
   }
-
-
 
   function saveCategory(e) {
     const categoryType = e.target.dataset.categoryType;

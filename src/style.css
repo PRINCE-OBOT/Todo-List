@@ -192,10 +192,19 @@ p {
   scale: 1;
 }
 
+.task :is(
+.description, .categoryPath) {
+  color: var(--transparent-white);
+}
+
 .task.task_mark {
   overflow-y: hidden;
   scale: 0;
   padding: 0;
+}
+
+.task .delete_task {
+  color: var(--warning);
 }
 
 .task :where(.title, .description, .task_overdue_date) {
@@ -220,7 +229,7 @@ p {
   row-gap: var(--sz-sm);
 }
 
-.categoryPath{
+.categoryPath {
   text-wrap: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
@@ -259,7 +268,6 @@ p {
 
 .task_overdue_date {
   color: var(--warning);
-  
 }
 
 .description {
@@ -286,10 +294,6 @@ p {
 
 .more_options_action.below {
   transform: translateY(100%);
-}
-
-.delete_task {
-  color: var(--warning);
 }
 
 .mainNavController {
@@ -495,11 +499,18 @@ dialog::backdrop {
   padding-top: var(--sz-lg);
 }
 
-.inbox_filter_completed_section {
+.inbox_section {
   display: flex;
   flex-direction: column;
   row-gap: var(--sz-lg);
 }
+
+.list_of_completed_task_section {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--sz-sm);
+}
+
 .myProjectCategorySection {
   display: flex;
   flex-direction: column;
@@ -557,11 +568,7 @@ dialog::backdrop {
   border-radius: 10px;
 }
 
-:is(
-    .projectOptions,
-    .myProjectOption,
-    .sectionOptions,
-  ).close {
+:is(.projectOptions, .myProjectOption, .sectionOptions, ).close {
   display: none;
 }
 
@@ -581,7 +588,7 @@ dialog::backdrop {
   flex: 1;
 }
 
-.sectionHolder{
+.sectionHolder {
   display: flex;
   flex-direction: column;
   row-gap: var(--sz-sm);
@@ -592,7 +599,7 @@ dialog::backdrop {
   flex-direction: column;
   flex: 1;
 }
-.taskNotInSectionHolder{
+.taskNotInSectionHolder {
   display: flex;
   flex-direction: column;
   gap: var(--sz-sm);

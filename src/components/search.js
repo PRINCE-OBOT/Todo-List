@@ -45,8 +45,9 @@ function Search(navContentHolder) {
     searchContentHolder.append(task);
   };
 
-  const handleDisplayTaskInSearchSection = (task) => {
-    DOMtask.set(task, appendTaskInSearchSection);
+  const handleDisplayTaskInSearchSection = (taskObj) => {
+    if(taskObj.status) return 
+    DOMtask.set(taskObj, appendTaskInSearchSection);
   };
 
   const resetSearchHolder = () => {

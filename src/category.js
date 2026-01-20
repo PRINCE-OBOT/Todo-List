@@ -32,9 +32,10 @@ class Section extends FolderTemplate {
 }
 
 class TaskTemplate {
-  constructor({ description, dueDate, priority }) {
+  constructor({ description, dueDate, status = false, priority }) {
     this._id = crypto.randomUUID();
     this.description = description;
+    this.status = status;
     this.dueDate = dueDate;
     this.priority = +priority;
     this._createdAt = new Date();
@@ -43,16 +44,16 @@ class TaskTemplate {
   }
 }
 
-class Task extends TaskTemplate{
-  constructor({ title, description, dueDate, priority }) {
-    super({ description, dueDate, priority });
+class Task extends TaskTemplate {
+  constructor({ title, description, status, dueDate, priority }) {
+    super({ description, dueDate, status, priority });
     this.taskTitle = title;
   }
 }
 
 class Subtask extends TaskTemplate {
-  constructor({ title, description, dueDate, priority }) {
-    super({ description, dueDate, priority });
+  constructor({ title, description, status, dueDate, priority }) {
+    super({ description, dueDate, status, priority });
     this.subtaskTitle = title;
   }
 }

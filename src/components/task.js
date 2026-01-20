@@ -44,6 +44,8 @@ function DOMTask() {
 
     taskSection.textContent += target.checked ? "Completed" : "Not completed";
 
+    todoList.mark(target.checked)
+
     setTimeout(() => taskSection.classList.add("task_mark"), 1000);
 
     setTimeout(() => taskSection.remove(), 1290);
@@ -95,8 +97,10 @@ function DOMTask() {
     const title = task.querySelector(".title");
     const description = task.querySelector(".description");
     const categoryPath = task.querySelector(".categoryPath");
+    const markStatus = task.querySelector(".mark-status");
 
     priority.setAttribute("data-priority", taskObj.priority);
+    markStatus.checked = taskObj.status
     title.textContent = taskObj[keys.taskTitle] || taskObj[keys.subtaskTitle];
     description.textContent = taskObj.description;
     categoryPath.textContent = todoList.pathFormat(taskObj._categoryPath);

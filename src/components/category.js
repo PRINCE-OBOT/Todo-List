@@ -4,6 +4,7 @@ import keys from "../constant";
 import storage from "../storage";
 import todoList from "../todo_list";
 import { MyProject } from "../category";
+import { DOMtask } from "./task";
 
 function Category(navContentHolder) {
   const init = () => {
@@ -19,13 +20,20 @@ function Category(navContentHolder) {
     </div>
 
     <div class="category_section_holder">
-        <div class="inbox_filter_completed_section">
+        <div class="inbox_section">
             <p class="icon_and_title" data-category="INBOX"><span>📥</span> <span class="title" data-category-path="${keys.inbox}">${keys.inbox}</span> <span class="number_of_inbox"></span></p>
+        </div>
+       
+        <div class="completed_section">
+            <p class="icon_and_title" data-category="COMPLETED"><span>©️</span> <span class="title">Completed</span> <span class="arrow_view_competed_task">⤵️</span></p>
+        </div>
+
+        <div class="list_of_completed_task_section">
         </div>
         
         <div class="project_title_and_myProjectCategorySection">
             <div class="project_title_and_ellipse">
-              <p>My Projects</p><p class="cursor_pointer" data-display="myProjectOption">&vellip;</p>
+              <p>${keys.myProject}s</p><p class="cursor_pointer" data-display="myProjectOption">&vellip;</p>
 
               <div class="projectOptions close">
                 <div data-add="${keys.myProject}"># Add Project</div>
@@ -41,6 +49,7 @@ function Category(navContentHolder) {
     </div>
   `;
 
+  const inboxSection = categoryContent.querySelector(".inbox_section");
   const numberOfInbox = categoryContent.querySelector(".number_of_inbox");
   const myProjectCategorySection = categoryContent.querySelector(
     ".myProjectCategorySection"
@@ -54,10 +63,10 @@ function Category(navContentHolder) {
   const iconSaveCategory = categoryContent.querySelector(".iconSaveCategory");
   const enterCategory = categoryContent.querySelector(".enterCategory");
 
-  const numOfTask = [];
+  const taskForAdjustment = [];
 
-  const categoryHolder = categoryContent.querySelector(
-    ".category_section_holder"
+  const listOfCompletedTaskSection = categoryContent.querySelector(
+    ".list_of_completed_task_section"
   );
 
   const showEnterCategorySection = () => {
@@ -100,6 +109,7 @@ function Category(navContentHolder) {
     const categoryPath =
       elemWithCategoryPath.getAttribute("data-category-path");
 
+    debugger;
     todoList.pathUpdate(categoryPath);
 
     PubSub.publish(EVENTS.NAV_RENDER, EVENTS.SUBCATEGORY);
@@ -120,6 +130,9 @@ function Category(navContentHolder) {
 
   const myProject = MyProjectSection();
 
+  const lenOfIncompleteTask = () =>
+    taskForAdjustment.filter((taskObj) => !taskObj.status).length;
+
   const displayCategoryElement = (myProjectObj) => {
     const element = myProject.template();
 
@@ -134,7 +147,8 @@ function Category(navContentHolder) {
     );
 
     categoryTitle.textContent = myProjectObj[keys.projectTitle];
-    numberOfTaskInCategory.textContent = numOfTask.length;
+
+    numberOfTaskInCategory.textContent = lenOfIncompleteTask();
 
     myProjectCategorySection.append(element);
   };
@@ -150,37 +164,63 @@ function Category(navContentHolder) {
     }
 
     displayCategoryElement(category);
-    numOfTask.splice(0);
+    taskForAdjustment.splice(0);
   };
 
   const handleProjectCategory = (todoListObj) => {
-    numOfTask.splice(0);
+    taskForAdjustment.splice(0);
     todoListObj[keys.myProject].forEach(getCategoryInformation);
   };
 
-  const setNumOfTaskInInbox = () => {
-    numberOfInbox.textContent = numOfTask.length;
-  };
-
-  const pushTaskToArrToGetLength = () => {
-    numOfTask.push(true);
+  const pushTaskToArrToGetLength = (task) => {
+    taskForAdjustment.push(task);
   };
 
   const resetCategory = () => {
-    numOfTask.splice(0);
+    taskForAdjustment.splice(0);
     myProjectCategorySection.innerHTML = "";
+    listOfCompletedTaskSection.innerHTML = "";
+  };
+
+  const displayCompletedTask = (task) => {
+    listOfCompletedTaskSection.append(task);
+  };
+
+  const handleDisplayCompletedTask = () => {
+    taskForAdjustment
+      .filter((taskObj) => {
+        return taskObj.status;
+      })
+      .sort(todoList.sortPriority)
+      .forEach((taskObj) => {
+        DOMtask.set(taskObj, displayCompletedTask);
+      });
+  };
+
+  const setNumOfTaskInInbox = () => {
+    numberOfInbox.textContent = lenOfIncompleteTask();
+  };
+
+  const pushTaskToArrForAdjustment = (task) => {
+    taskForAdjustment.push(task);
   };
 
   const handleCategoryTask = () => {
     resetCategory();
     const todoListObj = storage.get(keys.todo_list);
-    todoList.filter(
-      todoListObj[keys.inbox],
-      undefined,
-      undefined,
-      pushTaskToArrToGetLength
-    );
-    setNumOfTaskInInbox();
+
+    for (const root in todoListObj) {
+      todoList.filter(
+        todoListObj[root],
+        undefined,
+        undefined,
+        pushTaskToArrForAdjustment
+      );
+
+      if (root === keys.inbox) setNumOfTaskInInbox();
+    }
+
+    handleDisplayCompletedTask();
 
     handleProjectCategory(todoListObj);
   };
@@ -190,7 +230,9 @@ function Category(navContentHolder) {
     handleCategoryTask();
   };
 
-  categoryHolder.addEventListener("click", handleNavigation);
+  inboxSection.addEventListener("click", handleNavigation);
+
+  myProjectCategorySection.addEventListener("click", handleNavigation);
 
   iconSaveCategory.addEventListener("click", addMyProject);
 

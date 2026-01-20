@@ -74,9 +74,10 @@ function Today(navContentHolder) {
   };
 
   const splitTodayAndOverdueTask = (taskObj) => {
-    if (isBefore(new Date(taskObj.dueDate), today))
+    if (taskObj.status) return;
+    else if (isToday(taskObj.dueDate)) DOMtask.set(taskObj, appendTodayTask);
+    else if (isBefore(new Date(taskObj.dueDate), today))
       DOMtask.set(taskObj, appendOverdueTask);
-    if (isToday(taskObj.dueDate)) DOMtask.set(taskObj, appendTodayTask);
   };
 
   const pushTaskToArrForAdjustment = (task) => {
