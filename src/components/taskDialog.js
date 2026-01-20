@@ -168,8 +168,6 @@ function TaskDialog() {
 
     modifySaveBtnAction(keys.new);
 
-    resetLabel();
-
     form.markStatus.setAttribute("data-priority", "2");
 
     setValueOfSelect({ priority: "2" }, "priority");
@@ -200,21 +198,6 @@ function TaskDialog() {
     return date.split("T")[0];
   };
 
-  const setLabelValueInSelect = (label) => {
-    const option = document.createElement("option");
-
-    option.value = label;
-    option.textContent = label;
-
-    form.label.append(option);
-  };
-
-  const resetLabel = () => {
-    form.label.innerHTML = "";
-
-    label.get().forEach(setLabelValueInSelect);
-  };
-
   const appendSubtaskToSubtaskSection = (subtask) => {
     subtaskSection.append(subtask);
   };
@@ -233,7 +216,6 @@ function TaskDialog() {
   };
 
   const resetTaskDialog = () => {
-    resetLabel();
     resetSubtaskSection();
   };
 
@@ -254,6 +236,9 @@ function TaskDialog() {
 
   function saveTask() {
     const taskValue = getTaskValue();
+
+    if (taskValue.title.trim() === "" || taskValue.description.trim() === "")
+      return;
 
     const saveBtnAction = form.saveTaskButton.getAttribute(
       "data-save-btn-action"
