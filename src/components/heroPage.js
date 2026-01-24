@@ -8,7 +8,7 @@ function HeroPage() {
 
   const div = document.createElement("div");
   div.classList.add("hero_page_text");
-  div.textContent = "...✏️";
+  div.textContent = "TodoList...✏️";
 
   const render = () => {
     document.body.append(div);
