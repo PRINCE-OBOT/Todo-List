@@ -108,7 +108,9 @@ function Today(navContentHolder) {
     taskToBeAdjusted.sort(todoList.sortPriority);
     taskToBeAdjusted.forEach(splitTodayAndOverdueTask);
 
-    today_and_overdue_task.textContent = taskToBeAdjusted.length;
+    today_and_overdue_task.textContent = taskToBeAdjusted.filter(
+      (taskObj) => !taskObj.status
+    ).length;
   };
 
   function handleAddTask() {

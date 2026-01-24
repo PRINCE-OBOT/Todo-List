@@ -44,11 +44,14 @@ function DOMTask() {
 
     taskSection.textContent += target.checked ? "Completed" : "Not completed";
 
-    todoList.mark(target.checked)
+    todoList.mark(target.checked);
 
     setTimeout(() => taskSection.classList.add("task_mark"), 1000);
 
-    setTimeout(() => taskSection.remove(), 1290);
+    setTimeout(() => {
+      taskSection.remove();
+      PubSub.publish(EVENTS.NAV_RERENDER);
+    }, 1290);
   };
 
   const view = () => {
@@ -61,6 +64,7 @@ function DOMTask() {
     delete: () => {
       todoList.delete();
       DOMHistory.removeLast();
+      PubSub.publish(EVENTS.NAV_RERENDER);
     },
     view,
     mark
@@ -100,7 +104,7 @@ function DOMTask() {
     const markStatus = task.querySelector(".mark-status");
 
     priority.setAttribute("data-priority", taskObj.priority);
-    markStatus.checked = taskObj.status
+    markStatus.checked = taskObj.status;
     title.textContent = taskObj[keys.taskTitle] || taskObj[keys.subtaskTitle];
     description.textContent = taskObj.description;
     categoryPath.textContent = todoList.pathFormat(taskObj._categoryPath);
