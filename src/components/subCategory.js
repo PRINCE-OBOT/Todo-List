@@ -322,9 +322,14 @@ function SubCategory(navContentHolder) {
         sectionElem.sectionHolder.append(taskElem);
       };
 
-      sectionObj[keys.tasks].sort(todoList.sortPriority).forEach((taskObj) => {
-        DOMtask.set(taskObj, appendTaskToSection);
-      });
+      sectionObj[keys.tasks]
+        .filter((taskObj) => {
+          return !taskObj.status;
+        })
+        .sort(todoList.sortPriority)
+        .forEach((taskObj) => {
+          DOMtask.set(taskObj, appendTaskToSection);
+        });
 
       taskAndSubsectionHolder.append(sectionElem.sectionHolder);
 
